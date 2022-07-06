@@ -1,4 +1,6 @@
 export default class TimeFrame {
+  static t15s = '15s';
+
   static t1m = '1m';
 
   static t15m = '15m';

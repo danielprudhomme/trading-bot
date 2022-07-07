@@ -16,6 +16,10 @@ export default class ExchangeService {
     });
   }
 
+  parse8601 = (date: string) => this.client.parse8601(date);
+
+  iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
+
   async fetch(
     symbol: string,
     timeframe: TimeFrame,
@@ -29,11 +33,11 @@ export default class ExchangeService {
     symbol: string,
     timeframe: TimeFrame,
     startDate: string,
-    endNumberOfDays: number,
+    endDate: string,
   ): Promise<Ohlcv[]> {
-    const oneWeek = 60 * 60 * 24 * endNumberOfDays * 1000; // milliseconds
+    const end = this.client.parse8601(endDate);
+
     let since = this.client.parse8601(startDate);
-    const end = since + oneWeek;
     let ohlcvs: Ohlcv[] = [];
 
     while (since < end) {

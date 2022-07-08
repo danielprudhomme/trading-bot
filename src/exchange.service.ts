@@ -25,8 +25,8 @@ export default class ExchangeService {
     timeframe: TimeFrame,
     since: number | undefined = undefined,
   ): Promise<Ohlcv[]> {
-    const ohlcv = await this.client.fetchOHLCV(symbol, timeframe as string, since);
-    return ohlcv.map((x: any) => new Ohlcv(x[0], x[1], x[2], x[3], x[4], x[5]));
+    const ohlcvs = await this.client.fetchOHLCV(symbol, timeframe as string, since);
+    return ohlcvs.map((x: any) => new Ohlcv(x));
   }
 
   async fetchRange(

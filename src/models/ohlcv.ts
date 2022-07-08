@@ -9,6 +9,8 @@
 // the exchanges docstring may list whether quote or base units are used)
 // ],
 
+import ccxt from 'ccxt';
+
 export default class Ohlcv {
   timestamp: number;
 
@@ -22,20 +24,8 @@ export default class Ohlcv {
 
   volume: number;
 
-  constructor(
-    timestamp: number,
-    open: number,
-    high: number,
-    low: number,
-    close: number,
-    volume: number,
-  ) {
-    this.timestamp = timestamp;
-    this.open = open;
-    this.high = high;
-    this.low = low;
-    this.close = close;
-    this.volume = volume;
+  constructor(ohlcv: ccxt.OHLCV) {
+    [this.timestamp, this.open, this.high, this.low, this.close, this.volume] = ohlcv;
   }
 
   getDate = (): Date => new Date(this.timestamp);

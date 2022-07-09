@@ -5,9 +5,13 @@ export default class TimeFrame {
 
   static t15m = '15m';
 
+  static t1h = '1h';
+
+  static t4h = '4h';
+
   static t1d = '1d';
 
-  static t1h = '1h';
+  static t1w = '1w';
 
   static t1M = '1M';
 

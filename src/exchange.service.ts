@@ -5,7 +5,7 @@ import TimeFrame from './enums/timeframe';
 import Ohlcv from './models/ohlcv';
 
 export default class ExchangeService {
-  client: ccxt.Exchange;
+  private client: ccxt.Exchange;
 
   constructor(exchange: string) {
     const CCXT = ccxt as any;
@@ -32,17 +32,15 @@ export default class ExchangeService {
   async fetchRange(
     symbol: string,
     timeframe: TimeFrame,
-    startDate: string,
-    endDate: string,
+    start: number,
+    end: number,
   ): Promise<Ohlcv[]> {
-    const end = this.client.parse8601(endDate);
-
-    let since = this.client.parse8601(startDate);
+    let since = start;
     let ohlcvs: Ohlcv[] = [];
 
     while (since < end) {
       const response = await this.fetch(symbol, timeframe, since);
-      ohlcvs = ohlcvs.concat(response.filter((x) => x.timestamp < end));
+      ohlcvs = ohlcvs.concat(response.filter(x => x.timestamp < end));
 
       if (response.length > 0) {
         since = response[response.length - 1].timestamp + 1;

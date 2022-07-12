@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+// import BackTest from './backtest';
 import BackTest from './backtest';
 import ExchangeId from './enums/exchange-id';
 import ExchangeService from './exchange.service';
@@ -7,7 +8,14 @@ dotenv.config();
 
 // const start = new Date().getTime();
 
+// const values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+
 const exchange = new ExchangeService(ExchangeId.ftx);
+// const data = await exchange.fetch('BTC/USDT', TimeFrame.t1M);
+
+// const rsi = RelativeStrenghIndex.calculate(14, data.map(x => x.close));
+// console.log(rsi);
 
 const backtest = new BackTest(exchange);
 

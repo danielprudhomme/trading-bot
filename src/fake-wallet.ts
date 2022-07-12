@@ -29,6 +29,14 @@ export default class FakeWallet {
     this.asset = 0;
   }
 
+  get openTrade() {
+    return this.trades.find(x => x.isOpen);
+  }
+
+  get hasTradeOpen() {
+    return this.trades.findIndex(x => x.isOpen) > -1;
+  }
+
   revertLastOpenTrade() {
     const currentTrade = this.trades.find(x => x.isOpen);
     if (currentTrade) {
@@ -41,7 +49,7 @@ export default class FakeWallet {
   print() {
     this.trades.forEach((trade, i) =>
       console.log(i,
-        new Date(trade.openOrder.timestamp),
+        new Date (trade.openOrder.timestamp),
         trade.openOrder.price,
         trade.closeOrder ? new Date(trade.closeOrder.timestamp) : '',
         trade.closeOrder ? trade.closeOrder.price : '',

@@ -1,4 +1,5 @@
 import Indicator from './indicator';
+import IndicatorValue from './indicator-value';
 
 /* Exponential Moving Average */
 export default class EMA extends Indicator {
@@ -16,9 +17,9 @@ export default class EMA extends Indicator {
     const candle = this.chart.getCandleAtIndex(index);
     let ema = candle.close;
     if (index > 0) {
-      const lastEma = this.chart.getIndicatorValueAtIndex(index - 1, this) ?? 0;
+      const lastEma = this.chart.getIndicatorValueAtIndex(index - 1, this)?.value ?? 0;
       ema = alpha * candle.close + (1 - alpha) * lastEma;
     }
-    candle.setIndicatorValue(this, ema);
+    candle.setIndicatorValue(this, new IndicatorValue(ema));
   }
 }

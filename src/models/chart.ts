@@ -1,6 +1,7 @@
 import ccxt from 'ccxt';
 import TimeFrame from '../enums/timeframe';
 import Indicator from '../indicators/indicator';
+import IndicatorValue from '../indicators/indicator-value';
 import Candle from './candle';
 
 export default class Chart {
@@ -17,10 +18,10 @@ export default class Chart {
   hasIndicatorValueAtIndex = (index: number, indicator: Indicator): boolean =>
     this.getCandleAtIndex(index).hasIndicatorValue(indicator);
 
-  getIndicatorValueAtIndex = (index: number, indicator: Indicator) =>
+  getIndicatorValueAtIndex = (index: number, indicator: Indicator): IndicatorValue | null =>
     this.getCandleAtIndex(index).getIndicatorValue(indicator);
     
-  setIndicatorValueAtIndex = (index: number, indicator: Indicator, value: number) =>
+  setIndicatorValueAtIndex = (index: number, indicator: Indicator, value: IndicatorValue) =>
     this.getCandleAtIndex(index).setIndicatorValue(indicator, value);
 
   getLastCandle = () => this.candles[this.candles.length - 1];

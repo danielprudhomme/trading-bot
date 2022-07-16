@@ -17,7 +17,7 @@ const indic = new RSI(14);
 const chart = new Chart(TimeFrame.t1d, data);
 chart.addIndicator(indic); 
 
-chart.candles.forEach(x => console.log('values :::', x.close, x.getIndicatorValue(indic)));
+chart.candles.forEach(x => console.log('values :::', x.close, x.getIndicatorValue(indic)?.value));
 
 // const ema = ExponentialSMA.calculate(data.map(x => x.close), 9);
 // console.log(ema);

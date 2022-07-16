@@ -1,5 +1,5 @@
 import FakeWallet from '../fake-wallet';
-import MovingAverage from '../indicators/moving-average';
+import SMA from '../indicators/sma';
 import Ohlcv from '../models/ohlcv';
 import Strategy from './strategy';
 
@@ -13,7 +13,7 @@ export default class MA10Strategy implements Strategy {
 
   execute(timestamp: number, ohlcvs: Ohlcv[]): void {
     const maLength = 10;
-    const ma10 = MovingAverage.calculate(maLength, ohlcvs.map(x => x.close));
+    const ma10 = SMA.calculate(maLength, ohlcvs.map(x => x.close));
 
     const current = ohlcvs[ohlcvs.length - 1];
     const currentValue = current.close;

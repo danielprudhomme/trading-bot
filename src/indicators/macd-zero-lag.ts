@@ -1,4 +1,4 @@
-import ExponentialMovingAverage from "./exponential-moving-average";
+import ExponentialSMA from './ema';
 
 export interface MacdZeroLagValues {
   macdZeroLag: number[];
@@ -22,8 +22,8 @@ export class MacdZeroLag {
   }
 
   private static dema(values: number[], length: number) {
-    const ema = ExponentialMovingAverage.calculate(values, length);
-    const emaEma = ExponentialMovingAverage.calculate(ema, length);
+    const ema = ExponentialSMA.calculate(values, length);
+    const emaEma = ExponentialSMA.calculate(ema, length);
     return values.map((_, i) => 2 * ema[i] - emaEma[i]);
   }
 }

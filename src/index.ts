@@ -1,22 +1,38 @@
 import dotenv from 'dotenv';
-import BackTest from './backtest';
 // import BackTest from './backtest';
 import ExchangeId from './enums/exchange-id';
+import TimeFrame from './enums/timeframe';
 import ExchangeService from './exchange.service';
+import RSI from './indicators/rsi';
+import Chart from './models/chart';
 
 dotenv.config();
 
 // const start = new Date().getTime();
 
 const exchange = new ExchangeService(ExchangeId.ftx);
-// const data = await exchange.fetch('BTC/USDT', TimeFrame.t1d);
+const data = await exchange.fetch('BTC/USDT', TimeFrame.t1d);
+ 
+const indic = new RSI(14); 
+const chart = new Chart(TimeFrame.t1d, data);
+chart.addIndicator(indic); 
 
-// const ema = ExponentialMovingAverage.calculate(data.map(x => x.close), 9);
+chart.candles.forEach(x => console.log('values :::', x.close, x.getIndicatorValue(indic)));
+
+// const ema = ExponentialSMA.calculate(data.map(x => x.close), 9);
 // console.log(ema);
 
-const backtest = new BackTest(exchange);
+// const ma2 = new SMA(10);
 
-await backtest.launch();
+// Candle.setIndicatorValue(ma1, 100);
+// Candle.setIndicatorValue(ma2, 200);
+
+// console.log(Candle.getIndicatorValue(ma1), Candle.getIndicatorValue(ma2));
+
+
+// const backtest = new BackTest(exchange);
+
+// await backtest.launch();
 
 // const symbol = 'BTC/USDT';
 // const data = await exchange.fetch('BTC/USDT', TimeFrame.t1h);
@@ -47,4 +63,4 @@ await backtest.launch();
 // console.log('lastDate', lastDate);   
 // console.info('Execution time: %dms', end);
 
-// console.log('MA10', MovingAverage.calculate(10, data));
+// console.log('MA10', SMA.calculate(10, data));

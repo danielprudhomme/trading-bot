@@ -1,6 +1,6 @@
 import FakeWallet from '../fake-wallet';
-import MovingAverage from '../indicators/moving-average';
-import RelativeStrenghIndex from '../indicators/relative-strengh-index';
+import RelativeStrenghIndex from '../indicators/rsi';
+import SMA from '../indicators/sma';
 import Ohlcv from '../models/ohlcv';
 import Strategy from './strategy';
 
@@ -17,8 +17,8 @@ export default class SmallMACrossBigMAStrategy implements Strategy {
   }
 
   execute(timestamp: number, ohlcvs: Ohlcv[]): void {
-    const smallMa = MovingAverage.calculate(this.smallMaLength, ohlcvs.map(x => x.close));
-    const bigMa = MovingAverage.calculate(this.bigMaLength, ohlcvs.map(x => x.close));
+    const smallMa = SMA.calculate(this.smallMaLength, ohlcvs.map(x => x.close));
+    const bigMa = SMA.calculate(this.bigMaLength, ohlcvs.map(x => x.close));
     const rsi = RelativeStrenghIndex.calculate(ohlcvs.map(x => x.close));
 
     const current = ohlcvs[ohlcvs.length - 1];

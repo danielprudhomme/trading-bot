@@ -21,6 +21,9 @@ export default class TimeFrame {
     if (tf === TimeFrame.t15s) {
       return 15 * 1000;
     }
+    if (tf === TimeFrame.t30s) {
+      return 30 * 1000;
+    }
     if (tf === TimeFrame.t1m) {
       return 60 * 1000;
     }
@@ -32,6 +35,9 @@ export default class TimeFrame {
     }
     if (tf === TimeFrame.t1d) {
       return 60 * 60 * 24 * 1000;
+    }
+    if (tf === TimeFrame.t1w) {
+      return 7 * 60 * 24 * 1000;
     }
     throw new Error('Timeframe not found');
   }

@@ -24,29 +24,27 @@ export default class ExchangeService {
     timeframe: TimeFrame,
     since: number | undefined = undefined,
   ): Promise<ccxt.OHLCV[]> {
-    const ohlcvs = await this.client.fetchOHLCV(symbol, timeframe as string, since);
-    return ohlcvs;
-    // return ohlcvs.map((x: any) => new Ohlcv(x));
+    return await this.client.fetchOHLCV(symbol, timeframe as string, since);
   }
 
-  // async fetchRange(
-  //   symbol: string,
-  //   timeframe: TimeFrame,
-  //   start: number,
-  //   end: number,
-  // ): Promise<Ohlcv[]> {
-  //   let since = start;
-  //   let ohlcvs: Ohlcv[] = [];
+  async fetchRange(
+    symbol: string,
+    timeframe: TimeFrame,
+    start: number,
+    end: number,
+  ): Promise<ccxt.OHLCV[]> {
+    let since = start;
+    let ohlcvs: ccxt.OHLCV[] = [];
 
-  //   while (since < end) {
-  //     const response = await this.fetch(symbol, timeframe, since);
-  //     ohlcvs = ohlcvs.concat(response.filter(x => x.timestamp < end));
+    while (since < end) {
+      const response = await this.fetch(symbol, timeframe, since);
+      ohlcvs = ohlcvs.concat(response.filter(x => x[0] < end));
 
-  //     if (response.length > 0) {
-  //       since = response[response.length - 1].timestamp + 1;
-  //     }
-  //   }
+      if (response.length > 0) {
+        since = response[response.length - 1][0] + 1;
+      }
+    }
 
-  //   return ohlcvs;
-  // }
+    return ohlcvs;
+  }
 }

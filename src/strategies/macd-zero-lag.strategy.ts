@@ -1,17 +1,9 @@
-import FakeWallet from '../fake-wallet';
-import { MacdZeroLag } from '../indicators/macd-zero-lag';
-import Ohlcv from '../models/ohlcv';
 import Strategy from './strategy';
 
-export default class MACDZeroLagStrategy implements Strategy {
+export default class MACDZeroLagStrategy extends Strategy {
   private waitForFirstSignal = true;
-  private wallet: FakeWallet;
 
-  constructor(wallet: FakeWallet) {
-    this.wallet = wallet;
-  }
-
-  execute(timestamp: number, ohlcvs: Ohlcv[]): void {
+  execute(timestamp: number): void {
     const macdZeroLag = MacdZeroLag.calculate(ohlcvs.map(x => x.close));
     const macdAboveSignal = macdZeroLag.macdAboveSignal[macdZeroLag.macdAboveSignal.length - 1];
 

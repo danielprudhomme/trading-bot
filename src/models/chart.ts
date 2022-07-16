@@ -7,6 +7,7 @@ import Candle from './candle';
 export default class Chart {
   timeframe: TimeFrame;
   candles: Candle[];
+  indicators: Indicator[] = [];
 
   constructor(timeframe: TimeFrame, ohlcv: ccxt.OHLCV[]) {
     this.timeframe = timeframe;
@@ -26,14 +27,27 @@ export default class Chart {
 
   getLastCandle = () => this.candles[this.candles.length - 1];
 
-  // add data (tick par exemple) => calculer tous les indicateurs
-  addData() {
-    
-  }
-  
   addIndicator(indicator: Indicator) {
     indicator.bind(this);
+    this.indicators.push(indicator);
     indicator.calculate();
   }
-  
+
+  newCandle(candle: Candle) {
+    // checks if candle updates the last candle or if it is a new one
+    const lastCandle = this.getLastCandle();
+    const lastCandleTimestampStart = lastCandle.timestamp;
+    const lastCandleTimestampEnd = lastCandleTimestampStart + TimeFrame.toMilliseconds(this.timeframe);
+
+    if (candle.timestamp >= lastCandleTimestampStart && candle.timestamp < lastCandleTimestampEnd) {
+      candle.timestamp = lastCandle.timestamp;
+      this.candles.pop();
+    }
+    else if (candle.timestamp >= lastCandleTimestampEnd) {
+      candle.timestamp = lastCandleTimestampEnd;
+    }
+    this.candles.push(candle);
+
+    this.indicators.forEach(indicator => indicator.calculateAtIndex(this.candles.length - 1));
+  }
 }

@@ -5,12 +5,10 @@ import IndicatorValue from './indicator-value';
 /* Simple Moving Average */
 export default class SMA extends Indicator {
   length: number;
-  source: IndicatorSource;
 
-  constructor(length: number, source: IndicatorSource) {
-    super();
+  constructor(length: number, source: IndicatorSource | null = null) {
+    super(source);
     this.length = length;
-    this.source = source;
   }
 
   calculateAtIndex(index: number) {

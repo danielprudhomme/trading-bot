@@ -7,67 +7,29 @@ import SMA from './sma';
 export default class RSI extends Indicator {
   length: number;
   
+  private upIndicator : Up;
+  private downIndicator : Down;
+  private upSMA : SMA;
+  private downSMA : SMA;
+  private upRMA : RMA;
+  private downRMA : RMA;
+  
   constructor(length: number = 14) {
     super();
     this.length = length;
-  }
-
-  private _upIndicator : Up | null = null;
-  private _downIndicator : Up | null = null;
-  private get upIndicator(): Up {
-    if (this._upIndicator)
-      return this._upIndicator;
-    throw new Error('Up indicator should exists.');
-  }
-  private get downIndicator(): Up {
-    if (this._downIndicator)
-      return this._downIndicator;
-    throw new Error('Down indicator should exists.');
-  }
-
-  private _upSMA : SMA | null = null;
-  private _downSMA : SMA | null = null;
-  private get upSMA(): SMA {
-    if (this._upSMA)
-      return this._upSMA;
-    throw new Error('Up SMA should exists.');
-  }
-  private get downSMA(): SMA {
-    if (this._downSMA)
-      return this._downSMA;
-    throw new Error('Down SMA should exists.');
-  }
-
-  private _upRMA : RMA | null = null;
-  private _downRMA : RMA | null = null;
-  private get upRMA(): RMA {
-    if (this._upRMA)
-      return this._upRMA;
-    throw new Error('Up RMA should exists.');
-  }
-  private get downRMA(): RMA {
-    if (this._downRMA)
-      return this._downRMA;
-    throw new Error('Down SMA should exists.');
-  }
-
-  calculate(): void {
-    this._upIndicator = new Up();
-    this._downIndicator = new Down();
-    this.chart.addIndicator(this.upIndicator);
-    this.chart.addIndicator(this.downIndicator);
-
-    this._upSMA = new SMA(this.length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.upIndicator)?.value ?? 0);
-    this._downSMA = new SMA(this.length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.downIndicator)?.value ?? 0);
-    this.chart.addIndicator(this.upSMA);
-    this.chart.addIndicator(this.downSMA);
-
-    this._upRMA = new RMA(this.length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.upIndicator)?.value ?? 0, this.upSMA);
-    this._downRMA = new RMA(this.length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.downIndicator)?.value ?? 0, this.downSMA);
-    this.chart.addIndicator(this.upRMA);
-    this.chart.addIndicator(this.downRMA);
-
-    super.calculate();
+    
+    this.upIndicator = new Up();
+    this.addDependency(this.upIndicator);
+    this.downIndicator = new Down();
+    this.addDependency(this.downIndicator);
+    this.upSMA = new SMA(this.length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.upIndicator)?.value ?? 0);
+    this.addDependency(this.upSMA);
+    this.downSMA = new SMA(this.length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.downIndicator)?.value ?? 0);
+    this.addDependency(this.downSMA);
+    this.upRMA = new RMA(this.length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.upIndicator)?.value ?? 0, this.upSMA);
+    this.addDependency(this.upRMA);
+    this.downRMA = new RMA(this.length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.downIndicator)?.value ?? 0, this.downSMA);
+    this.addDependency(this.downRMA);
   }
 
   calculateAtIndex(index: number) {

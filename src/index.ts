@@ -3,8 +3,7 @@ import dotenv from 'dotenv';
 import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
 import ExchangeService from './exchange.service';
-import MacdZeroLag from './indicators/macd-zero-lag';
-import MacdZeroLagValue from './indicators/macd-zero-lag-value';
+import RSI from './indicators/rsi';
 import Chart from './models/chart';
 
 dotenv.config();
@@ -14,14 +13,16 @@ dotenv.config();
 const exchange = new ExchangeService(ExchangeId.ftx);
 const data = await exchange.fetch('BTC/USDT', TimeFrame.t1d);
  
-const indic = new MacdZeroLag();
+const indic = new RSI();
 const chart = new Chart(TimeFrame.t1d, data);
 chart.addIndicator(indic);
 
-chart.candles.forEach(x => {
-  const macdzl = x.getIndicatorValue(indic) as MacdZeroLagValue;
-  console.log('values :::', x.close, macdzl.macdZeroLag, macdzl.signal, macdzl.macdAboveSignal);
-});
+console.log(chart.candles[chart.candles.length - 2].getIndicatorValue(indic));
+
+// chart.candles.forEach(x => {
+//   const macdzl = x.getIndicatorValue(indic) as MacdZeroLagValue;
+//   console.log('values :::', x.close, macdzl.macdZeroLag, macdzl.signal, macdzl.macdAboveSignal);
+// });
 
 // const ema = ExponentialSMA.calculate(data.map(x => x.close), 9);
 // console.log(ema);

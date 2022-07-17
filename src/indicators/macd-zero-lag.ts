@@ -12,16 +12,11 @@ export default class MacdZeroLag extends Indicator {
   constructor(fastLength: number = 12, slowLength: number = 26, signalLength: number = 9) {
     super();
     this.fastDema = new Dema(fastLength);
+    this.addDependency(this.fastDema);
     this.slowDema = new Dema(slowLength);
+    this.addDependency(this.slowDema);
     this.signal = new Dema(signalLength, (index: number) => this.getMacdZeroLagValue(index));
-  }
-
-  calculate(): void {
-    this.chart.addIndicator(this.fastDema);
-    this.chart.addIndicator(this.slowDema);
-    this.chart.addIndicator(this.signal);
-
-    super.calculate();
+    this.addDependency(this.signal);
   }
 
   calculateAtIndex(index: number): void {
@@ -44,14 +39,9 @@ class Dema extends EMA {
   constructor(length: number, source: IndicatorSource | null = null) {
     super(length, source);
     this.ema = new EMA(length, source);
+    this.addDependency(this.ema);
     this.emaEma = new EMA(length, (index: number) => this.chart.getIndicatorValueAtIndex(index, this.ema)?.value ?? 0);
-  }
-
-  calculate(): void {
-    this.chart.addIndicator(this.ema);
-    this.chart.addIndicator(this.emaEma);
-    
-    super.calculate();
+    this.addDependency(this.emaEma);
   }
 
   calculateAtIndex(index: number) {

@@ -48,6 +48,6 @@ export default class Chart {
     }
     this.candles.push(candle);
 
-    this.indicators.forEach(indicator => indicator.calculateAtIndex(this.candles.length - 1));
+    this.indicators.forEach(indicator => indicator.calculate(this.candles.length - 1));
   }
 }

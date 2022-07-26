@@ -1,23 +1,24 @@
-import dotenv from 'dotenv';
 // import BackTest from './backtest';
+import { ConfigurationManager } from './configuration-manager';
 import ExchangeId from './enums/exchange-id';
-import TimeFrame from './enums/timeframe';
 import ExchangeService from './exchange.service';
-import RSI from './indicators/rsi';
-import Chart from './models/chart';
 
-dotenv.config();
+ConfigurationManager.load();
 
 // const start = new Date().getTime();
 
-const exchange = new ExchangeService(ExchangeId.ftx);
-const data = await exchange.fetch('BTC/USDT', TimeFrame.t1d);
- 
-const indic = new RSI();
-const chart = new Chart(TimeFrame.t1d, data);
-chart.addIndicator(indic);
+const exchange = new ExchangeService(ExchangeId.binance); 
 
-console.log(chart.candles[chart.candles.length - 2].getIndicatorValue(indic));
+exchange.fetchOrders();
+
+
+// const data = await exchange.fetch('BTC/USDT', TimeFrame.t1d);
+ 
+// const indic = new RSI();
+// const chart = new Chart(TimeFrame.t1d, data);
+// chart.addIndicator(indic);
+
+// console.log(chart.candles[chart.candles.length - 2].getIndicatorValue(indic));
 
 // chart.candles.forEach(x => {
 //   const macdzl = x.getIndicatorValue(indic) as MacdZeroLagValue;

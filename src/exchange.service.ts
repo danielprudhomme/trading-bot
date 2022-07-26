@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import ccxt from 'ccxt';
-import { config, Config } from './config';
+import { Config, ConfigurationManager } from './configuration-manager';
 import TimeFrame from './enums/timeframe';
 
 export default class ExchangeService {
@@ -8,9 +8,11 @@ export default class ExchangeService {
 
   constructor(exchange: string) {
     const CCXT = ccxt as any;
-    this.client = new CCXT[exchange]({
-      apiKey: config[exchange as keyof Config].apiKey,
-      secret: config[exchange as keyof Config].apiKey,
+    const config = ConfigurationManager.config[exchange as keyof Config];
+
+    this.client = new CCXT[exchange]({ 
+      apiKey: config.apiKey,
+      secret: config.secretKey,
       enableRateLimit: true,
     });
   }
@@ -46,5 +48,11 @@ export default class ExchangeService {
     }
 
     return ohlcvs;
+  }
+
+  async fetchOrders(): Promise<ccxt.Order[]>  {
+    const orders = await this.client.fetchOrders('EGLD/BUSD');
+    console.log(orders);
+    return orders;
   }
 }

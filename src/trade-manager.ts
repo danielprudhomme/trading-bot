@@ -1,0 +1,164 @@
+import { ExchangeOrderStatus } from './enums/exchange-order-status';
+import { OrderSide } from './enums/order-side';
+import { OrderStatus } from './enums/order-status';
+import { OrderTradeStep } from './enums/order-trade-step';
+import { OrderType } from './enums/order-type';
+import ExchangeService from './exchange-service/exchange.service';
+import Chart from './models/chart';
+import Order from './models/order';
+import Trade from './models/trade';
+
+export default class TradeManager {
+  exchangeService: ExchangeService;
+  chart: Chart;
+  trades: Trade[] = [];
+
+  constructor(exchangeService: ExchangeService, chart: Chart) {
+    this.exchangeService = exchangeService;
+    this.chart = chart;
+  }
+
+  create = async (trade: Trade): Promise<void> => {
+    console.log('TradeManager - create', this.exchangeService.iso8601(this.chart.currentCandle.timestamp), this.chart.currentCandle.close);
+    this.trades.push(trade);
+    await this.sync(trade);
+  }
+
+  close = async (trade: Trade): Promise<void> => {
+    console.log('TradeManager - close', this.exchangeService.iso8601(this.chart.currentCandle.timestamp), this.chart.currentCandle.close);
+
+    this.cancelAllOrders(trade);
+
+    // Close position with remaining quantity
+    const closeOrder = new Order(
+      OrderType.Market,
+      OrderSide.getOpposite(trade.side),
+      OrderTradeStep.Close,
+      trade.remaining
+    );
+    closeOrder.status = OrderStatus.Open;
+    
+    await this.sync(trade);
+  }
+
+  syncAll = async (): Promise<void> => {
+    for (const trade of this.trades.filter(x => x.isOpen)) {
+      await this.sync(trade);
+    }
+  }
+
+  getPerformance = (): void => {
+    this.trades.forEach((trade, i) => console.log('perf ' + i, trade.getPerformance()));
+  }
+
+  private sync = async (trade: Trade): Promise<void> => {
+    await this.syncCanceledOrdersWithExchange(trade);
+    await this.syncOpenOrdersWithExchange(trade);
+    
+    // Si on a plus d'ordres ouverts, ouvrir les ordres waiting
+    this.openNextWaitingOrdersIfNoOpenOrders(trade);
+
+    // Transmettre les ordres ouverts sur l'exchange
+    // On transmet les ordres limit (take profit), les stop loss
+    await this.transmitNextOpenOrderToTransmit(trade);
+
+    // Si on a un stop loss (pour l'instant pas envoyer directement sur l'exchange)
+    // TODO : IL FAUT CANCEL LES AUTRES ORDRES (TPs)
+    await this.checkAndTransmitStopLoss(trade);
+  }
+
+  private syncOpenOrdersWithExchange = async (trade: Trade): Promise<void> => {
+    // Sync orders open in exchange : check if order is closed in exchange
+    const ordersToSync = trade.orders
+      .filter(x => x.status === OrderStatus.Open && x.exchange?.status === ExchangeOrderStatus.Open);
+
+    for (const order of ordersToSync) {
+      if (order.exchange) {
+        const exchangeOrder = await this.exchangeService.fetchOrder(trade.symbol, order.exchange?.id);
+        if (exchangeOrder) {
+          order.exchange = exchangeOrder;
+          if (order.exchange.status === ExchangeOrderStatus.Closed) {
+            order.status = OrderStatus.Closed;
+          }
+        }
+      }
+    }
+  }
+
+  private syncCanceledOrdersWithExchange = async (trade: Trade): Promise<void> => {
+    // Cancel orders to be cancelled in exchange (canceled in bot but open in exchange)
+    const ordersToCancel = trade.orders
+      .filter(x => x.status === OrderStatus.Canceled && x.exchange?.status == ExchangeOrderStatus.Open);
+    for (const order of ordersToCancel) {
+      if (order.exchange?.id) {
+        await this.exchangeService.cancelOrder(trade.symbol, order.exchange?.id);
+        order.status = OrderStatus.Canceled;
+      }
+    }
+  }
+
+  private openNextWaitingOrdersIfNoOpenOrders(trade: Trade): void {
+    if (trade.orders.filter(x => x.status === OrderStatus.Open).length === 0) {
+
+      // On ne fait que des longs pour l'instant, donc on tri par limit (inverser si on fait un short)
+      const takeProfits = trade.orders.filter(x => x.step === OrderTradeStep.TakeProfit && x.status === OrderStatus.Waiting)
+        .sort((a, b) => (a.limit ?? 0) - (b.limit ?? 0));
+
+      if (takeProfits.length > 0) {
+        console.log('open take profit');
+        const nextTp = takeProfits[0];
+        nextTp.status = OrderStatus.Open;
+      }
+
+      const stopLoss = trade.orders.find(x => x.step === OrderTradeStep.StopLoss && x.status === OrderStatus.Waiting)
+      if (stopLoss) {
+        stopLoss.status = OrderStatus.Open;
+      }
+    }
+  }
+
+  private transmitNextOpenOrderToTransmit = async (trade: Trade): Promise<void> => {
+    const openOrders = trade.orders.filter(x => x.status === OrderStatus.Open && x.exchange === null);
+
+    if (openOrders.length === 0) return;
+
+    let nextOpenOrder = openOrders.find(x => x.step === OrderTradeStep.Open);
+    if (!nextOpenOrder) nextOpenOrder = openOrders.find(x => x.step === OrderTradeStep.Close);
+    if (!nextOpenOrder) nextOpenOrder = openOrders.find(x => x.step === OrderTradeStep.TakeProfit);
+    // On ne transmet pas les stop loss pour l'instant (on ne transmet que les TPs)
+    
+    if (nextOpenOrder) await this.transmitOrder(trade.symbol, nextOpenOrder);
+  }
+
+  private checkAndTransmitStopLoss = async (trade: Trade): Promise<void> => {
+    const lastClosePrice = this.chart.currentCandle.close;
+    const openSl = trade.orders.find(x => x.step === OrderTradeStep.StopLoss && x.status === OrderStatus.Open);
+    if (openSl?.stop && lastClosePrice < openSl.stop) {
+      this.cancelAllOrders(trade);
+      await this.syncCanceledOrdersWithExchange(trade);
+      
+      await this.transmitOrder(trade.symbol, openSl, OrderType.Market);
+    }
+  }
+
+  private cancelAllOrders = (trade: Trade): void => {
+    // Cancel all open and waiting orders
+    trade.orders.filter(order => order.status === OrderStatus.Waiting || order.status === OrderStatus.Open)
+      .forEach(order => order.status = OrderStatus.Canceled);
+  }
+
+  private transmitOrder = async (symbol: string, order: Order, type?: OrderType): Promise<void> => {
+    type = type ?? order.type;
+    
+    if (type === OrderType.Market) {
+      order.exchange = await this.exchangeService.createMarketOrder(symbol, order.side, order.quantity);
+      order.status = OrderStatus.Closed;
+    }
+    else if (type === OrderType.Limit && order.limit) {
+      order.exchange = await this.exchangeService.createlimitOrder(symbol, order.side, order.limit, order.quantity);
+    }
+    else {
+      throw new Error('transmitOrder not yet implemented for this order type.');
+    }
+  }
+}

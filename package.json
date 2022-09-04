@@ -13,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "ccxt": "^1.88.41",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "guid-typescript": "^1.0.9"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",

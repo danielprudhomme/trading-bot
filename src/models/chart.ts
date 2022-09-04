@@ -5,16 +5,21 @@ import IndicatorValue from '../indicators/indicator-value';
 import Candle from './candle';
 
 export default class Chart {
+  symbol: string;
   timeframe: TimeFrame;
   candles: Candle[];
   indicators: Indicator[] = [];
 
-  constructor(timeframe: TimeFrame, ohlcv: ccxt.OHLCV[]) {
+  constructor(symbol: string, timeframe: TimeFrame, ohlcv: ccxt.OHLCV[]) {
+    this.symbol = symbol;
     this.timeframe = timeframe;
     this.candles = ohlcv.map(x => new Candle(x));
   }
 
-  getCandleAtIndex = (index: number) => this.candles[index];
+  getCandleAtIndex = (index: number) => {
+    if (index < 0 || index >= this.candles.length) throw new Error('Index out of bounds of candles array.');
+    return this.candles[index];
+  }
 
   hasIndicatorValueAtIndex = (index: number, indicator: Indicator): boolean =>
     this.getCandleAtIndex(index).hasIndicatorValue(indicator);
@@ -25,7 +30,10 @@ export default class Chart {
   setIndicatorValueAtIndex = (index: number, indicator: Indicator, value: IndicatorValue) =>
     this.getCandleAtIndex(index).setIndicatorValue(indicator, value);
 
-  getLastCandle = () => this.candles[this.candles.length - 1];
+  get currentCandle() {
+    if (this.candles.length == 0) throw new Error('Chart contains no candle.')
+    return this.candles[this.candles.length - 1];
+  }
 
   addIndicator(indicator: Indicator) {
     indicator.bind(this);
@@ -35,12 +43,11 @@ export default class Chart {
 
   newCandle(candle: Candle) {
     // checks if candle updates the last candle or if it is a new one
-    const lastCandle = this.getLastCandle();
-    const lastCandleTimestampStart = lastCandle.timestamp;
+    const lastCandleTimestampStart = this.currentCandle.timestamp;
     const lastCandleTimestampEnd = lastCandleTimestampStart + TimeFrame.toMilliseconds(this.timeframe);
 
     if (candle.timestamp >= lastCandleTimestampStart && candle.timestamp < lastCandleTimestampEnd) {
-      candle.timestamp = lastCandle.timestamp;
+      candle.timestamp = this.currentCandle.timestamp;
       this.candles.pop();
     }
     else if (candle.timestamp >= lastCandleTimestampEnd) {

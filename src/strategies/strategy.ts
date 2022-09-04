@@ -1,14 +1,14 @@
 import Chart from '../models/chart';
-import ExchangeWallet from '../wallet/exchange-wallet';
+import TradeManager from '../trade-manager';
 
 export default abstract class Strategy {
-  private chart: Chart;
-  private exchangeWallet: ExchangeWallet;
+  protected chart: Chart;
+  protected tradeManager: TradeManager;
 
-  constructor(chart: Chart, exchangeWallet: ExchangeWallet) {
+  constructor(chart: Chart, tradeManager: TradeManager) {
     this.chart = chart;
-    this.exchangeWallet = exchangeWallet;
+    this.tradeManager = tradeManager;
   }
   
-  abstract execute(timestamp: number): void;
+  abstract execute(): Promise<void>;
 }

@@ -1,6 +1,6 @@
 import { OrderSide } from "../enums/order-side";
 import Chart from "../models/chart";
-import ExchangeWallet from "./exchange-wallet";
+import ExchangeWallet from "./wallet";
 
 // simplified version with only one asset (chart BTC/UDT for example)
 export default class FakeExchangeWallet extends ExchangeWallet {
@@ -19,7 +19,7 @@ export default class FakeExchangeWallet extends ExchangeWallet {
   }
 
   marketOrder(symbol: string, side: OrderSide, amount: number): void {
-    const currentPrice = this.chart.getLastCandle().close;
+    const currentPrice = this.chart.currentCandle.close;
 
     if (side === OrderSide.Buy) {
       const usdValue = amount * currentPrice;

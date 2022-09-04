@@ -18,7 +18,7 @@ export default abstract class Indicator {
 
   bind = (chart: Chart) => { 
     this._chart = chart;
-    this.dependencies.forEach(indicator => indicator.bind(this.chart));
+    this.dependencies.forEach(dependency => dependency.bind(this.chart));
   }
 
   // If index is null, calculate for all candles
@@ -38,7 +38,6 @@ export default abstract class Indicator {
   protected abstract calculateAtIndex(index: number): void;
 
   addDependency(indicator: Indicator): void {
-    
     this.dependencies.push(indicator);
   }
 }

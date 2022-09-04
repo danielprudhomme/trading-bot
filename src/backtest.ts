@@ -1,49 +1,66 @@
+import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
-import ExchangeService from './exchange.service';
+import ExchangeService from './exchange-service/exchange.service';
+import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
 import Candle from './models/candle';
 import Chart from './models/chart';
 import MACDZeroLagStrategy from './strategies/macd-zero-lag.strategy';
 import Strategy from './strategies/strategy';
-import ExchangeWallet from './wallet/exchange-wallet';
-import FakeExchangeWallet from './wallet/fake-exchange-wallet';
+import { default as TradeManager } from './trade-manager';
+import TradingWorker from './trading-worker/trading-worker';
 
-export default class BackTest {
-  private exchange: ExchangeService;
+export default class BackTest extends TradingWorker {
+  private symbol: string;
+  private startDate: string;
+  private endDate: string;
+  private startTimestamp: number = 0;
+  private endTimestamp: number = 0;
+  private exchangeId: ExchangeId;
+  private lastCandle: Candle | null = null;
 
-  private symbol = 'BTC/USDT';
-
-  constructor(exchange: ExchangeService) {
-    this.exchange = exchange;
+  constructor(chartTimeFrame: TimeFrame, tickTimeFrame: TimeFrame, startDate: string, endDate: string, symbol: string, exchangeId: ExchangeId) {
+    super(chartTimeFrame, tickTimeFrame);
+    this.startDate = startDate;
+    this.endDate = endDate;
+    this.symbol = symbol;
+    this.exchangeId = exchangeId;
   }
 
-  async launch(): Promise<void> {    
-    const start = this.exchange.parse8601('2022-07-03T00:00:00Z');
-    // const start = this.exchange.parse8601('2022-07-02T00:00:00Z');
-    const end = this.exchange.parse8601('2022-07-13T00:00:00Z');
+  protected initExchangeService = (): ExchangeService => new ReadOnlyExchangeService(this.exchangeId);
 
-    const ticks = await this.exchange.fetchRange(this.symbol, TimeFrame.t1h, start, end);
-
+  protected async initChart(): Promise<Chart> {
+    console.log('Backtest - initChart');
+    this.startTimestamp = this.exchangeService.parse8601(this.startDate);
+    this.endTimestamp = this.exchangeService.parse8601(this.endDate);
     // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
-    const timeframe = TimeFrame.t1h;
-    const startMinus10Periods = start - TimeFrame.toMilliseconds(timeframe) * 50;
-    const data = await this.exchange.fetchRange(this.symbol, timeframe, startMinus10Periods, end);
+    const startMinus10Periods = this.startTimestamp - TimeFrame.toMilliseconds(this.chartTimeFrame) * 50;
+    const data = await this.exchangeService.fetchOHLCVRange(this.symbol, this.chartTimeFrame, startMinus10Periods, this.startTimestamp);
 
-    const chart = new Chart(timeframe, data);
-    const exchangeWallet = new FakeExchangeWallet(chart, 1000, 0.001);
+    const chart = new Chart(this.symbol, this.chartTimeFrame, data);
 
-    const strategy = new MACDZeroLagStrategy(chart, exchangeWallet);
-    ticks.forEach(tick => this.onTick(new Candle(tick), strategy, chart, exchangeWallet));
-
-    // if (wallet.usd === 0) {
-    //   wallet.revertLastOpenTrade();
-    // }
-    
-    // wallet.print();
+    (this.exchangeService as ReadOnlyExchangeService).addChart(chart);
+    return chart;
   }
 
-  onTick = (newCandle: Candle, strategy: Strategy, chart: Chart, exchangeWallet: ExchangeWallet): void => {
-    const timestamp = newCandle.timestamp;
-    chart.newCandle(newCandle);
-    strategy.execute(timestamp);
+  protected initTradeManager = (): TradeManager => new TradeManager(this.exchangeService, this.chart);
+
+  protected initStategy = (): Strategy => new MACDZeroLagStrategy(this.chart, this.tradeManager);
+
+  async launch(): Promise<void> {
+    console.log('Backtest - launch');
+    const ticks = await this.exchangeService.fetchOHLCVRange(this.symbol, this.tickTimeFrame, this.startTimestamp, this.endTimestamp);
+    console.log('ticks number', ticks.length);
+
+    for (const tick of ticks) {
+      this.lastCandle = new Candle(tick);
+      await this.onTick();
+    }
+
+    this.tradeManager.getPerformance();
+  }
+
+  protected async fetchLastCandle(): Promise<Candle> {
+    if (!this.lastCandle) throw new Error('Last candle should not be null');
+    return this.lastCandle;
   }
 }

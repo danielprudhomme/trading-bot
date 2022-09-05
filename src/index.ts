@@ -6,10 +6,11 @@ import TimeFrame from './enums/timeframe';
 ConfigurationManager.load();
 
 const backtest = new BackTest(
-  TimeFrame.t1h,
   TimeFrame.t15m,
-  '2022-08-21T00:00:00Z',
-  '2022-08-22T02:00:00Z',
+  TimeFrame.t15m,
+  '2022-09-03T15:00:00Z',
+  // '2022-09-03T20:00:00Z',
+  '2022-09-05T04:00:00Z',
   'BTC/USDT',
   ExchangeId.binance);
 await backtest.init();

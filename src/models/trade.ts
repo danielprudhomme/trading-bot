@@ -51,7 +51,9 @@ export default class Trade {
     this.orders.push(sl);
   }
 
-  getPerformance(): number {
+  getPerformance(): number | null {
+    if (this.isOpen) return null;
+    
     const openAmount = this.openTradeOrder.quantity * (this.openTradeOrder.exchange?.executedPrice ?? 0);
 
     const profitTaken = this.orders.filter(x => x.step === OrderTradeStep.TakeProfit && x.status === OrderStatus.Closed)
@@ -64,6 +66,8 @@ export default class Trade {
     const closeAmount = closeOrder ? closeOrder.quantity * (closeOrder.exchange?.executedPrice ?? 0) : 0;
 
     const finalAmount = profitTaken + stopAmount + closeAmount;
+
+    console.log('amounts : ', openAmount, profitTaken, stopAmount, closeAmount);
 
     return (finalAmount / openAmount - 1) * 100;
 

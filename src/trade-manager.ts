@@ -37,6 +37,8 @@ export default class TradeManager {
       trade.remaining
     );
     closeOrder.status = OrderStatus.Open;
+
+    trade.orders.push(closeOrder);
     
     await this.sync(trade);
   }
@@ -48,12 +50,18 @@ export default class TradeManager {
   }
 
   getPerformance = (): void => {
-    this.trades.forEach((trade, i) => console.log('perf ' + i, trade.getPerformance()));
+    // somme des perfs de chaque trade, pas d'intérets composés ici
+    const sumPerf = this.trades.reduce((sum, trade, i) => {
+      const perf = trade.getPerformance();
+      console.log('perf ' + i, perf);
+      return sum + (perf ?? 0);
+    }, 0);
+    console.log('perf globale : ', sumPerf);
   }
 
   private sync = async (trade: Trade): Promise<void> => {
     await this.syncCanceledOrdersWithExchange(trade);
-    await this.syncOpenOrdersWithExchange(trade);
+    await this.syncOpenOrdersWithExchange(trade); // TODO : si le dernier TP est passé (remaining = 0), on cancel tout le reste
     
     // Si on a plus d'ordres ouverts, ouvrir les ordres waiting
     this.openNextWaitingOrdersIfNoOpenOrders(trade);
@@ -63,7 +71,6 @@ export default class TradeManager {
     await this.transmitNextOpenOrderToTransmit(trade);
 
     // Si on a un stop loss (pour l'instant pas envoyer directement sur l'exchange)
-    // TODO : IL FAUT CANCEL LES AUTRES ORDRES (TPs)
     await this.checkAndTransmitStopLoss(trade);
   }
 
@@ -79,6 +86,9 @@ export default class TradeManager {
           order.exchange = exchangeOrder;
           if (order.exchange.status === ExchangeOrderStatus.Closed) {
             order.status = OrderStatus.Closed;
+            if (trade.remaining === 0) {
+              this.cancelAllOrders(trade);
+            }
           }
         }
       }
@@ -105,7 +115,6 @@ export default class TradeManager {
         .sort((a, b) => (a.limit ?? 0) - (b.limit ?? 0));
 
       if (takeProfits.length > 0) {
-        console.log('open take profit');
         const nextTp = takeProfits[0];
         nextTp.status = OrderStatus.Open;
       }

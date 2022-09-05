@@ -57,7 +57,6 @@ export default class ReadOnlyExchangeService extends ExchangeService {
       this.chart.currentCandle.close
     );
     this.orders.set(order.id, order);
-    console.log('EXCHANGE --- create market order', order.executedPrice);
     return order;
   }
 
@@ -73,7 +72,6 @@ export default class ReadOnlyExchangeService extends ExchangeService {
       quantity,
       this.chart.currentCandle.close
     );
-    console.log('EXCHANGE --- create limit order', order.id);
     this.orders.set(order.id, order);
     return order;
   }

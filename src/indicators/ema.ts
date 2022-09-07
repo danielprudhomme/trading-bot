@@ -4,7 +4,7 @@ import IndicatorValue from './indicator-value';
 
 /* Exponential Moving Average */
 export default class EMA extends Indicator {
-  length: number;
+  private length: number;
 
   constructor(length: number, source: IndicatorSource | null = null) {
     super(source);

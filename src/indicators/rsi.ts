@@ -5,7 +5,7 @@ import SMA from './sma';
 
 /* Relative Strength Index */
 export default class RSI extends Indicator {
-  length: number;
+  private length: number;
   
   private upIndicator : Up;
   private downIndicator : Down;

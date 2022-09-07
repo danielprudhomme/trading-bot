@@ -4,7 +4,7 @@ import IndicatorValue from './indicator-value';
 
 /* Simple Moving Average */
 export default class SMA extends Indicator {
-  length: number;
+  protected length: number;
 
   constructor(length: number, source: IndicatorSource | null = null) {
     super(source);

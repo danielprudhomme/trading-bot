@@ -23,9 +23,13 @@ export default class MACDZeroLagStrategy extends Strategy {
       console.log('buy signal')
       this.currentTrade = Trade.openAtMarket(this.chart.symbol, 1) // get quantity from wallet
       
-      // TP at +0,5%
-      const tpPrice = this.chart.currentCandle.close * 1.005;
-      this.currentTrade.addTakeProfit(1, tpPrice);
+      // TP1 at +0,2%
+      const tp1Price = this.chart.currentCandle.close * 1.002;
+      this.currentTrade.addTakeProfit(0.5, tp1Price);
+
+      // TP2 at +0,5%
+      const tp2Price = this.chart.currentCandle.close * 1.005;
+      this.currentTrade.addTakeProfit(0.5, tp2Price);
 
       const slPrice = this.chart.currentCandle.low;
       this.currentTrade.addStopLoss(slPrice);

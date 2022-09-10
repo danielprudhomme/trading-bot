@@ -29,7 +29,6 @@ export default class BackTest extends TradingWorker {
   protected initExchangeService = (): ExchangeService => new ReadOnlyExchangeService(this.exchangeId);
 
   protected async initChart(): Promise<Chart> {
-    console.log('Backtest - initChart');
     this.startTimestamp = this.exchangeService.parse8601(this.startDate);
     this.endTimestamp = this.exchangeService.parse8601(this.endDate);
     // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
@@ -54,6 +53,9 @@ export default class BackTest extends TradingWorker {
     for (const tick of ticks) {
       this.lastCandle = new Candle(tick);
       await this.onTick();
+      console.log(
+        this.exchangeService.iso8601(this.chart.currentCandle.timestamp),
+      )
     }
 
     this.tradeManager.getPerformance();

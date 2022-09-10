@@ -9,25 +9,25 @@ export default abstract class TradingWorker {
   protected chartTimeFrame: TimeFrame;
   protected tickTimeFrame: TimeFrame;
 
-  private _exchangeService: ExchangeService | null = null;
+  protected _exchangeService: ExchangeService | null = null;
   protected get exchangeService(): ExchangeService {
     if (!this._exchangeService) throw new Error('ExchangeService should not be null.');
     return this._exchangeService;
   }
 
-  private _tradeManager: TradeManager | null = null;
+  protected _tradeManager: TradeManager | null = null;
   protected get tradeManager(): TradeManager {
     if (!this._tradeManager) throw new Error('TradeManager should not be null.');
     return this._tradeManager;
   }
   
-  private _chart: Chart | null = null;
+  protected _chart: Chart | null = null;
   protected get chart(): Chart {
     if (!this._chart) throw new Error('Chart should not be null.');
     return this._chart;
   }
 
-  private _strategy: Strategy | null = null;
+  protected _strategy: Strategy | null = null;
   protected get strategy(): Strategy {
     if (!this._strategy) throw new Error('Strategy should not be null.');
     return this._strategy;

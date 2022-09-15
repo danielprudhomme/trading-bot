@@ -1,21 +1,28 @@
+import TimeFrame from '../enums/timeframe';
 import MacdZeroLag from '../indicators/macd-zero-lag';
 import MacdZeroLagValue from '../indicators/macd-zero-lag-value';
-import Chart from '../models/chart';
+import ChartWorkspace from '../models/chart-workspace';
 import Trade from '../models/trade';
 import TradeManager from '../trade-manager';
-import Strategy from './strategy';
+import StrategyOneTimeFrame from './strategy-one-timeframe';
 
-export default class MACDZeroLagStrategy extends Strategy {
+export default class MACDZeroLagStrategy extends StrategyOneTimeFrame {
   private waitForFirstSignal = true;
   private macdZeroLag = new MacdZeroLag();
   private currentTrade: Trade | null = null; // ONE TRADE AT A TIME
 
-  constructor(chart: Chart, tradeManager: TradeManager) {
-    super(chart, tradeManager);
+  constructor(timeframe: TimeFrame) {
+    super(timeframe);
+  }
+
+  init(chartWorkspace: ChartWorkspace, tradeManager: TradeManager) {
+    super.init(chartWorkspace, tradeManager);
     this.chart.addIndicator(this.macdZeroLag);
   }
 
   async execute(): Promise<void> {
+    const currentCandle = this.chart.currentCandle;
+    console.log({currentCandle});
 
     if (!this.currentTrade?.isOpen) this.currentTrade = null;
 
@@ -24,17 +31,17 @@ export default class MACDZeroLagStrategy extends Strategy {
       this.currentTrade = Trade.openAtMarket(this.chart.symbol, 1) // get quantity from wallet
       
       // TP1 at +0,2%
-      const tp1Price = this.chart.currentCandle.close * 1.002;
+      const tp1Price = currentCandle.close * 1.002;
       this.currentTrade.addTakeProfit(0.5, tp1Price);
 
       // TP2 at +0,5%
-      const tp2Price = this.chart.currentCandle.close * 1.005;
+      const tp2Price = currentCandle.close * 1.005;
       this.currentTrade.addTakeProfit(0.5, tp2Price);
 
-      const slPrice = this.chart.currentCandle.low;
+      const slPrice = currentCandle.low;
       this.currentTrade.addStopLoss(slPrice);
 
-      await this.tradeManager.create(this.currentTrade);
+      await this.tradeManager.create(this.currentTrade, currentCandle);
     }
 
     if (!this.macdAboveSignal) {
@@ -42,7 +49,7 @@ export default class MACDZeroLagStrategy extends Strategy {
       
       if (this.currentTrade) {
         console.log('sell signal');
-        await this.tradeManager.close(this.currentTrade);
+        await this.tradeManager.close(this.currentTrade, currentCandle);
         this.currentTrade = null;
       }
     }

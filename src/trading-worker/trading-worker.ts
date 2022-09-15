@@ -1,13 +1,13 @@
 import TimeFrame from '../enums/timeframe';
 import ExchangeService from '../exchange-service/exchange.service';
 import Candle from '../models/candle';
-import Chart from '../models/chart';
+import ChartWorkspace from '../models/chart-workspace';
 import Strategy from '../strategies/strategy';
 import TradeManager from '../trade-manager';
 
 export default abstract class TradingWorker {
-  protected chartTimeFrame: TimeFrame;
   protected tickTimeFrame: TimeFrame;
+  protected strategy: Strategy;
 
   protected _exchangeService: ExchangeService | null = null;
   protected get exchangeService(): ExchangeService {
@@ -20,35 +20,28 @@ export default abstract class TradingWorker {
     if (!this._tradeManager) throw new Error('TradeManager should not be null.');
     return this._tradeManager;
   }
-  
-  protected _chart: Chart | null = null;
-  protected get chart(): Chart {
-    if (!this._chart) throw new Error('Chart should not be null.');
-    return this._chart;
+
+  protected _chartWorkspace: ChartWorkspace | null = null;
+  protected get chartWorkspace(): ChartWorkspace {
+    if (!this._chartWorkspace) throw new Error('ChartWorkspace should not be null.');
+    return this._chartWorkspace;
   }
 
-  protected _strategy: Strategy | null = null;
-  protected get strategy(): Strategy {
-    if (!this._strategy) throw new Error('Strategy should not be null.');
-    return this._strategy;
-  }
-
-  constructor(chartTimeFrame: TimeFrame, tickTimeFrame: TimeFrame) {
-    this.chartTimeFrame = chartTimeFrame;
+  constructor(tickTimeFrame: TimeFrame, strategy: Strategy) {
     this.tickTimeFrame = tickTimeFrame;
+    this.strategy = strategy;
   }
 
   async init(): Promise<void> {
     this._exchangeService = this.initExchangeService();
-    this._chart = await this.initChart();
     this._tradeManager = this.initTradeManager();
-    this._strategy = this.initStategy();
+    this._chartWorkspace = await this.initChartWorkspace(this.strategy.timeframes);
+    this.strategy.init(this.chartWorkspace, this.tradeManager);
   }
 
   protected abstract initExchangeService(): ExchangeService;
-  protected abstract initChart(): Promise<Chart>;
   protected abstract initTradeManager(): TradeManager;
-  protected abstract initStategy(): Strategy;
+  protected abstract initChartWorkspace(timeframes: TimeFrame[]): Promise<ChartWorkspace>;
 
   async launch(): Promise<void> {
     // CRON qui appelle onTick toutes les x secondes
@@ -57,10 +50,10 @@ export default abstract class TradingWorker {
 
   async onTick() {
     const lastCandle = await this.fetchLastCandle();
-    this.chart.newCandle(lastCandle);
-
+    this.chartWorkspace.newCandle(lastCandle);
+ 
     // update trade manager with orders
-    await this.tradeManager.syncAll();
+    await this.tradeManager.syncAll(lastCandle);
 
     // execute strategy
     await this.strategy.execute();

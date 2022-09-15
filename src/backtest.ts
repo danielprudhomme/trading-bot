@@ -4,22 +4,29 @@ import ExchangeService from './exchange-service/exchange.service';
 import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
 import Candle from './models/candle';
 import Chart from './models/chart';
-import MACDZeroLagStrategy from './strategies/macd-zero-lag.strategy';
+import ChartWorkspace from './models/chart-workspace';
 import Strategy from './strategies/strategy';
 import { default as TradeManager } from './trade-manager';
 import TradingWorker from './trading-worker/trading-worker';
 
 export default class BackTest extends TradingWorker {
-  private symbol: string;
-  private startDate: string;
-  private endDate: string;
-  private startTimestamp: number = 0;
-  private endTimestamp: number = 0;
-  private exchangeId: ExchangeId;
+  protected symbol: string;
+  protected startDate: string;
+  protected endDate: string;
+  protected startTimestamp: number = 0;
+  protected endTimestamp: number = 0;
+  protected exchangeId: ExchangeId;
   private lastCandle: Candle | null = null;
 
-  constructor(chartTimeFrame: TimeFrame, tickTimeFrame: TimeFrame, startDate: string, endDate: string, symbol: string, exchangeId: ExchangeId) {
-    super(chartTimeFrame, tickTimeFrame);
+  constructor(
+    strategy: Strategy,
+    tickTimeFrame: TimeFrame,
+    startDate: string,
+    endDate: string,
+    symbol: string,
+    exchangeId: ExchangeId
+  ) {
+    super(tickTimeFrame, strategy);
     this.startDate = startDate;
     this.endDate = endDate;
     this.symbol = symbol;
@@ -28,22 +35,36 @@ export default class BackTest extends TradingWorker {
 
   protected initExchangeService = (): ExchangeService => new ReadOnlyExchangeService(this.exchangeId);
 
-  protected async initChart(): Promise<Chart> {
+  private async initChartForTimeframe(timeframe: TimeFrame): Promise<Chart> {
     this.startTimestamp = this.exchangeService.parse8601(this.startDate);
     this.endTimestamp = this.exchangeService.parse8601(this.endDate);
     // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
-    const startMinus10Periods = this.startTimestamp - TimeFrame.toMilliseconds(this.chartTimeFrame) * 50;
-    const data = await this.exchangeService.fetchOHLCVRange(this.symbol, this.chartTimeFrame, startMinus10Periods, this.startTimestamp);
+    const startMinus10Periods = this.startTimestamp - TimeFrame.toMilliseconds(timeframe) * 50;
+    const data = await this.exchangeService.fetchOHLCVRange(this.symbol, timeframe, startMinus10Periods, this.startTimestamp);
 
-    const chart = new Chart(this.symbol, this.chartTimeFrame, data);
+    const chart = new Chart(this.symbol, timeframe, data);
 
-    (this.exchangeService as ReadOnlyExchangeService).addChart(chart);
     return chart;
   }
 
-  protected initTradeManager = (): TradeManager => new TradeManager(this.exchangeService, this.chart);
+  protected initTradeManager = (): TradeManager => new TradeManager(this.exchangeService);
 
-  protected initStategy = (): Strategy => new MACDZeroLagStrategy(this.chart, this.tradeManager);
+  protected initChartWorkspace = async (timeframes: TimeFrame[]): Promise<ChartWorkspace> => {
+    if (timeframes.length === 0) throw new Error('At least one timeframe should be defined.');
+    timeframes.sort(TimeFrame.compare);
+
+    const chartWorkspace = new ChartWorkspace(this.symbol);
+
+    for (const timeframe of timeframes) {
+      const chart = await this.initChartForTimeframe(timeframe);
+      chartWorkspace.set(timeframe, chart);
+    }
+
+    const chartLowerTimeframe = chartWorkspace.get(timeframes[0]);
+    if (chartLowerTimeframe) (this.exchangeService as ReadOnlyExchangeService).addChart(chartLowerTimeframe);
+
+    return chartWorkspace;
+  }
 
   async launch(): Promise<void> {
     console.log('Backtest - launch');
@@ -53,9 +74,6 @@ export default class BackTest extends TradingWorker {
     for (const tick of ticks) {
       this.lastCandle = new Candle(tick);
       await this.onTick();
-      console.log(
-        this.exchangeService.iso8601(this.chart.currentCandle.timestamp),
-      )
     }
 
     this.tradeManager.getPerformance();

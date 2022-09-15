@@ -46,4 +46,8 @@ export default class TimeFrame {
     }
     throw new Error('Timeframe not found');
   }
+
+  static compare = (a: TimeFrame, b: TimeFrame): number => TimeFrame.toMilliseconds(a) - TimeFrame.toMilliseconds(b);
+
+  
 }

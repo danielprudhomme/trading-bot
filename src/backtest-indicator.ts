@@ -1,22 +1,52 @@
 import BackTest from './backtest';
 import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
+import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
 import BollingerBandsValue from './indicators/bollinger-bands-value';
 import Indicator from './indicators/indicator';
+import Chart from './models/chart';
+import StrategyOneTimeFrame from './strategies/strategy-one-timeframe';
+
+class EmptyStrategy extends StrategyOneTimeFrame {
+  async execute(): Promise<void> {
+  }
+}
 
 export default class BackTestIndicator extends BackTest {
   indicator: Indicator;
+  timeframe: TimeFrame;
+
+  protected _chart: Chart | null = null;
+  protected get chart(): Chart {
+    if (!this._chart) throw new Error('Chart should not be null.');
+    return this._chart;
+  }
 
   constructor(
-    timeFrame: TimeFrame,
+    timeframe: TimeFrame,
     startDate: string,
     endDate: string,
     symbol: string,
     exchangeId: ExchangeId,
     indicator: Indicator
   ) {
-    super(timeFrame, timeFrame, startDate, endDate, symbol, exchangeId);
+    super(new EmptyStrategy(timeframe), timeframe, startDate, endDate, symbol, exchangeId);
+    this.timeframe = timeframe;
     this.indicator = indicator;
+  }
+
+  private async initChart(): Promise<Chart> {
+    this.startTimestamp = this.exchangeService.parse8601(this.startDate);
+    this.endTimestamp = this.exchangeService.parse8601(this.endDate);
+    // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
+    const startMinus10Periods = this.startTimestamp - TimeFrame.toMilliseconds(this.timeframe) * 50;
+    const data = await this.exchangeService.fetchOHLCVRange(this.symbol, this.timeframe, startMinus10Periods, this.startTimestamp);
+
+    const chart = new Chart(this.symbol, this.timeframe, data);
+
+    (this.exchangeService as ReadOnlyExchangeService).addChart(chart);
+
+    return chart;
   }
 
   async init(): Promise<void> {
@@ -29,9 +59,9 @@ export default class BackTestIndicator extends BackTest {
     this.chart.candles.forEach(candle => {
       const indicatorValue = candle.getIndicatorValue(this.indicator) as BollingerBandsValue;
       console.log(
-        `${this.exchangeService.iso8601(candle.timestamp)}\t
-        close: ${candle.close}\t
-        indicator: ${indicatorValue.lower} ${indicatorValue.basis} ${indicatorValue.upper} `
+        `${this.exchangeService.iso8601(candle.timestamp)}
+        close: ${candle.close}
+        indicator: \t${indicatorValue.lower} \t${indicatorValue.basis} \t${indicatorValue.upper} `
       );
     }) 
   }

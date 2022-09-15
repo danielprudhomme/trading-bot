@@ -11,4 +11,6 @@ export default class BollingerBandsValue extends IndicatorValue {
     this.upper = upper;
     this.lower = lower;
   }
+
+  toString = () => `Basis: ${this.basis}\tUpper: ${this.upper}\tLower: ${this.lower}`;
 }

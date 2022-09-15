@@ -4,4 +4,6 @@ export default class IndicatorValue {
   constructor(value: number) {
     this.value = value;
   }
+
+  toString = () => `Value:\t${this.value}`;
 }

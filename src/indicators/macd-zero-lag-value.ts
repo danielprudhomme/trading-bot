@@ -12,4 +12,6 @@ export default class MacdZeroLagValue extends IndicatorValue {
     this.macdZeroLag = macdZeroLag;
     this.signal = signal;
   }
+
+  toString = () => `Value: ${this.macdZeroLag}\tSignal: ${this.signal}\tAbove: ${this.macdAboveSignal}`;
 }

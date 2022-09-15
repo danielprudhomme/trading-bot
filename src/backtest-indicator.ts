@@ -2,7 +2,6 @@ import BackTest from './backtest';
 import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
 import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
-import BollingerBandsValue from './indicators/bollinger-bands-value';
 import Indicator from './indicators/indicator';
 import Chart from './models/chart';
 import StrategyOneTimeFrame from './strategies/strategy-one-timeframe';
@@ -57,11 +56,11 @@ export default class BackTestIndicator extends BackTest {
   async launch(): Promise<void> {
     this.chart.addIndicator(this.indicator);
     this.chart.candles.forEach(candle => {
-      const indicatorValue = candle.getIndicatorValue(this.indicator) as BollingerBandsValue;
+      const indicatorValue = candle.getIndicatorValue(this.indicator);
       console.log(
         `${this.exchangeService.iso8601(candle.timestamp)}
         close: ${candle.close}
-        indicator: \t${indicatorValue.lower} \t${indicatorValue.basis} \t${indicatorValue.upper} `
+        indicator: ${indicatorValue?.toString()}`
       );
     }) 
   }

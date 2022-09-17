@@ -1,0 +1,1 @@
+export type MovingAverageDirection = 'up' | 'down';

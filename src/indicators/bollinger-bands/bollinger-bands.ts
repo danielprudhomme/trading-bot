@@ -1,6 +1,6 @@
+import Indicator from '../indicator';
+import SMA from '../moving-average/sma';
 import BollingerBandsValue from './bollinger-bands-value';
-import Indicator from './indicator';
-import SMA from './sma';
 import StandardDeviation from './standard-deviation';
 
 export default class BollingerBands extends Indicator {

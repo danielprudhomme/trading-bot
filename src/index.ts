@@ -2,7 +2,7 @@ import BackTestIndicator from './backtest-indicator';
 import { ConfigurationManager } from './configuration-manager';
 import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
-import BollingerBands from './indicators/bollinger-bands';
+import BollingerBands from './indicators/bollinger-bands/bollinger-bands';
 
 ConfigurationManager.load();
 

@@ -1,6 +1,6 @@
 import TimeFrame from '../enums/timeframe';
-import MacdZeroLag from '../indicators/macd-zero-lag';
 import MacdZeroLagValue from '../indicators/macd-zero-lag-value';
+import MacdZeroLag from '../indicators/macd-zero-lag/macd-zero-lag';
 import ChartWorkspace from '../models/chart-workspace';
 import Trade from '../models/trade';
 import TradeManager from '../trade-manager';

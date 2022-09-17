@@ -1,7 +1,7 @@
-import Indicator from './indicator';
-import { IndicatorSource } from './indicator-source';
-import IndicatorValue from './indicator-value';
-import SMA from './sma';
+import Indicator from '../indicator';
+import { IndicatorSource } from '../indicator-source';
+import IndicatorValue from '../indicator-value';
+import SMA from '../moving-average/sma';
 
 /* Relative Strength Index */
 export default class RSI extends Indicator {

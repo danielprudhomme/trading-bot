@@ -1,4 +1,4 @@
-import IndicatorValue from './indicator-value';
+import IndicatorValue from '../indicator-value';
 
 export default class BollingerBandsValue extends IndicatorValue {
   basis: number;

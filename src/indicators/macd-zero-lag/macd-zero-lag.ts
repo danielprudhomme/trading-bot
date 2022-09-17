@@ -1,7 +1,7 @@
-import EMA from './ema';
-import Indicator from './indicator';
-import { IndicatorSource } from './indicator-source';
-import IndicatorValue from './indicator-value';
+import Indicator from '../indicator';
+import { IndicatorSource } from '../indicator-source';
+import IndicatorValue from '../indicator-value';
+import EMA from '../moving-average/ema';
 import MacdZeroLagValue from './macd-zero-lag-value';
 
 export default class MacdZeroLag extends Indicator {

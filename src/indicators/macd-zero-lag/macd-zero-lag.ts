@@ -1,10 +1,10 @@
-import Indicator from '../indicator';
 import { IndicatorSource } from '../indicator-source';
-import IndicatorValue from '../indicator-value';
+import IndicatorWithValue from '../indicator-with-value';
 import EMA from '../moving-average/ema';
+import MovingAverageValue from '../moving-average/moving-average-value';
 import MacdZeroLagValue from './macd-zero-lag-value';
 
-export default class MacdZeroLag extends Indicator {
+export default class MacdZeroLag extends IndicatorWithValue<MacdZeroLagValue> {
   private fastDema: Dema;
   private slowDema: Dema;
   private signal: Dema;
@@ -19,14 +19,10 @@ export default class MacdZeroLag extends Indicator {
     this.addDependency(this.signal);
   }
 
-  calculateAtIndex(index: number): void {
-    const value = new MacdZeroLagValue(
-      this.getMacdZeroLagValue(index),
-      this.chart.getIndicatorValueAtIndex(index, this.signal)?.value ?? 0
-    );
-
-    this.chart.setIndicatorValueAtIndex(index, this, value);
-  }
+  calculateAtIndex = (index: number): MacdZeroLagValue | null => new MacdZeroLagValue(
+    this.getMacdZeroLagValue(index),
+    this.chart.getIndicatorValueAtIndex(index, this.signal)?.value ?? 0
+  );
 
   private getMacdZeroLagValue = (index: number): number =>
     (this.chart.getIndicatorValueAtIndex(index, this.fastDema)?.value ?? 0) - (this.chart.getIndicatorValueAtIndex(index, this.slowDema)?.value ?? 0);
@@ -44,10 +40,11 @@ class Dema extends EMA {
     this.addDependency(this.emaEma);
   }
 
-  calculateAtIndex(index: number) {
+  protected calculateAtIndex(index: number): MovingAverageValue | null {
     const ema = this.chart.getIndicatorValueAtIndex(index, this.ema)?.value ?? 0;
     const emaEma = this.chart.getIndicatorValueAtIndex(index, this.emaEma)?.value ?? 0;
     const value = 2 * ema - emaEma;
-    this.chart.setIndicatorValueAtIndex(index, this, new IndicatorValue(value));
+
+    return new MovingAverageValue(value);
   }
 }

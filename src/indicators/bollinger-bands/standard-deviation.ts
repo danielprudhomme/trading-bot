@@ -13,7 +13,7 @@ export default class StandardDeviation extends Indicator {
     this.addDependency(this.avg);
   }
 
-  protected calculateAtIndex(index: number): void {
+  protected calculateAtIndex(index: number): IndicatorValue | null {
     const avg = this.chart.getIndicatorValueAtIndex(index, this.avg)?.value ?? 0;
 
     const sumOfSquareDeviations = this.chart.candles.slice(index - this.length + 1, index + 1)
@@ -23,7 +23,7 @@ export default class StandardDeviation extends Indicator {
       }, 0);
 
     const stdev = Math.sqrt(sumOfSquareDeviations / this.length);
-    this.chart.setIndicatorValueAtIndex(index, this, new IndicatorValue(stdev));
+    return new IndicatorValue(stdev);
   }
 
   private isZero = (value: number, epsilon: number = Number.EPSILON): boolean => Math.abs(value) <= epsilon;

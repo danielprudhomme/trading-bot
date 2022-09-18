@@ -38,8 +38,8 @@ export default class BackTestIndicator extends BackTest {
     this.startTimestamp = this.exchangeService.parse8601(this.startDate);
     this.endTimestamp = this.exchangeService.parse8601(this.endDate);
     // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
-    const startMinus10Periods = this.startTimestamp - TimeFrame.toMilliseconds(this.timeframe) * 50;
-    const data = await this.exchangeService.fetchOHLCVRange(this.symbol, this.timeframe, startMinus10Periods, this.startTimestamp);
+    const startMinus50Periods = this.startTimestamp - TimeFrame.toMilliseconds(this.timeframe) * 50;
+    const data = await this.exchangeService.fetchOHLCVRange(this.symbol, this.timeframe, startMinus50Periods, this.endTimestamp);
 
     const chart = new Chart(this.symbol, this.timeframe, data);
 

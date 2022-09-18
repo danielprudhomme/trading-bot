@@ -1,1 +1,1 @@
-export type MovingAverageDirection = 'up' | 'down';
+export type MovingAverageDirection = 'up' | 'down' | null;

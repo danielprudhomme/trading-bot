@@ -16,12 +16,10 @@ ConfigurationManager.load();
 //   'BTC/USDT',
 //   ExchangeId.binance);
 const backtest = new BackTestIndicator(TimeFrame.t1d,
-    '2022-09-08T00:00:00Z',
-  '2022-09-08T20:00:00Z',
+  '2022-09-01T12:00:00Z',
+  '2022-09-17T00:00:00Z',
   'BTC/USDT',
   ExchangeId.binance,
   new BollingerBands(20, 2.5));
-
-
 await backtest.init();
 await backtest.launch();

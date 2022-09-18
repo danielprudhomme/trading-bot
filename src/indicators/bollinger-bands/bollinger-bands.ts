@@ -1,9 +1,9 @@
-import Indicator from '../indicator';
+import IndicatorWithValue from '../indicator-with-value';
 import SMA from '../moving-average/sma';
 import BollingerBandsValue from './bollinger-bands-value';
 import StandardDeviation from './standard-deviation';
 
-export default class BollingerBands extends Indicator {
+export default class BollingerBands extends IndicatorWithValue<BollingerBandsValue> {
   private mult: number;
   private basis: SMA;
   private stdev: StandardDeviation;
@@ -18,13 +18,12 @@ export default class BollingerBands extends Indicator {
     this.addDependency(this.stdev);
   }
 
-  protected calculateAtIndex(index: number): void {
+  protected calculateAtIndex(index: number): BollingerBandsValue | null {
     const basis = this.chart.getIndicatorValueAtIndex(index, this.basis)?.value ?? 0;
     const dev = this.mult * (this.chart.getIndicatorValueAtIndex(index, this.stdev)?.value ?? 0);
     const upper = basis + dev;
     const lower = basis - dev;
 
-    const value = new BollingerBandsValue(basis, upper, lower);
-    this.chart.setIndicatorValueAtIndex(index, this, value);
+    return new BollingerBandsValue(basis, upper, lower);
   }
 }

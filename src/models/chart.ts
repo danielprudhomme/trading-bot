@@ -1,6 +1,6 @@
 import ccxt from 'ccxt';
 import TimeFrame from '../enums/timeframe';
-import Indicator from '../indicators/indicator';
+import { Indicator } from '../indicators/indicator';
 import IndicatorValue from '../indicators/indicator-value';
 import Candle from './candle';
 

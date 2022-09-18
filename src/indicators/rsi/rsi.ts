@@ -32,43 +32,45 @@ export default class RSI extends Indicator {
     this.addDependency(this.downRMA);
   }
 
-  calculateAtIndex(index: number) {
+  protected calculateAtIndex(index: number): IndicatorValue | null {
     const up = this.chart.getIndicatorValueAtIndex(index, this.upRMA)?.value;
     const down = this.chart.getIndicatorValueAtIndex(index, this.downRMA)?.value;
 
-    if (up && down) {
-      const rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down));
-      this.chart.setIndicatorValueAtIndex(index, this, new IndicatorValue(rsi));
-    }
+    if (!up || !down) return null;
+
+    const rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down));
+    return new IndicatorValue(rsi);
   }
 }
 
 class Up extends Indicator {
-  calculateAtIndex(index: number): void {
+  protected calculateAtIndex(index: number): IndicatorValue | null {
     const candle = this.chart.getCandleAtIndex(index);
     const value = index === 0 ? 0 : Math.max(candle.close - this.chart.getCandleAtIndex(index - 1).close, 0);
-    candle.setIndicatorValue(this, new IndicatorValue(value));
+    return new IndicatorValue(value);
   }
 }
 
 class Down extends Indicator {
-  calculateAtIndex(index: number): void {
+  protected calculateAtIndex(index: number): IndicatorValue | null {
     const candle = this.chart.getCandleAtIndex(index);
     const value = index === 0 ? 0 : -Math.min(candle.close - this.chart.getCandleAtIndex(index - 1).close, 0);
-    candle.setIndicatorValue(this, new IndicatorValue(value));
+    return new IndicatorValue(value);
   }
 }
 
-class RMA extends SMA {
+class RMA extends Indicator {
+  length: number;
   sma: SMA;
 
   constructor(length: number, source: IndicatorSource, sma: SMA) {
-    super(length, source);
+    super(source);
+    this.length = length;
     this.sma = sma;
   }
 
-  calculateAtIndex(index: number) {
-    if (index < this.length - 1) return;
+  protected calculateAtIndex(index: number): IndicatorValue | null {
+    if (index < this.length - 1) return null;
 
     const alpha = 1 / this.length;
 
@@ -79,6 +81,6 @@ class RMA extends SMA {
       candle.getIndicatorValue(this.sma)?.value ?? 0 : 
       alpha * this.source(index) + (1 - alpha) * lastCandleRMA;
     
-    candle.setIndicatorValue(this, new IndicatorValue(value));
+    return new IndicatorValue(value);
   }
 }

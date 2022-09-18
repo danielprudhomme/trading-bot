@@ -4,7 +4,7 @@ import { MovingAverageDirection } from './moving-average-direction';
 export default class MovingAverageValue extends IndicatorValue {
   direction: MovingAverageDirection;
 
-  constructor(value: number, direction: MovingAverageDirection) {
+  constructor(value: number, direction: MovingAverageDirection = null) {
     super(value);
     this.direction = direction;
   }

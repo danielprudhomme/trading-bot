@@ -16,19 +16,19 @@ export default class Chart {
     this.candles = ohlcv.map(x => new Candle(x));
   }
 
-  getCandleAtIndex = (index: number) => {
-    if (index < 0 || index >= this.candles.length) throw new Error('Index out of bounds of candles array.');
+  getCandleAtIndex = (index: number): Candle | null => {
+    if (index < 0 || index >= this.candles.length) return null;
     return this.candles[index];
   }
 
   hasIndicatorValueAtIndex = (index: number, indicator: Indicator): boolean =>
-    this.getCandleAtIndex(index).hasIndicatorValue(indicator);
+    this.getCandleAtIndex(index)?.hasIndicatorValue(indicator) ?? false;
 
   getIndicatorValueAtIndex = (index: number, indicator: Indicator): IndicatorValue | null =>
-    this.getCandleAtIndex(index).getIndicatorValue(indicator);
+    this.getCandleAtIndex(index)?.getIndicatorValue(indicator) ?? null;
     
   setIndicatorValueAtIndex = (index: number, indicator: Indicator, value: IndicatorValue) =>
-    this.getCandleAtIndex(index).setIndicatorValue(indicator, value);
+    this.getCandleAtIndex(index)?.setIndicatorValue(indicator, value);
 
   get currentCandle() {
     if (this.candles.length == 0) throw new Error('Chart contains no candle.')

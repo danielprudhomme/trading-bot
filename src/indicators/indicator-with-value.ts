@@ -1,5 +1,5 @@
 import Chart from '../models/chart';
-import { Indicator } from './indicator';
+import Indicator from './indicator';
 import { IndicatorSource } from './indicator-source';
 import IndicatorValue from './indicator-value';
 
@@ -15,7 +15,7 @@ export default abstract class IndicatorWithValue<T extends IndicatorValue> {
   }
 
   constructor(source: IndicatorSource | null = null) {
-    this.source = source ? source : (index: number) => this.chart.getCandleAtIndex(index).close;
+    this.source = source ? source : (index: number) => this.chart.getCandleAtIndex(index)?.close ?? 0;
   }
 
   bind = (chart: Chart) => { 

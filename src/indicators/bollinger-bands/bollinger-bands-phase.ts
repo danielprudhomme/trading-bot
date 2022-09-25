@@ -1,0 +1,1 @@
+export type BollingerBandsPhase = 'narrowing' | 'flat' | 'widening';

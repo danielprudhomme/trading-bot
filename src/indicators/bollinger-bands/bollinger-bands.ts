@@ -1,5 +1,6 @@
 import IndicatorWithValue from '../indicator-with-value';
 import SMA from '../moving-average/sma';
+import { BollingerBandsPhase } from './bollinger-bands-phase';
 import BollingerBandsValue from './bollinger-bands-value';
 import StandardDeviation from './standard-deviation';
 
@@ -24,8 +25,16 @@ export default class BollingerBands extends IndicatorWithValue<BollingerBandsVal
     const upper = basis + dev;
     const lower = basis - dev;
 
-    const percentBandWidth = (this.chart.getCandleAtIndex(index).close - lower)/(upper - lower)
+    const percentB = (this.chart.getCandleAtIndex(index)?.close ?? 0 - lower)/(upper - lower);
 
-    return new BollingerBandsValue(basis, upper, lower, percentBandWidth);
+    const width = (upper - lower) / basis;
+
+    const previousWidth = this.getValue(index - 1)?.width;
+    const diffPreviousWidth = previousWidth ? 1 - previousWidth / width : 0;
+    let phase: BollingerBandsPhase = 'flat';
+    if (diffPreviousWidth > 0.05) phase = 'widening';
+    if (diffPreviousWidth < -0.05) phase = 'narrowing';
+
+    return new BollingerBandsValue(basis, upper, lower, percentB, width, phase);
   }
 }

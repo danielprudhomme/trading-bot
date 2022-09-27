@@ -1,7 +1,8 @@
 import ccxt from 'ccxt';
 import TimeFrame from '../enums/timeframe';
-import { Indicator } from '../indicators/indicator';
+import Indicator from '../indicators/indicator';
 import IndicatorValue from '../indicators/indicator-value';
+import IndicatorWithValue from '../indicators/indicator-with-value';
 import Candle from './candle';
 
 export default class Chart {
@@ -16,18 +17,15 @@ export default class Chart {
     this.candles = ohlcv.map(x => new Candle(x));
   }
 
-  getCandleAtIndex = (index: number): Candle | null => {
-    if (index < 0 || index >= this.candles.length) return null;
-    return this.candles[index];
-  }
+  getCandleAtIndex = (index: number): Candle | null => index < 0 || index >= this.candles.length ? null : this.candles[index];
 
   hasIndicatorValueAtIndex = (index: number, indicator: Indicator): boolean =>
     this.getCandleAtIndex(index)?.hasIndicatorValue(indicator) ?? false;
 
-  getIndicatorValueAtIndex = (index: number, indicator: Indicator): IndicatorValue | null =>
+  getIndicatorValueAtIndex = <T extends IndicatorValue>(index: number, indicator: IndicatorWithValue<T>): T | null =>
     this.getCandleAtIndex(index)?.getIndicatorValue(indicator) ?? null;
-    
-  setIndicatorValueAtIndex = (index: number, indicator: Indicator, value: IndicatorValue) =>
+  
+  setIndicatorValueAtIndex = <T extends IndicatorValue>(index: number, indicator: IndicatorWithValue<T>, value: T) =>
     this.getCandleAtIndex(index)?.setIndicatorValue(indicator, value);
 
   get currentCandle() {

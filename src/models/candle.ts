@@ -1,6 +1,7 @@
 import ccxt from 'ccxt';
-import { Indicator } from '../indicators/indicator';
+import Indicator from '../indicators/indicator';
 import IndicatorValue from '../indicators/indicator-value';
+import IndicatorWithValue from '../indicators/indicator-with-value';
 
 export default class Candle {
   timestamp: number;
@@ -22,6 +23,6 @@ export default class Candle {
   }
 
   hasIndicatorValue = (indicator: Indicator): boolean => this.indicators.has(indicator);
-  getIndicatorValue = (indicator: Indicator): IndicatorValue | null => this.indicators.get(indicator) ?? null;
-  setIndicatorValue = (indicator: Indicator, value: IndicatorValue): void => { this.indicators.set(indicator, value) };
+  getIndicatorValue = <T extends IndicatorValue>(indicator: IndicatorWithValue<T>): T | null => this.indicators.get(indicator) as T ?? null;
+  setIndicatorValue = <T extends IndicatorValue>(indicator: IndicatorWithValue<T>, value: T): void => { this.indicators.set(indicator, value) };
 }

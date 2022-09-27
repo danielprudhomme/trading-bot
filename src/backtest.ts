@@ -2,7 +2,7 @@ import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
 import ExchangeService from './exchange-service/exchange.service';
 import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
-import Candle from './models/candle';
+import Candlestick from './models/candlestick';
 import Chart from './models/chart';
 import ChartWorkspace from './models/chart-workspace';
 import Strategy from './strategies/strategy';
@@ -16,7 +16,7 @@ export default class BackTest extends TradingWorker {
   protected startTimestamp: number = 0;
   protected endTimestamp: number = 0;
   protected exchangeId: ExchangeId;
-  private lastCandle: Candle | null = null;
+  private lastCandlestick: Candlestick | null = null;
 
   constructor(
     strategy: Strategy,
@@ -72,15 +72,15 @@ export default class BackTest extends TradingWorker {
     console.log('ticks number', ticks.length);
 
     for (const tick of ticks) {
-      this.lastCandle = new Candle(tick);
+      this.lastCandlestick = new Candlestick(tick);
       await this.onTick();
     }
 
     this.tradeManager.getPerformance();
   }
 
-  protected async fetchLastCandle(): Promise<Candle> {
-    if (!this.lastCandle) throw new Error('Last candle should not be null');
-    return this.lastCandle;
+  protected async fetchLastCandlestick(): Promise<Candlestick> {
+    if (!this.lastCandlestick) throw new Error('Last candlestick should not be null');
+    return this.lastCandlestick;
   }
 }

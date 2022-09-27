@@ -3,34 +3,34 @@ import TimeFrame from '../enums/timeframe';
 import Indicator from '../indicators/indicator';
 import IndicatorValue from '../indicators/indicator-value';
 import IndicatorWithValue from '../indicators/indicator-with-value';
-import Candle from './candle';
+import Candlestick from './candlestick';
 
 export default class Chart {
   symbol: string;
   timeframe: TimeFrame;
-  candles: Candle[];
+  candlesticks: Candlestick[];
   indicators: Indicator[] = [];
 
   constructor(symbol: string, timeframe: TimeFrame, ohlcv: ccxt.OHLCV[]) {
     this.symbol = symbol;
     this.timeframe = timeframe;
-    this.candles = ohlcv.map(x => new Candle(x));
+    this.candlesticks = ohlcv.map(x => new Candlestick(x));
   }
 
-  getCandleAtIndex = (index: number): Candle | null => index < 0 || index >= this.candles.length ? null : this.candles[index];
+  getCandlestickAtIndex = (index: number): Candlestick | null => index < 0 || index >= this.candlesticks.length ? null : this.candlesticks[index];
 
   hasIndicatorValueAtIndex = (index: number, indicator: Indicator): boolean =>
-    this.getCandleAtIndex(index)?.hasIndicatorValue(indicator) ?? false;
+    this.getCandlestickAtIndex(index)?.hasIndicatorValue(indicator) ?? false;
 
   getIndicatorValueAtIndex = <T extends IndicatorValue>(index: number, indicator: IndicatorWithValue<T>): T | null =>
-    this.getCandleAtIndex(index)?.getIndicatorValue(indicator) ?? null;
+    this.getCandlestickAtIndex(index)?.getIndicatorValue(indicator) ?? null;
   
   setIndicatorValueAtIndex = <T extends IndicatorValue>(index: number, indicator: IndicatorWithValue<T>, value: T) =>
-    this.getCandleAtIndex(index)?.setIndicatorValue(indicator, value);
+    this.getCandlestickAtIndex(index)?.setIndicatorValue(indicator, value);
 
-  get currentCandle() {
-    if (this.candles.length == 0) throw new Error('Chart contains no candle.')
-    return this.candles[this.candles.length - 1];
+  get currentCandlestick() {
+    if (this.candlesticks.length == 0) throw new Error('Chart contains no candlestick.')
+    return this.candlesticks[this.candlesticks.length - 1];
   }
 
   addIndicator(indicator: Indicator) {
@@ -39,20 +39,20 @@ export default class Chart {
     indicator.calculate();
   }
 
-  newCandle(candle: Candle) {
-    // checks if candle updates the last candle or if it is a new one
-    const lastCandleTimestampStart = this.currentCandle.timestamp;
-    const lastCandleTimestampEnd = lastCandleTimestampStart + TimeFrame.toMilliseconds(this.timeframe);
+  newCandlestick(candlestick: Candlestick) {
+    // checks if candlestick updates the last candlestick or if it is a new one
+    const lastCandlestickTimestampStart = this.currentCandlestick.timestamp;
+    const lastCandlestickTimestampEnd = lastCandlestickTimestampStart + TimeFrame.toMilliseconds(this.timeframe);
 
-    if (candle.timestamp >= lastCandleTimestampStart && candle.timestamp < lastCandleTimestampEnd) {
-      candle.timestamp = this.currentCandle.timestamp;
-      this.candles.pop();
+    if (candlestick.timestamp >= lastCandlestickTimestampStart && candlestick.timestamp < lastCandlestickTimestampEnd) {
+      candlestick.timestamp = this.currentCandlestick.timestamp;
+      this.candlesticks.pop();
     }
-    else if (candle.timestamp >= lastCandleTimestampEnd) {
-      candle.timestamp = lastCandleTimestampEnd;
+    else if (candlestick.timestamp >= lastCandlestickTimestampEnd) {
+      candlestick.timestamp = lastCandlestickTimestampEnd;
     }
-    this.candles.push(candle);
+    this.candlesticks.push(candlestick);
 
-    this.indicators.forEach(indicator => indicator.calculate(this.candles.length - 1));
+    this.indicators.forEach(indicator => indicator.calculate(this.candlesticks.length - 1));
   }
 }

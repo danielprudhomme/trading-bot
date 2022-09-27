@@ -1,5 +1,5 @@
 import TimeFrame from "../enums/timeframe";
-import Candle from "./candle";
+import Candlestick from "./candlestick";
 import Chart from "./chart";
 
 export default class ChartWorkspace {
@@ -14,5 +14,5 @@ export default class ChartWorkspace {
 
   get = (timeframe: TimeFrame) => this.charts.get(timeframe);
 
-  newCandle = (candle: Candle) => this.charts.forEach(chart => chart.newCandle(candle));
+  newCandlestick = (candlestick: Candlestick) => this.charts.forEach(chart => chart.newCandlestick(candlestick));
 }

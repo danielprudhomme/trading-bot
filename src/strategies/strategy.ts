@@ -24,7 +24,10 @@ export default abstract class Strategy {
   init(chartWorkspace: ChartWorkspace, tradeManager: TradeManager) {
     this._chartWorkspace = chartWorkspace;
     this._tradeManager = tradeManager;
+    this.addIndicators();
   }
   
+  abstract addIndicators(): void;
+
   abstract execute(): Promise<void>;
 }

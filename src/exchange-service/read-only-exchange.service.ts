@@ -47,14 +47,14 @@ export default class ReadOnlyExchangeService extends ExchangeService {
   createMarketOrder = async (symbol: string, side: OrderSide, quantity: number): Promise<ExchangeOrder> => {
     const order = new ExtendedExchangeOrder(
       Guid.create().toString(),
-      this.chart.currentCandle.timestamp,
+      this.chart.currentCandlestick.timestamp,
       ExchangeOrderStatus.Closed,
       OrderType.Market,
       side,
       null,
       null,
       quantity,
-      this.chart.currentCandle.close
+      this.chart.currentCandlestick.close
     );
     this.orders.set(order.id, order);
     return order;
@@ -63,14 +63,14 @@ export default class ReadOnlyExchangeService extends ExchangeService {
   createlimitOrder = async (symbol: string, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> => {
     const order = new ExtendedExchangeOrder(
       Guid.create().toString(),
-      this.chart.currentCandle.timestamp,
+      this.chart.currentCandlestick.timestamp,
       ExchangeOrderStatus.Open,
       OrderType.Limit,
       side,
       limit,
       null,
       quantity,
-      this.chart.currentCandle.close
+      this.chart.currentCandlestick.close
     );
     this.orders.set(order.id, order);
     return order;
@@ -89,8 +89,8 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     if (order.status !== ExchangeOrderStatus.Open) return order;
 
     if (order.type === OrderType.Limit && order.limit &&
-      ((order.side === OrderSide.Sell && this.chart.currentCandle.high >= order.limit) 
-        || (order.side === OrderSide.Buy && this.chart.currentCandle.low <= order.limit))) {
+      ((order.side === OrderSide.Sell && this.chart.currentCandlestick.high >= order.limit) 
+        || (order.side === OrderSide.Buy && this.chart.currentCandlestick.low <= order.limit))) {
         order.status = ExchangeOrderStatus.Closed;
         order.executedPrice = order.limit;
         console.log('EXCHANGE --- limit order has been closed', order.executedPrice);

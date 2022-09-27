@@ -1,6 +1,6 @@
 import TimeFrame from '../enums/timeframe';
 import ExchangeService from '../exchange-service/exchange.service';
-import Candle from '../models/candle';
+import Candlestick from '../models/candlestick';
 import ChartWorkspace from '../models/chart-workspace';
 import Strategy from '../strategies/strategy';
 import TradeManager from '../trade-manager';
@@ -49,15 +49,15 @@ export default abstract class TradingWorker {
   }
 
   async onTick() {
-    const lastCandle = await this.fetchLastCandle();
-    this.chartWorkspace.newCandle(lastCandle);
+    const lastCandlestick = await this.fetchLastCandlestick();
+    this.chartWorkspace.newCandlestick(lastCandlestick);
  
     // update trade manager with orders
-    await this.tradeManager.syncAll(lastCandle);
+    await this.tradeManager.syncAll(lastCandlestick);
 
     // execute strategy
     await this.strategy.execute();
   }
 
-  protected abstract fetchLastCandle(): Promise<Candle>;
+  protected abstract fetchLastCandlestick(): Promise<Candlestick>;
 }

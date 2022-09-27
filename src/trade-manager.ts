@@ -4,7 +4,7 @@ import { OrderStatus } from './enums/order-status';
 import { OrderTradeStep } from './enums/order-trade-step';
 import { OrderType } from './enums/order-type';
 import ExchangeService from './exchange-service/exchange.service';
-import Candle from './models/candle';
+import Candlestick from './models/candlestick';
 import Order from './models/order';
 import Trade from './models/trade';
 
@@ -16,12 +16,12 @@ export default class TradeManager {
     this.exchangeService = exchangeService;
   }
 
-  create = async (trade: Trade, currentCandle: Candle): Promise<void> => {
+  create = async (trade: Trade, currentCandlestick: Candlestick): Promise<void> => {
     this.trades.push(trade);
-    await this.sync(trade, currentCandle);
+    await this.sync(trade, currentCandlestick);
   }
 
-  close = async (trade: Trade, currentCandle: Candle): Promise<void> => {
+  close = async (trade: Trade, currentCandlestick: Candlestick): Promise<void> => {
     this.cancelAllOrders(trade);
 
     // Close position with remaining quantity
@@ -35,12 +35,12 @@ export default class TradeManager {
 
     trade.orders.push(closeOrder);
     
-    await this.sync(trade, currentCandle);
+    await this.sync(trade, currentCandlestick);
   }
 
-  syncAll = async (currentCandle: Candle): Promise<void> => {
+  syncAll = async (currentCandlestick: Candlestick): Promise<void> => {
     for (const trade of this.trades.filter(x => x.isOpen)) {
-      await this.sync(trade, currentCandle);
+      await this.sync(trade, currentCandlestick);
     }
   }
 
@@ -54,7 +54,7 @@ export default class TradeManager {
     console.log('perf globale : ', sumPerf);
   }
 
-  private sync = async (trade: Trade, currentCandle: Candle): Promise<void> => {
+  private sync = async (trade: Trade, currentCandlestick: Candlestick): Promise<void> => {
     await this.syncCanceledOrdersWithExchange(trade);
     await this.syncOpenOrdersWithExchange(trade); // TODO : si le dernier TP est passé (remaining = 0), on cancel tout le reste
     
@@ -66,7 +66,7 @@ export default class TradeManager {
     await this.transmitNextOpenOrderToTransmit(trade);
 
     // Si on a un stop loss (pour l'instant pas envoyer directement sur l'exchange)
-    await this.checkAndTransmitStopLoss(trade, currentCandle);
+    await this.checkAndTransmitStopLoss(trade, currentCandlestick);
   }
 
   private syncOpenOrdersWithExchange = async (trade: Trade): Promise<void> => {
@@ -134,8 +134,8 @@ export default class TradeManager {
     if (nextOpenOrder) await this.transmitOrder(trade.symbol, nextOpenOrder);
   }
 
-  private checkAndTransmitStopLoss = async (trade: Trade, currentCandle: Candle): Promise<void> => {
-    const lastClosePrice = currentCandle.close;
+  private checkAndTransmitStopLoss = async (trade: Trade, currentCandlestick: Candlestick): Promise<void> => {
+    const lastClosePrice = currentCandlestick.close;
     const openSl = trade.orders.find(x => x.step === OrderTradeStep.StopLoss && x.status === OrderStatus.Open);
     if (openSl?.stop && lastClosePrice < openSl.stop) {
       this.cancelAllOrders(trade);

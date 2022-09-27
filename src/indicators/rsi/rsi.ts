@@ -45,16 +45,18 @@ export default class RSI extends Indicator {
 
 class Up extends Indicator {
   protected calculateAtIndex(index: number): IndicatorValue | null {
-    const candle = this.chart.getCandleAtIndex(index);
-    const value = index === 0 ? 0 : Math.max(candle.close - this.chart.getCandleAtIndex(index - 1).close, 0);
+    const candlestick = this.chart.getCandlestickAtIndex(index);
+    const previousCandlestick = this.chart.getCandlestickAtIndex(index - 1);
+    const value = candlestick && previousCandlestick ? Math.max(candlestick.close - previousCandlestick.close, 0) : 0;
     return new IndicatorValue(value);
   }
 }
 
 class Down extends Indicator {
   protected calculateAtIndex(index: number): IndicatorValue | null {
-    const candle = this.chart.getCandleAtIndex(index);
-    const value = index === 0 ? 0 : -Math.min(candle.close - this.chart.getCandleAtIndex(index - 1).close, 0);
+    const candlestick = this.chart.getCandlestickAtIndex(index);
+    const previousCandlestick = this.chart.getCandlestickAtIndex(index - 1);
+    const value = candlestick && previousCandlestick ? -Math.min(candlestick.close - previousCandlestick.close, 0) : 0;
     return new IndicatorValue(value);
   }
 }
@@ -74,12 +76,12 @@ class RMA extends Indicator {
 
     const alpha = 1 / this.length;
 
-    const candle = this.chart.getCandleAtIndex(index);
-    const lastCandleRMA = this.chart.getIndicatorValueAtIndex(index - 1, this)?.value ?? 0;
+    const candlestick = this.chart.getCandlestickAtIndex(index);
+    const lastCandlestickRMA = this.chart.getIndicatorValueAtIndex(index - 1, this)?.value ?? 0;
 
-    const value = lastCandleRMA === null ?
-      candle.getIndicatorValue(this.sma)?.value ?? 0 : 
-      alpha * this.source(index) + (1 - alpha) * lastCandleRMA;
+    const value = lastCandlestickRMA === null ?
+      candlestick?.getIndicatorValue(this.sma)?.value ?? 0 : 
+      alpha * this.source(index) + (1 - alpha) * lastCandlestickRMA;
     
     return new IndicatorValue(value);
   }

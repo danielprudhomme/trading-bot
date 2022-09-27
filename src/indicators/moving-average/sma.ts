@@ -7,7 +7,7 @@ export default class SMA extends MovingAverage {
   protected calculateAtIndex(index: number): MovingAverageValue | null {
     if (index < this.length - 1) return null;
 
-    const sum = this.chart.candles.slice(index - this.length + 1, index + 1)
+    const sum = this.chart.candlesticks.slice(index - this.length + 1, index + 1)
       .reduce((a, _, i) => a + this.source(i + index - this.length + 1), 0);
 
     const value = sum / this.length;

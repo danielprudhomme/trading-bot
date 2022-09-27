@@ -16,9 +16,9 @@ export default class StandardDeviation extends Indicator {
   protected calculateAtIndex(index: number): IndicatorValue | null {
     const avg = this.chart.getIndicatorValueAtIndex(index, this.avg)?.value ?? 0;
 
-    const sumOfSquareDeviations = this.chart.candles.slice(index - this.length + 1, index + 1)
-      .reduce((sumOfSquareDeviations, candle) => {
-        const sum = this.sum(candle.close, -avg);
+    const sumOfSquareDeviations = this.chart.candlesticks.slice(index - this.length + 1, index + 1)
+      .reduce((sumOfSquareDeviations, candlestick) => {
+        const sum = this.sum(candlestick.close, -avg);
         return sumOfSquareDeviations + sum * sum;
       }, 0);
 

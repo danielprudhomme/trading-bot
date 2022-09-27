@@ -7,6 +7,9 @@ import Chart from './models/chart';
 import StrategyOneTimeFrame from './strategies/strategy-one-timeframe';
 
 class EmptyStrategy extends StrategyOneTimeFrame {
+  addIndicators(): void {
+  }
+
   async execute(): Promise<void> {
   }
 }
@@ -55,11 +58,11 @@ export default class BackTestIndicator extends BackTest {
 
   async launch(): Promise<void> {
     this.chart.addIndicator(this.indicator);
-    this.chart.candles.forEach(candle => {
-      const indicatorValue = candle.getIndicatorValue(this.indicator);
+    this.chart.candlesticks.forEach(candlestick => {
+      const indicatorValue = candlestick.getIndicatorValue(this.indicator);
       console.log(
-        `${this.exchangeService.iso8601(candle.timestamp)}
-        close: ${candle.close}
+        `${this.exchangeService.iso8601(candlestick.timestamp)}
+        close: ${candlestick.close}
         indicator: ${indicatorValue?.toString()}`
       );
     }) 

@@ -3,7 +3,7 @@ import Indicator from '../indicators/indicator';
 import IndicatorValue from '../indicators/indicator-value';
 import IndicatorWithValue from '../indicators/indicator-with-value';
 
-export default class Candle {
+export default class Candlestick {
   timestamp: number;
 
   open: number;

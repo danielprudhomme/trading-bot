@@ -15,7 +15,7 @@ export default abstract class IndicatorWithValue<T extends IndicatorValue> {
   }
 
   constructor(source: IndicatorSource | null = null) {
-    this.source = source ? source : (index: number) => this.chart.getCandleAtIndex(index)?.close ?? 0;
+    this.source = source ? source : (index: number) => this.chart.getCandlestickAtIndex(index)?.close ?? 0;
   }
 
   bind = (chart: Chart) => { 
@@ -23,12 +23,12 @@ export default abstract class IndicatorWithValue<T extends IndicatorValue> {
     this.dependencies.forEach(dependency => dependency.bind(this.chart));
   }
 
-  // If index is null, calculate for all candles
+  // If index is null, calculate for all candlesticks
   calculate(index: number | null = null): void {
     this.dependencies.forEach(indicator => indicator.calculate(index));
 
     if (index === null) {
-      this.chart.candles.forEach((_, index: number) => {
+      this.chart.candlesticks.forEach((_, index: number) => {
         this.calculateAndSetValue(index);
       });
       return;

@@ -2,10 +2,11 @@ import { OrderSide } from '../enums/order-side';
 import { OrderStatus } from '../enums/order-status';
 import { OrderTradeStep } from '../enums/order-trade-step';
 import { OrderType } from '../enums/order-type';
+import { Symbol } from '../models/symbol';
 import Order from './order';
 
 export default class Trade {
-  symbol: string;
+  symbol: Symbol;
   orders: Order[] = [];
 
   private get openTradeOrder(): Order {
@@ -28,13 +29,13 @@ export default class Trade {
     return this.openTradeOrder.quantity - quantityFilledInTakeProfits;
   }
 
-  constructor(symbol: string, open: Order) {
+  constructor(symbol: Symbol, open: Order) {
     this.symbol = symbol;
     this.orders.push(open);
   }
 
   // Actuellement on ne fait que des LONG en Spot
-  static openAtMarket = (symbol: string, quantity: number): Trade => {
+  static openAtMarket = (symbol: Symbol, quantity: number): Trade => {
     const open = new Order(OrderType.Market, OrderSide.Buy, OrderTradeStep.Open, quantity);
     open.status = OrderStatus.Open;
     return new Trade(symbol, open);
@@ -67,7 +68,8 @@ export default class Trade {
 
     const finalAmount = profitTaken + stopAmount + closeAmount;
 
-    console.log('amounts : ', openAmount, profitTaken, stopAmount, closeAmount);
+    const tradeDate = this.openTradeOrder.exchange ? new Date(this.openTradeOrder.exchange.timestamp) : null;
+    if (tradeDate) console.log(`Trade\t${tradeDate}\t${openAmount}\t${profitTaken}\t${stopAmount}\t${closeAmount}`);
 
     return (finalAmount / openAmount - 1) * 100;
 

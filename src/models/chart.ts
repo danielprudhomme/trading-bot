@@ -6,13 +6,11 @@ import IndicatorWithValue from '../indicators/indicator-with-value';
 import Candlestick from './candlestick';
 
 export default class Chart {
-  symbol: string;
   timeframe: TimeFrame;
   candlesticks: Candlestick[];
   indicators: Indicator[] = [];
 
-  constructor(symbol: string, timeframe: TimeFrame, ohlcv: ccxt.OHLCV[]) {
-    this.symbol = symbol;
+  constructor(timeframe: TimeFrame, ohlcv: ccxt.OHLCV[]) {
     this.timeframe = timeframe;
     this.candlesticks = ohlcv.map(x => new Candlestick(x));
   }
@@ -24,11 +22,12 @@ export default class Chart {
 
   getIndicatorValueAtIndex = <T extends IndicatorValue>(index: number, indicator: IndicatorWithValue<T>): T | null =>
     this.getCandlestickAtIndex(index)?.getIndicatorValue(indicator) ?? null;
-  
+
   setIndicatorValueAtIndex = <T extends IndicatorValue>(index: number, indicator: IndicatorWithValue<T>, value: T) =>
     this.getCandlestickAtIndex(index)?.setIndicatorValue(indicator, value);
 
   get currentCandlestick() {
+    // console.log('current', this.candlesticks.length);
     if (this.candlesticks.length == 0) throw new Error('Chart contains no candlestick.')
     return this.candlesticks[this.candlesticks.length - 1];
   }
@@ -40,6 +39,8 @@ export default class Chart {
   }
 
   newCandlestick(candlestick: Candlestick) {
+    // console.log('new', this.timeframe, candlestick.timestamp)
+    // console.log('chart new candlestick', this.timeframe, new Date(candlestick.timestamp));
     // checks if candlestick updates the last candlestick or if it is a new one
     const lastCandlestickTimestampStart = this.currentCandlestick.timestamp;
     const lastCandlestickTimestampEnd = lastCandlestickTimestampStart + TimeFrame.toMilliseconds(this.timeframe);

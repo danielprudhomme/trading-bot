@@ -1,5 +1,6 @@
 import TimeFrame from '../enums/timeframe';
 import Chart from '../models/chart';
+import { Symbol } from '../models/symbol';
 import Strategy from './strategy';
 
 export default abstract class StrategyOneTimeFrame extends Strategy {
@@ -13,7 +14,7 @@ export default abstract class StrategyOneTimeFrame extends Strategy {
     return chart;
   }
 
-  constructor(timeframe: TimeFrame) {
-    super([timeframe]);
+  constructor(symbol: Symbol, timeframe: TimeFrame) {
+    super(symbol, [timeframe]);
   }
 }

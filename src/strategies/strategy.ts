@@ -1,11 +1,14 @@
 import TimeFrame from '../enums/timeframe';
 import ChartWorkspace from '../models/chart-workspace';
+import { Symbol } from '../models/symbol';
 import TradeManager from '../trade-manager';
 
 export default abstract class Strategy {
+  symbol: Symbol;
   timeframes: TimeFrame[];
 
-  constructor(timeframes: TimeFrame[]) {
+  constructor(symbol: Symbol, timeframes: TimeFrame[]) {
+    this.symbol = symbol;
     this.timeframes = timeframes;
   }
 

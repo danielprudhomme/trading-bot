@@ -4,6 +4,7 @@ import { OrderSide } from '../enums/order-side';
 import { OrderType } from '../enums/order-type';
 import Chart from '../models/chart';
 import ExchangeOrder from '../models/exchange-order';
+import { Symbol } from '../models/symbol';
 import ExchangeService from './exchange.service';
 
 class ExtendedExchangeOrder extends ExchangeOrder {
@@ -44,7 +45,7 @@ export default class ReadOnlyExchangeService extends ExchangeService {
   addChart = (chart: Chart) => this._chart = chart;
 
   // TODO : ajouter des checks sur la quantité, s'il est possible de passer les ordres ou non (il faut avoir acheter avant de vendre)
-  createMarketOrder = async (symbol: string, side: OrderSide, quantity: number): Promise<ExchangeOrder> => {
+  createMarketOrder = async (symbol: Symbol, side: OrderSide, quantity: number): Promise<ExchangeOrder> => {
     const order = new ExtendedExchangeOrder(
       Guid.create().toString(),
       this.chart.currentCandlestick.timestamp,
@@ -60,7 +61,7 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     return order;
   }
 
-  createlimitOrder = async (symbol: string, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> => {
+  createlimitOrder = async (symbol: Symbol, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> => {
     const order = new ExtendedExchangeOrder(
       Guid.create().toString(),
       this.chart.currentCandlestick.timestamp,
@@ -76,14 +77,14 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     return order;
   }
 
-  cancelOrder = async (symbol: string, exchangeOrderId: string): Promise<ExchangeOrder | null> => {
+  cancelOrder = async (symbol: Symbol, exchangeOrderId: string): Promise<ExchangeOrder | null> => {
     const order = this.orders.get(exchangeOrderId);
     if (!order) return null;
     order.status = ExchangeOrderStatus.Canceled;
     return order;
   }
 
-  fetchOrder = async (symbol: string, exchangeOrderId: string): Promise<ExchangeOrder | null> => {
+  fetchOrder = async (symbol: Symbol, exchangeOrderId: string): Promise<ExchangeOrder | null> => {
     const order = this.orders.get(exchangeOrderId);
     if (!order) return null;
     if (order.status !== ExchangeOrderStatus.Open) return order;

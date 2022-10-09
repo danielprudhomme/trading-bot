@@ -5,6 +5,7 @@ import ExchangeId from '../enums/exchange-id';
 import { OrderSide } from '../enums/order-side';
 import TimeFrame from '../enums/timeframe';
 import ExchangeOrder from '../models/exchange-order';
+import { Symbol } from '../models/symbol';
 
 export default class ExchangeService {
   protected client: ccxt.Exchange;
@@ -25,7 +26,7 @@ export default class ExchangeService {
   iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
 
   async fetchOHLCV(
-    symbol: string,
+    symbol: Symbol,
     timeframe: TimeFrame,
     since: number | undefined = undefined,
   ): Promise<ccxt.OHLCV[]> {
@@ -33,7 +34,7 @@ export default class ExchangeService {
   }
 
   async fetchOHLCVRange(
-    symbol: string,
+    symbol: Symbol,
     timeframe: TimeFrame,
     start: number,
     end: number,
@@ -53,19 +54,19 @@ export default class ExchangeService {
     return ohlcvs;
   }
 
-  createMarketOrder = async (symbol: string, side: OrderSide, quantity: number): Promise<ExchangeOrder> =>
+  createMarketOrder = async (symbol: Symbol, side: OrderSide, quantity: number): Promise<ExchangeOrder> =>
     ExchangeOrder.mapCcxtOrder(
       await this.client.createMarketOrder(symbol, this.toExchangeOrderSide(side), quantity));
 
-  createlimitOrder = async (symbol: string, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
+  createlimitOrder = async (symbol: Symbol, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
     ExchangeOrder.mapCcxtOrder(
       await this.client.createLimitOrder(symbol, this.toExchangeOrderSide(side), quantity, limit));
 
-  cancelOrder = async (symbol: string, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
+  cancelOrder = async (symbol: Symbol, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
     ExchangeOrder.mapCcxtOrder(
       await this.client.cancelOrder(exchangeOrderId, symbol));
 
-  fetchOrder = async (symbol: string, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
+  fetchOrder = async (symbol: Symbol, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
     ExchangeOrder.mapCcxtOrder(
       await this.client.fetchOrder(exchangeOrderId, symbol));
 

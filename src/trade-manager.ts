@@ -6,6 +6,7 @@ import { OrderType } from './enums/order-type';
 import ExchangeService from './exchange-service/exchange.service';
 import Candlestick from './models/candlestick';
 import Order from './models/order';
+import { Symbol } from './models/symbol';
 import Trade from './models/trade';
 
 export default class TradeManager {
@@ -141,6 +142,7 @@ export default class TradeManager {
       this.cancelAllOrders(trade);
       await this.syncCanceledOrdersWithExchange(trade);
       
+      openSl.quantity = trade.remaining;
       await this.transmitOrder(trade.symbol, openSl, OrderType.Market);
     }
   }
@@ -151,7 +153,7 @@ export default class TradeManager {
       .forEach(order => order.status = OrderStatus.Canceled);
   }
 
-  private transmitOrder = async (symbol: string, order: Order, type?: OrderType): Promise<void> => {
+  private transmitOrder = async (symbol: Symbol, order: Order, type?: OrderType): Promise<void> => {
     type = type ?? order.type;
     
     if (type === OrderType.Market) {

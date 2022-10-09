@@ -26,5 +26,5 @@ export default class BollingerBandsValue extends IndicatorValue {
     this.phase = phase;
   }
 
-  toString = () => `\tUpper: ${this.upper}\tLower: ${this.lower}\tPhase: ${this.phase}`;
+  toString = () => `\tUpper: ${this.upper}\tLower: ${this.lower}\tPhase: ${this.phase}\t%B: ${this.percentB}`;
 }

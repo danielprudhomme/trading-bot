@@ -25,7 +25,7 @@ export default class BollingerBands extends IndicatorWithValue<BollingerBandsVal
     const upper = basis + dev;
     const lower = basis - dev;
 
-    const percentB = (this.chart.getCandlestickAtIndex(index)?.close ?? 0 - lower)/(upper - lower);
+    const percentB = ((this.chart.getCandlestickAtIndex(index)?.close ?? 0) - lower)/(upper - lower);
 
     const width = (upper - lower) / basis;
 

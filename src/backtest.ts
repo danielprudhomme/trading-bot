@@ -68,8 +68,9 @@ export default class BackTest extends TradingWorker {
   }
 
   async launch(): Promise<void> {
+    console.log('Backtest - launch');
     const ticks = await this.exchangeService.fetchOHLCVRange(this.symbol, this.tickTimeFrame, this.startTimestamp, this.endTimestamp);
-    console.log('Backtest - launch', ticks.length, 'ticks');
+    console.log('Fetched : ', ticks.length, 'ticks');
 
     for (const tick of ticks) {
       this.lastCandlestick = new Candlestick(tick);

@@ -17,6 +17,12 @@ export default class Chart {
 
   getCandlestickAtIndex = (index: number): Candlestick | null => index < 0 || index >= this.candlesticks.length ? null : this.candlesticks[index];
 
+  getCandlestickFromEnd = (index: number): Candlestick | null => {
+    if (index > 0) throw new Error('Index should be negative');
+    if (this.candlesticks.length + index < 0) return null;
+    return this.candlesticks[this.candlesticks.length + index - 1];
+  }
+
   hasIndicatorValueAtIndex = (index: number, indicator: Indicator): boolean =>
     this.getCandlestickAtIndex(index)?.hasIndicatorValue(indicator) ?? false;
 
@@ -27,7 +33,6 @@ export default class Chart {
     this.getCandlestickAtIndex(index)?.setIndicatorValue(indicator, value);
 
   get currentCandlestick() {
-    // console.log('current', this.candlesticks.length);
     if (this.candlesticks.length == 0) throw new Error('Chart contains no candlestick.')
     return this.candlesticks[this.candlesticks.length - 1];
   }
@@ -39,8 +44,6 @@ export default class Chart {
   }
 
   newCandlestick(candlestick: Candlestick) {
-    // console.log('new', this.timeframe, candlestick.timestamp)
-    // console.log('chart new candlestick', this.timeframe, new Date(candlestick.timestamp));
     // checks if candlestick updates the last candlestick or if it is a new one
     const lastCandlestickTimestampStart = this.currentCandlestick.timestamp;
     const lastCandlestickTimestampEnd = lastCandlestickTimestampStart + TimeFrame.toMilliseconds(this.timeframe);

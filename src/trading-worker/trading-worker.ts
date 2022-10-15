@@ -33,9 +33,12 @@ export default abstract class TradingWorker {
   }
 
   async init(): Promise<void> {
+    console.log('Trading worker - init');
     this._exchangeService = this.initExchangeService();
     this._tradeManager = this.initTradeManager();
+    console.log('Trading worker - chart workspace init start !');
     this._chartWorkspace = await this.initChartWorkspace(this.strategy.timeframes);
+    console.log('Trading worker - chart workspace init done !');
     this.strategy.init(this.chartWorkspace, this.tradeManager);
   }
 

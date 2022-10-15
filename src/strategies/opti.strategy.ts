@@ -7,32 +7,41 @@ import Trade from '../models/trade';
 import Strategy from './strategy';
 
 export default class OptiStrategy extends Strategy {
+  private readonly smallTimeframes;
+  private readonly bigTimeframe;
+
   private sma = new SMA(20);
   private macdZeroLag = new MacdZeroLag();
   private bb = new BollingerBands(20, 2.5);
   private ongoingSignal = false;
+  private currentTrade: Trade | null = null;
 
   constructor(symbol: Symbol) {
-    super(symbol, [TimeFrame.t5m, TimeFrame.t15m, TimeFrame.t1h, TimeFrame.t1d]);
+    const smallTimeframes = [TimeFrame.t5m, TimeFrame.t15m, TimeFrame.t1h];
+    const bigTimeframe = TimeFrame.t4h;
+    super(symbol, [...smallTimeframes, bigTimeframe]);
+    this.smallTimeframes = smallTimeframes;
+    this.bigTimeframe = bigTimeframe;
   }
-
+ 
   addIndicators(): void {
-    for (const timeframe of [TimeFrame.t5m, TimeFrame.t15m, TimeFrame.t1h]) {
+    for (const timeframe of this.smallTimeframes) {
       this.chartWorkspace.get(timeframe)?.addIndicator(this.sma);
       this.chartWorkspace.get(timeframe)?.addIndicator(this.macdZeroLag);
     }
 
-    this.chartWorkspace.get(TimeFrame.t1d)?.addIndicator(this.bb);
+    this.chartWorkspace.get(this.bigTimeframe)?.addIndicator(this.bb);
   }
 
   async execute(): Promise<void> {
-    const currentCandlestick = this.chartWorkspace.get(TimeFrame.t1d)?.currentCandlestick;
+    if (!this.currentTrade?.isOpen) this.currentTrade = null;
+
+    const currentCandlestick = this.chartWorkspace.get(this.smallTimeframes[0])?.currentCandlestick;
     if (!currentCandlestick) return;
 
-    const currentPrice = currentCandlestick.close;
-    const bb1d = this.chartWorkspace.get(TimeFrame.t1d)?.currentCandlestick.getIndicatorValue(this.bb);
+    const bb1d = this.chartWorkspace.get(this.bigTimeframe)?.currentCandlestick.getIndicatorValue(this.bb);
 
-    const buySignal = bb1d && (bb1d.phase == 'flat' || bb1d.phase == 'narrowing') &&
+    const buySignal = bb1d && bb1d.percentB < 0.5 && (bb1d.phase == 'flat' || bb1d.phase == 'narrowing') &&
       this.opti();
     // const buySignal = currentPrice < 1295 && currentPrice > 1244 &&
     //   bb1d && (bb1d.phase == 'flat' || bb1d.phase == 'narrowing') &&
@@ -42,26 +51,33 @@ export default class OptiStrategy extends Strategy {
       this.ongoingSignal = false;
     }
 
-    if (!this.ongoingSignal && buySignal) {
-      console.log('%b', bb1d.percentB, currentCandlestick.close, bb1d.lower, bb1d.upper, (currentCandlestick.close - bb1d.lower) / (bb1d.upper - bb1d.lower))
+    if (!this.ongoingSignal && buySignal && !this.currentTrade) {
       this.ongoingSignal = true;
       console.log('>>>>>>>>>>>>>>>>> signal ', new Date(currentCandlestick.timestamp), currentCandlestick.close);
-      const currentTrade = Trade.openAtMarket(this.symbol, 1) // get quantity from wallet
+      this.currentTrade = Trade.openAtMarket(this.symbol, 1) // get quantity from wallet
       
-      // TP1 at +0,5%
       const tp1Price = currentCandlestick.close * 1.01;
-      currentTrade.addTakeProfit(1, tp1Price);
+      this.currentTrade.addTakeProfit(1, tp1Price);
 
-      const slPrice = currentCandlestick.low;
-      currentTrade.addStopLoss(slPrice);
+      // const tp1Price = currentCandlestick.close * 1.01;
+      // this.currentTrade.addTakeProfit(0.5, tp1Price);
 
-      await this.tradeManager.create(currentTrade, currentCandlestick);
+      // const tp2Price = currentCandlestick.close * 1.02;
+      // this.currentTrade.addTakeProfit(0.5, tp2Price);
+
+      // const tp2Price = (bb1d.upper + bb1d.basis) / 2;
+      // this.currentTrade.addTakeProfit(1, tp2Price);
+
+      const slPrice = this.chartWorkspace.get(this.bigTimeframe)?.getCandlestickFromEnd(-1)?.low ?? 0;
+      this.currentTrade.addStopLoss(slPrice);
+
+      await this.tradeManager.create(this.currentTrade, currentCandlestick);
     }
   }
 
   private opti(): boolean {
     let opti = false;
-    for (const timeframe of [TimeFrame.t5m, TimeFrame.t15m, TimeFrame.t1h]) {
+    for (const timeframe of this.smallTimeframes) {
       const chart = this.chartWorkspace.get(timeframe);
 
       const sma = chart?.currentCandlestick.getIndicatorValue(this.sma);

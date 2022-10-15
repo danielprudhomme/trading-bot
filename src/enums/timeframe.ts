@@ -5,6 +5,8 @@ export default class TimeFrame {
 
   static t1m = '1m';
 
+  static t2m = '2m';
+
   static t5m = '5m';
 
   static t15m = '15m';
@@ -29,6 +31,9 @@ export default class TimeFrame {
     if (tf === TimeFrame.t1m) {
       return 60 * 1000;
     }
+    if (tf === TimeFrame.t2m) {
+      return 2 * TimeFrame.toMilliseconds(TimeFrame.t1m);
+    }
     if (tf === TimeFrame.t5m) {
       return 5 * TimeFrame.toMilliseconds(TimeFrame.t1m);
     }
@@ -37,6 +42,9 @@ export default class TimeFrame {
     }
     if (tf === TimeFrame.t1h) {
       return 60 * TimeFrame.toMilliseconds(TimeFrame.t1m);
+    }
+    if (tf === TimeFrame.t4h) {
+      return 4 * TimeFrame.toMilliseconds(TimeFrame.t1h);
     }
     if (tf === TimeFrame.t1d) {
       return 60 * 60 * 24 * 1000;

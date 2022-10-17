@@ -17,8 +17,8 @@ export default class OptiStrategy extends Strategy {
   private currentTrade: Trade | null = null;
 
   constructor(symbol: Symbol) {
-    const smallTimeframes = [TimeFrame.t5m, TimeFrame.t15m, TimeFrame.t1h];
-    const bigTimeframe = TimeFrame.t4h;
+    const smallTimeframes = [TimeFrame.t1m, TimeFrame.t5m];
+    const bigTimeframe = TimeFrame.t1h;
     super(symbol, [...smallTimeframes, bigTimeframe]);
     this.smallTimeframes = smallTimeframes;
     this.bigTimeframe = bigTimeframe;

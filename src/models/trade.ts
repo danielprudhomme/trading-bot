@@ -68,7 +68,7 @@ export default class Trade {
 
     const finalAmount = profitTaken + stopAmount + closeAmount;
 
-    const tradeDate = this.openTradeOrder.exchange ? new Date(this.openTradeOrder.exchange.timestamp) : null;
+    const tradeDate = this.openTradeOrder.exchange ? new Date(this.openTradeOrder.exchange.timestamp).toUTCString(): null;
     if (tradeDate) console.log(`Trade\t${tradeDate}\t${openAmount}\t${profitTaken}\t${stopAmount}\t${closeAmount}`);
 
     return (finalAmount / openAmount - 1) * 100;

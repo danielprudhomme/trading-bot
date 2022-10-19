@@ -38,44 +38,46 @@ export default class Reverse1hStrategy extends Strategy {
 
   async execute(): Promise<void> {
     if (!this.currentTrade?.isOpen) this.currentTrade = null;
+    if (this.currentTrade) return;
+    if (!this.macdBreaksSignal && !this.waitForMacdToBreak) this.waitForMacdToBreak = true;
 
-    const currentCandlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
-    if (!currentCandlestick) return;
+    const buySignal = this.waitForMacdToBreak && this.macdBreaksSignal && this.bbFlatAndCloseLower;
 
-
-
-    if (!this.currentTrade) {
-      const buySignal = this.macdBreaksSignal() && this.bbFlatAndCloseLower();
-
-      if (buySignal) {
-        console.log('>>>>>>>>>>>>>>>>> signal ', new Date(currentCandlestick.timestamp), currentCandlestick.close);
-        this.currentTrade = Trade.openAtMarket(this.symbol, 1) // get quantity from wallet
-        
-        const tp1Price = currentCandlestick.close * 1.01;
-        this.currentTrade.addTakeProfit(1, tp1Price);
-
-        // const tp1Price = currentCandlestick.close * 1.001;
-        // this.currentTrade.addTakeProfit(0.5, tp1Price);
-
-        // const tp2Price = currentCandlestick.close * 1.002;
-        // this.currentTrade.addTakeProfit(0.5, tp2Price);
-
-        // const tp2Price = (bb1h.upper + bb1h.basis) / 2;
-        // this.currentTrade.addTakeProfit(1, tp2Price);
-
-        const slPrice = this.chartWorkspace.get(this.timeframe)?.getCandlestickFromEnd(-1)?.low ?? 0;
-        this.currentTrade.addStopLoss(slPrice);
-
-        await this.tradeManager.create(this.currentTrade, currentCandlestick);
-      }
+    if (buySignal) {
+      this.waitForMacdToBreak = false;
+      await this.openTrade();
     }
   }
 
-  private bbFlatAndCloseLower(): boolean {
-    return (this.bb.phase === 'flat' || this.bb.phase === 'narrowing') && this.bb.percentB < 0.5;
+  private get bbFlatAndCloseLower(): boolean {
+    return (this.bb.phase === 'flat' || this.bb.phase === 'narrowing') && this.bb.percentB < 0.4;
   }
 
-  private macdBreaksSignal(): boolean {
+  private get macdBreaksSignal(): boolean {
     return this.macdzl.macdAboveSignal && this.macdzl.value < 0;
+  }
+
+  private async openTrade(): Promise<void> {
+    const currentCandlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
+    if (!currentCandlestick) return;
+    
+    this.currentTrade = Trade.openAtMarket(this.symbol, 1) // get quantity from wallet
+        
+    const tp1Price = currentCandlestick.close * 1.01;
+    this.currentTrade.addTakeProfit(1, tp1Price);
+
+    // const tp1Price = currentCandlestick.close * 1.001;
+    // this.currentTrade.addTakeProfit(0.5, tp1Price);
+
+    // const tp2Price = currentCandlestick.close * 1.002;
+    // this.currentTrade.addTakeProfit(0.5, tp2Price);
+
+    // const tp2Price = (bb1h.upper + bb1h.basis) / 2;
+    // this.currentTrade.addTakeProfit(1, tp2Price);
+
+    const slPrice = this.chartWorkspace.get(this.timeframe)?.getCandlestickFromEnd(-1)?.low ?? 0;
+    this.currentTrade.addStopLoss(slPrice);
+
+    await this.tradeManager.create(this.currentTrade, currentCandlestick);
   }
 }

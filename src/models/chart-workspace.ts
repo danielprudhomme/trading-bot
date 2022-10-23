@@ -1,6 +1,6 @@
-import TimeFrame from "../enums/timeframe";
-import Candlestick from "./candlestick";
-import Chart from "./chart";
+import TimeFrame from '../enums/timeframe';
+import Candlestick from './candlestick';
+import Chart from './chart';
 
 export default class ChartWorkspace {
   private charts: Map<TimeFrame, Chart> = new Map<TimeFrame, Chart>();

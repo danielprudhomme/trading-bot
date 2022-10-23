@@ -1,23 +1,23 @@
 import { Guid } from 'guid-typescript';
 import { ExchangeOrderStatus } from '../enums/exchange-order-status';
 import { OrderSide } from '../enums/order-side';
-import { OrderType } from '../enums/order-type';
 import Chart from '../models/chart';
 import ExchangeOrder from '../models/exchange-order';
 import { Symbol } from '../models/symbol';
 import ExchangeService from './exchange.service';
 
 class ExtendedExchangeOrder extends ExchangeOrder {
-  type: OrderType;
+  type: 'market' | 'limit';
   side: OrderSide;
   limit: number | null;
   stop: number | null;
   quantity: number;
 
-  constructor(id: string,
+  constructor(
+    type: 'market' | 'limit',
+    id: string,
     timestamp: number,
     status: ExchangeOrderStatus,
-    type: OrderType,
     side: OrderSide,
     limit: number | null,
     stop: number | null,
@@ -47,10 +47,10 @@ export default class ReadOnlyExchangeService extends ExchangeService {
   // TODO : ajouter des checks sur la quantité, s'il est possible de passer les ordres ou non (il faut avoir acheter avant de vendre)
   createMarketOrder = async (symbol: Symbol, side: OrderSide, quantity: number): Promise<ExchangeOrder> => {
     const order = new ExtendedExchangeOrder(
+      'market',
       Guid.create().toString(),
       this.chart.currentCandlestick.timestamp,
       ExchangeOrderStatus.Closed,
-      OrderType.Market,
       side,
       null,
       null,
@@ -61,12 +61,12 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     return order;
   }
 
-  createlimitOrder = async (symbol: Symbol, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> => {
+  createLimitOrder = async (symbol: Symbol, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> => {
     const order = new ExtendedExchangeOrder(
+      'limit',
       Guid.create().toString(),
       this.chart.currentCandlestick.timestamp,
       ExchangeOrderStatus.Open,
-      OrderType.Limit,
       side,
       limit,
       null,
@@ -89,12 +89,11 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     if (!order) return null;
     if (order.status !== ExchangeOrderStatus.Open) return order;
 
-    if (order.type === OrderType.Limit && order.limit &&
+    if (order.type === 'limit' && order.limit &&
       ((order.side === OrderSide.Sell && this.chart.currentCandlestick.high >= order.limit) 
         || (order.side === OrderSide.Buy && this.chart.currentCandlestick.low <= order.limit))) {
         order.status = ExchangeOrderStatus.Closed;
         order.executedPrice = order.limit;
-        console.log('EXCHANGE --- limit order has been closed', order.executedPrice);
     }
     
     return order;

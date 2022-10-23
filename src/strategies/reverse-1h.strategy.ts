@@ -1,4 +1,5 @@
 import TimeFrame from '../enums/timeframe';
+import ExchangeService from '../exchange-service/exchange.service';
 import BollingerBands from '../indicators/bollinger-bands/bollinger-bands';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import MacdZeroLag from '../indicators/macd-zero-lag/macd-zero-lag';
@@ -30,13 +31,13 @@ export default class Reverse1hStrategy extends Strategy {
     super(symbol, [timeframe]);
     this.timeframe = timeframe;
   }
- 
+  
   addIndicators(): void {
     this.chartWorkspace.get(this.timeframe)?.addIndicator(this.bollingerBands);
     this.chartWorkspace.get(this.timeframe)?.addIndicator(this.macdZeroLag);
   }
 
-  async execute(): Promise<void> {
+  async execute(exchangeService: ExchangeService): Promise<void> {
     if (!this.currentTrade?.isOpen) this.currentTrade = null;
     if (this.currentTrade) return;
     if (!this.macdBreaksSignal && !this.waitForMacdToBreak) this.waitForMacdToBreak = true;
@@ -45,7 +46,7 @@ export default class Reverse1hStrategy extends Strategy {
 
     if (buySignal) {
       this.waitForMacdToBreak = false;
-      await this.openTrade();
+      await this.openTrade(exchangeService);
     }
   }
 
@@ -57,27 +58,21 @@ export default class Reverse1hStrategy extends Strategy {
     return this.macdzl.macdAboveSignal && this.macdzl.value < 0;
   }
 
-  private async openTrade(): Promise<void> {
+  private async openTrade(exchangeService: ExchangeService): Promise<void> {
     const currentCandlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
     if (!currentCandlestick) return;
+
+    this.currentTrade = Trade.openTrade(
+      currentCandlestick,
+      exchangeService,
+      this.symbol,
+      1,
+      [
+        { quantity: 1, price: currentCandlestick.close * 1.01 },
+      ],
+      this.chartWorkspace.get(this.timeframe)?.getCandlestickFromEnd(-1)?.low
+    );
     
-    this.currentTrade = Trade.openAtMarket(this.symbol, 1) // get quantity from wallet
-        
-    const tp1Price = currentCandlestick.close * 1.01;
-    this.currentTrade.addTakeProfit(1, tp1Price);
-
-    // const tp1Price = currentCandlestick.close * 1.001;
-    // this.currentTrade.addTakeProfit(0.5, tp1Price);
-
-    // const tp2Price = currentCandlestick.close * 1.002;
-    // this.currentTrade.addTakeProfit(0.5, tp2Price);
-
-    // const tp2Price = (bb1h.upper + bb1h.basis) / 2;
-    // this.currentTrade.addTakeProfit(1, tp2Price);
-
-    const slPrice = this.chartWorkspace.get(this.timeframe)?.getCandlestickFromEnd(-1)?.low ?? 0;
-    this.currentTrade.addStopLoss(slPrice);
-
-    await this.tradeManager.create(this.currentTrade, currentCandlestick);
+    await this.tradeManager.add(this.currentTrade);
   }
 }

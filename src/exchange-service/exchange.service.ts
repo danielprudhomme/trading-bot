@@ -58,7 +58,7 @@ export default class ExchangeService {
     ExchangeOrder.mapCcxtOrder(
       await this.client.createMarketOrder(symbol, this.toExchangeOrderSide(side), quantity));
 
-  createlimitOrder = async (symbol: Symbol, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
+  createLimitOrder = async (symbol: Symbol, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
     ExchangeOrder.mapCcxtOrder(
       await this.client.createLimitOrder(symbol, this.toExchangeOrderSide(side), quantity, limit));
 

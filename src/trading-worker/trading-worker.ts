@@ -56,10 +56,10 @@ export default abstract class TradingWorker {
     this.chartWorkspace.newCandlestick(lastCandlestick);
  
     // update trade manager with orders
-    await this.tradeManager.syncAll(lastCandlestick);
+    await this.tradeManager.synchronizeAllWithExchange(lastCandlestick);
 
     // execute strategy
-    await this.strategy.execute();
+    await this.strategy.execute(this.exchangeService);
   }
 
   protected abstract fetchLastCandlestick(): Promise<Candlestick>;

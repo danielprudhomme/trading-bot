@@ -13,6 +13,7 @@ const backtest = new BackTest(
   TimeFrame.t5m,
   '2022-10-01T00:00:00Z',
   '2022-10-15T23:00:00Z',
+  // '2022-10-01T03:00:00Z',
   ExchangeId.binance);
 
 // const backtest = new BackTestIndicator(TimeFrame.t1d,

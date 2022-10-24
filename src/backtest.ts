@@ -6,6 +6,7 @@ import Candlestick from './models/candlestick';
 import Chart from './models/chart';
 import ChartWorkspace from './models/chart-workspace';
 import { Symbol } from './models/symbol';
+import PerformanceCalculator from './performance-calculator';
 import Strategy from './strategies/strategy';
 import { default as TradeManager } from './trade-manager';
 import TradingWorker from './trading-worker/trading-worker';
@@ -77,7 +78,7 @@ export default class BackTest extends TradingWorker {
       await this.onTick();
     }
 
-    this.tradeManager.getPerformance();
+    PerformanceCalculator.getPerformance(this.tradeManager.trades);
   }
 
   protected async fetchLastCandlestick(): Promise<Candlestick> {

@@ -2,7 +2,29 @@ import { OrderStatus } from './enums/order-status';
 import Trade from './models/trade';
 
 export default class PerformanceCalculator {
-  static getTradePerformance(trade: Trade): number | null {
+  static getPerformance(trades: Trade[]): void {
+    const initialAmount = 100;
+    let capital = initialAmount;
+    let wonTrades = 0;
+    let lostTrades = 0;
+
+    trades.forEach(trade => {
+      const performance = this.getTradePerformance(trade);
+      if (performance) {
+        capital += capital * performance / 100;
+
+        if (performance >= 0) wonTrades++;
+        if (performance < 0) lostTrades++;
+      }
+    });
+
+    const totalPerformance = (capital / initialAmount - 1) * 100;
+    const winRate = (wonTrades / (wonTrades + lostTrades)) * 100;
+
+    console.log(`Performance totale: ${this.toPercentage(totalPerformance)}\tWin: ${wonTrades}\tLoss: ${lostTrades}\tWinRate: ${this.toPercentage(winRate)}`);
+  }
+
+  private static getTradePerformance(trade: Trade): number | null {
     if (trade.isOpen) return null;
     
     const openAmount = trade.quantity * (trade.open.exchangeOrder?.executedPrice ?? 0);
@@ -19,8 +41,11 @@ export default class PerformanceCalculator {
     const finalAmount = profitTaken + stopAmount + closeAmount;
 
     const thisDate = trade.open.exchangeOrder ? new Date(trade.open.exchangeOrder.timestamp).toUTCString(): null;
-    if (thisDate) console.log(`Trade\t${thisDate}\topen: ${openAmount}\ttp: ${profitTaken}\tstop: ${stopAmount}\tclose: ${closeAmount}`);
+    const performance = (finalAmount / openAmount - 1) * 100;
+    if (thisDate) console.log(`Trade\t${thisDate}\topen: ${openAmount}\ttp: ${profitTaken}\tstop: ${stopAmount}\tclose: ${closeAmount}\t -> ${this.toPercentage(performance)}`);
 
-    return (finalAmount / openAmount - 1) * 100;
+    return performance;
   }
+
+  private static toPercentage = (n: number): string => `${n.toFixed(2)}%`
 }

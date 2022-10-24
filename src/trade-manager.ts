@@ -1,7 +1,6 @@
 import ExchangeService from './exchange-service/exchange.service';
 import Candlestick from './models/candlestick';
 import Trade from './models/trade';
-import PerformanceCalculator from './performance-calculator';
 
 export default class TradeManager {
   exchangeService: ExchangeService;
@@ -23,15 +22,5 @@ export default class TradeManager {
     for (const trade of this.trades.filter(x => x.isOpen)) {
       await trade.synchronizeWithExchange(currentCandlestick, this.exchangeService);
     }
-  }
-
-  getPerformance = (): void => {
-    // somme des perfs de chaque trade, pas d'intérets composés ici
-    const sumPerf = this.trades.reduce((sum, trade, i) => {
-      const perf = PerformanceCalculator.getTradePerformance(trade);
-      console.log('perf ' + i, perf);
-      return sum + (perf ?? 0);
-    }, 0);
-    console.log('perf globale : ', sumPerf);
   }
 }

@@ -68,7 +68,7 @@ export default class Reverse1hStrategy extends Strategy {
       this.symbol,
       1,
       [
-        { quantity: 1, price: currentCandlestick.close * 1.01 },
+        { quantity: 1, price: currentCandlestick.close * 1.005 },
       ],
       this.chartWorkspace.get(this.timeframe)?.getCandlestickFromEnd(-1)?.low
     );

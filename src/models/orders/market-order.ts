@@ -13,7 +13,6 @@ export default class MarketOrder extends Order {
   }
 
   async transmitToExchange(exchangeService: ExchangeService): Promise<void> {
-    console.log('transmit market order');
     this.exchangeOrder = await exchangeService.createMarketOrder(this.symbol, this.side, this.quantity);
     this.status = OrderStatus.Closed;
   }

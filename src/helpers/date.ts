@@ -1,0 +1,1 @@
+export const timestampToString = (timestamp: number): string => new Date(timestamp).toUTCString();

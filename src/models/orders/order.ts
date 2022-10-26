@@ -13,7 +13,6 @@ export default abstract class Order {
   side: OrderSide;
   status: OrderStatus = OrderStatus.Waiting;
   limit: number | null;
-  stop: number | null;
   quantity: number | 'remaining';
 
   protected constructor(
@@ -21,13 +20,11 @@ export default abstract class Order {
     side: OrderSide,
     quantity: number | 'remaining',
     limit: number | null = null,
-    stop: number | null = null,
   ) {
     this.symbol = symbol;
     this.side = side;
     this.quantity = quantity;
     this.limit = limit;
-    this.stop = stop;
   }
 
   abstract transmitToExchange(exchangeService: ExchangeService, options: { remainingQuantity: number }): Promise<void>;

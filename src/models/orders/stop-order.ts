@@ -5,8 +5,8 @@ import { Symbol } from '../symbol';
 import Order from './order';
 
 export default class StopOrder extends Order {
-  constructor(symbol: Symbol, side: OrderSide, stop: number) {
-    super(symbol, side, 'remaining', null, stop);
+  constructor(symbol: Symbol, side: OrderSide, limit: number) {
+    super(symbol, side, 'remaining', limit);
   }
 
   async transmitToExchange(exchangeService: ExchangeService, options: { remainingQuantity: number }): Promise<void> {

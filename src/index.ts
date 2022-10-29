@@ -2,18 +2,17 @@ import BackTest from './backtest';
 import { ConfigurationManager } from './configuration-manager';
 import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
-import Reverse1hStrategy from './strategies/reverse-1h.strategy';
+import LowOutsideBBStrategy from './strategies/low-outside-bb.strategy';
 
 ConfigurationManager.load();
 
-const strategy = new Reverse1hStrategy('BTC/USDT', TimeFrame.t1h);
+const strategy = new LowOutsideBBStrategy('ETH/USDT', TimeFrame.t1h);
 
 const backtest = new BackTest(
   strategy,
   TimeFrame.t5m,
   '2022-10-01T00:00:00Z',
-  '2022-10-15T23:00:00Z',
-  // '2022-10-01T03:00:00Z',
+  '2022-10-29T15:00:00Z',
   ExchangeId.binance);
 
 // const backtest = new BackTestIndicator(TimeFrame.t1d,

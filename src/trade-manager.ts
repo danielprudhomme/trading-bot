@@ -1,5 +1,4 @@
 import ExchangeService from './exchange-service/exchange.service';
-import Candlestick from './models/candlestick';
 import Trade from './models/trade';
 
 export default class TradeManager {
@@ -18,9 +17,9 @@ export default class TradeManager {
     trade.closeTrade(this.exchangeService);
   }
 
-  synchronizeAllWithExchange = async (currentCandlestick: Candlestick): Promise<void> => {
+  synchronizeAllWithExchange = async (currentPrice: number): Promise<void> => {
     for (const trade of this.trades.filter(x => x.isOpen)) {
-      await trade.synchronizeWithExchange(currentCandlestick, this.exchangeService);
+      await trade.synchronizeWithExchange(currentPrice, this.exchangeService);
     }
   }
 }

@@ -1,18 +1,18 @@
-import ccxt from 'ccxt';
 import TimeFrame from '../enums/timeframe';
 import Indicator from '../indicators/indicator';
 import IndicatorValue from '../indicators/indicator-value';
 import IndicatorWithValue from '../indicators/indicator-with-value';
 import Candlestick from './candlestick';
+import { OHLCV } from './ohlcv';
 
 export default class Chart {
   timeframe: TimeFrame;
   candlesticks: Candlestick[];
   indicators: Indicator[] = [];
 
-  constructor(timeframe: TimeFrame, ohlcv: ccxt.OHLCV[]) {
+  constructor(timeframe: TimeFrame, ohlcvs: OHLCV[]) {
     this.timeframe = timeframe;
-    this.candlesticks = ohlcv.map(x => new Candlestick(x));
+    this.candlesticks = ohlcvs.map(ohlcv => new Candlestick(ohlcv, true));
   }
 
   getCandlestickAtIndex = (index: number): Candlestick | null => index < 0 || index >= this.candlesticks.length ? null : this.candlesticks[index];
@@ -43,20 +43,14 @@ export default class Chart {
     indicator.calculate();
   }
 
-  newCandlestick(candlestick: Candlestick) {
-    // checks if candlestick updates the last candlestick or if it is a new one
-    const lastCandlestickTimestampStart = this.currentCandlestick.timestamp;
-    const lastCandlestickTimestampEnd = lastCandlestickTimestampStart + TimeFrame.toMilliseconds(this.timeframe);
+  newOHLCV(ohlcv: OHLCV) {
+    const isNewCandle = Number.isInteger(ohlcv.timestamp / TimeFrame.toMilliseconds(this.timeframe));
+    const isClosed = Number.isInteger((ohlcv.timestamp + TimeFrame.toMilliseconds(ohlcv.timeframe)) / TimeFrame.toMilliseconds(this.timeframe));
 
-    if (candlestick.timestamp >= lastCandlestickTimestampStart && candlestick.timestamp < lastCandlestickTimestampEnd) {
-      candlestick.timestamp = this.currentCandlestick.timestamp;
-      this.candlesticks.pop();
-    }
-    else if (candlestick.timestamp >= lastCandlestickTimestampEnd) {
-      candlestick.timestamp = lastCandlestickTimestampEnd;
-    }
+    if (isNewCandle) this.candlesticks.pop();
+    const candlestick = new Candlestick(ohlcv, isClosed);
     this.candlesticks.push(candlestick);
-
+    
     this.indicators.forEach(indicator => indicator.calculate(this.candlesticks.length - 1));
   }
 }

@@ -11,6 +11,8 @@ export default class TimeFrame {
 
   static t15m = '15m';
 
+  static t30m = '30m';
+
   static t1h = '1h';
 
   static t4h = '4h';
@@ -39,6 +41,9 @@ export default class TimeFrame {
     }
     if (tf === TimeFrame.t15m) {
       return 15 * TimeFrame.toMilliseconds(TimeFrame.t1m);
+    }
+    if (tf === TimeFrame.t30m) {
+      return 30 * TimeFrame.toMilliseconds(TimeFrame.t1m);
     }
     if (tf === TimeFrame.t1h) {
       return 60 * TimeFrame.toMilliseconds(TimeFrame.t1m);

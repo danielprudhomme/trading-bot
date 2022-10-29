@@ -5,6 +5,7 @@ import ExchangeId from '../enums/exchange-id';
 import { OrderSide } from '../enums/order-side';
 import TimeFrame from '../enums/timeframe';
 import ExchangeOrder from '../models/exchange-order';
+import { mapFromCcxt, OHLCV } from '../models/ohlcv';
 import { Symbol } from '../models/symbol';
 
 export default class ExchangeService {
@@ -25,29 +26,24 @@ export default class ExchangeService {
 
   iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
 
-  async fetchOHLCV(
-    symbol: Symbol,
-    timeframe: TimeFrame,
-    since: number | undefined = undefined,
-  ): Promise<ccxt.OHLCV[]> {
-    return await this.client.fetchOHLCV(symbol, timeframe as string, since);
-  }
+  fetchOHLCV = async (symbol: Symbol, timeframe: TimeFrame, since: number | undefined = undefined): Promise<OHLCV[]> =>
+    (await this.client.fetchOHLCV(symbol, timeframe as string, since)).map(ohlcv => mapFromCcxt(timeframe, ohlcv));
 
   async fetchOHLCVRange(
     symbol: Symbol,
     timeframe: TimeFrame,
     start: number,
     end: number,
-  ): Promise<ccxt.OHLCV[]> {
+  ): Promise<OHLCV[]> {
     let since = start;
-    let ohlcvs: ccxt.OHLCV[] = [];
+    let ohlcvs: OHLCV[] = [];
 
     while (since < end) {
       const response = await this.fetchOHLCV(symbol, timeframe, since);
-      ohlcvs = ohlcvs.concat(response.filter(x => x[0] < end));
+      ohlcvs = ohlcvs.concat(response.filter(x => x.timestamp < end));
 
       if (response.length > 0) {
-        since = response[response.length - 1][0] + 1;
+        since = response[response.length - 1].timestamp + 1;
       }
     }
 

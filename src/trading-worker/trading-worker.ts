@@ -1,7 +1,7 @@
 import TimeFrame from '../enums/timeframe';
 import ExchangeService from '../exchange-service/exchange.service';
-import Candlestick from '../models/candlestick';
 import ChartWorkspace from '../models/chart-workspace';
+import { OHLCV } from '../models/ohlcv';
 import Strategy from '../strategies/strategy';
 import TradeManager from '../trade-manager';
 
@@ -52,15 +52,15 @@ export default abstract class TradingWorker {
   }
 
   async onTick() {
-    const lastCandlestick = await this.fetchLastCandlestick();
-    this.chartWorkspace.newCandlestick(lastCandlestick);
+    const lastOhlcv = await this.fetchLastOHLCV();
+    this.chartWorkspace.newOHLCV(lastOhlcv);
  
     // update trade manager with orders
-    await this.tradeManager.synchronizeAllWithExchange(lastCandlestick);
+    await this.tradeManager.synchronizeAllWithExchange(lastOhlcv.close);
 
     // execute strategy
     await this.strategy.execute(this.exchangeService);
   }
 
-  protected abstract fetchLastCandlestick(): Promise<Candlestick>;
+  protected abstract fetchLastOHLCV(): Promise<OHLCV>;
 }

@@ -51,7 +51,7 @@ export default class Trade {
 
     // Transmit open order
     open.transmitToExchange(exchangeService);
-    trade.synchronizeWithExchange(currentCandlestick, exchangeService);
+    trade.synchronizeWithExchange(currentCandlestick.close, exchangeService);
 
     return trade;
   }
@@ -78,11 +78,11 @@ export default class Trade {
     return this.orders.findIndex(x => x.status === OrderStatus.Open || x.status === OrderStatus.Waiting) > -1;
   }
 
-  synchronizeWithExchange = async (currentCandlestick: Candlestick, exchangeService: ExchangeService): Promise<void> => {
+  synchronizeWithExchange = async (currentPrice: number, exchangeService: ExchangeService): Promise<void> => {
     await this.synchronizeOpenOrdersWithExchange(exchangeService);
     this.openNextWaitingOrdersIfNoOpenOrders();
     await this.transmitToExchangeNextOpenOrder(exchangeService);
-    await this.handleStopLoss(currentCandlestick, exchangeService);
+    await this.handleStopLoss(currentPrice, exchangeService);
   }
 
   async closeTrade(exchangeService: ExchangeService): Promise<void> {
@@ -153,11 +153,10 @@ export default class Trade {
     this.stopLoss.status = OrderStatus.Open;
   }
 
-  private handleStopLoss = async (currentCandlestick: Candlestick, exchangeService: ExchangeService): Promise<void> => {
+  private handleStopLoss = async (currentPrice: number, exchangeService: ExchangeService): Promise<void> => {
     if (this.stopLoss?.status !== OrderStatus.Open) return;
 
-    const lastClosePrice = currentCandlestick.close;
-    if (!this.stopLoss.limit || lastClosePrice >= this.stopLoss.limit) return;
+    if (!this.stopLoss.limit || currentPrice >= this.stopLoss.limit) return;
     
     await this.cancelAllOrders(exchangeService);
     this.stopLoss.status = OrderStatus.Open;

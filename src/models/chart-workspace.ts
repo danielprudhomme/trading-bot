@@ -1,6 +1,6 @@
 import TimeFrame from '../enums/timeframe';
-import Candlestick from './candlestick';
 import Chart from './chart';
+import { OHLCV } from './ohlcv';
 
 export default class ChartWorkspace {
   private charts: Map<TimeFrame, Chart> = new Map<TimeFrame, Chart>();
@@ -9,5 +9,5 @@ export default class ChartWorkspace {
 
   get = (timeframe: TimeFrame) => this.charts.get(timeframe);
 
-  newCandlestick = (candlestick: Candlestick) => this.charts.forEach(chart => chart.newCandlestick({...candlestick}));
+  newOHLCV = (ohlcv: OHLCV) => this.charts.forEach(chart => chart.newOHLCV(ohlcv));
 }

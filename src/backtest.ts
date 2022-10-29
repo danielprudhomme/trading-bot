@@ -2,9 +2,9 @@ import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
 import ExchangeService from './exchange-service/exchange.service';
 import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
-import Candlestick from './models/candlestick';
 import Chart from './models/chart';
 import ChartWorkspace from './models/chart-workspace';
+import { OHLCV } from './models/ohlcv';
 import { Symbol } from './models/symbol';
 import PerformanceCalculator from './performance-calculator';
 import Strategy from './strategies/strategy';
@@ -18,7 +18,7 @@ export default class BackTest extends TradingWorker {
   protected startTimestamp: number = 0;
   protected endTimestamp: number = 0;
   protected exchangeId: ExchangeId;
-  private lastCandlestick: Candlestick | null = null;
+  private lastOhlcv: OHLCV | null = null;
 
   constructor(
     strategy: Strategy,
@@ -74,15 +74,15 @@ export default class BackTest extends TradingWorker {
     console.log('Fetched : ', ticks.length, 'ticks');
 
     for (const tick of ticks) {
-      this.lastCandlestick = new Candlestick(tick);
+      this.lastOhlcv = tick;
       await this.onTick();
     }
 
     PerformanceCalculator.getPerformance(this.tradeManager.trades);
   }
 
-  protected async fetchLastCandlestick(): Promise<Candlestick> {
-    if (!this.lastCandlestick) throw new Error('Last candlestick should not be null');
-    return this.lastCandlestick;
+  protected async fetchLastOHLCV(): Promise<OHLCV> {
+    if (!this.lastOhlcv) throw new Error('Last OHLCV should not be null');
+    return this.lastOhlcv;
   }
 }

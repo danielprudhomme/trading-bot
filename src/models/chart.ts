@@ -47,7 +47,7 @@ export default class Chart {
     const isNewCandle = Number.isInteger(ohlcv.timestamp / TimeFrame.toMilliseconds(this.timeframe));
     const isClosed = Number.isInteger((ohlcv.timestamp + TimeFrame.toMilliseconds(ohlcv.timeframe)) / TimeFrame.toMilliseconds(this.timeframe));
 
-    if (isNewCandle) this.candlesticks.pop();
+    if (!isNewCandle) this.candlesticks.pop();
     const candlestick = new Candlestick(ohlcv, isClosed);
     this.candlesticks.push(candlestick);
     

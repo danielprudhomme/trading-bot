@@ -2,7 +2,7 @@ import { ExchangeOrderStatus } from '../enums/exchange-order-status';
 import { OrderSide } from '../enums/order-side';
 import { OrderStatus } from '../enums/order-status';
 import ExchangeService from '../exchange-service/exchange.service';
-import { Symbol } from '../models/symbol';
+import Ticker from '../models/ticker';
 import Candlestick from './candlestick';
 import LimitOrder from './orders/limit-order';
 import MarketOrder from './orders/market-order';
@@ -25,13 +25,13 @@ export default class Trade {
   static openTrade = (
     currentCandlestick: Candlestick,
     exchangeService: ExchangeService,
-    symbol: Symbol,
+    ticker: Ticker,
     quantity: number,
     takeProfits: { quantity: number, price: number }[] | null = null,
     stopLoss: number | null = null,
     stopLossMoveCondition: StopLossMoveCondition | null = null,
   ): Trade => {
-    const open = new MarketOrder(symbol, OrderSide.Buy, quantity);
+    const open = new MarketOrder(ticker, OrderSide.Buy, quantity);
     open.status = OrderStatus.Open;
 
     const trade = new Trade(open);
@@ -42,11 +42,11 @@ export default class Trade {
       const takeProfitsQuantity = takeProfits.reduce((sum, tp) => sum += tp.quantity, 0);
       if (takeProfitsQuantity > quantity) throw new Error('Take profit quantity is too high.');
       takeProfits.forEach(takeProfit => {
-        trade.takeProfits.push(new LimitOrder(symbol, OrderSide.Sell, takeProfit.quantity, takeProfit.price));
+        trade.takeProfits.push(new LimitOrder(ticker, OrderSide.Sell, takeProfit.quantity, takeProfit.price));
       });
     }
     
-    if (stopLoss) trade.stopLoss = new StopOrder(symbol, OrderSide.Sell, stopLoss);
+    if (stopLoss) trade.stopLoss = new StopOrder(ticker, OrderSide.Sell, stopLoss);
     trade.stopLossMoveCondition = stopLossMoveCondition;
 
     // Transmit open order
@@ -88,7 +88,7 @@ export default class Trade {
   async closeTrade(exchangeService: ExchangeService): Promise<void> {
     if (this.close) throw new Error('Close order should not exist yet.');
     await this.cancelAllOrders(exchangeService);
-    this.close = new MarketOrder(this.open.symbol, OrderSide.Sell, this.remaining);
+    this.close = new MarketOrder(this.open.ticker, OrderSide.Sell, this.remaining);
     await this.close.transmitToExchange(exchangeService);
   }
 
@@ -149,7 +149,7 @@ export default class Trade {
 
     const newStopLoss = this.open.exchangeOrder.executedPrice;    
 
-    this.stopLoss = new StopOrder(this.open.symbol, OrderSide.Sell, newStopLoss);
+    this.stopLoss = new StopOrder(this.open.ticker, OrderSide.Sell, newStopLoss);
     this.stopLoss.status = OrderStatus.Open;
   }
 

@@ -5,7 +5,7 @@ import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-v
 import MacdZeroLag from '../indicators/macd-zero-lag/macd-zero-lag';
 import MacdZeroLagValue from '../indicators/macd-zero-lag/macd-zero-lag-value';
 import Candlestick from '../models/candlestick';
-import { Symbol } from '../models/symbol';
+import Ticker from '../models/ticker';
 import Trade from '../models/trade';
 import Strategy from './strategy';
 
@@ -34,8 +34,8 @@ export default class Reverse1hStrategy extends Strategy {
     return bb;
   }
 
-  constructor(symbol: Symbol, timeframe: TimeFrame) {
-    super(symbol, [timeframe]);
+  constructor(ticker: Ticker, timeframe: TimeFrame) {
+    super(ticker, [timeframe]);
     this.timeframe = timeframe;
   }
   
@@ -87,7 +87,7 @@ export default class Reverse1hStrategy extends Strategy {
     this.currentTrade = Trade.openTrade(
       currentCandlestick,
       exchangeService,
-      this.symbol,
+      this.ticker,
       1,
       // null,
       [

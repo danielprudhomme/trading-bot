@@ -3,7 +3,7 @@ import ExchangeService from '../exchange-service/exchange.service';
 import BollingerBands from '../indicators/bollinger-bands/bollinger-bands';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import Candlestick from '../models/candlestick';
-import { Symbol } from '../models/symbol';
+import Ticker from '../models/ticker';
 import Trade from '../models/trade';
 import Strategy from './strategy';
 
@@ -24,8 +24,8 @@ export default class LowOutsideBBStrategy extends Strategy {
     return bb;
   }
 
-  constructor(symbol: Symbol, timeframe: TimeFrame) {
-    super(symbol, [timeframe]);
+  constructor(ticker: Ticker, timeframe: TimeFrame) {
+    super(ticker, [timeframe]);
     this.timeframe = timeframe;
   }
   
@@ -81,7 +81,7 @@ export default class LowOutsideBBStrategy extends Strategy {
     this.currentTrade = Trade.openTrade(
       currentCandlestick,
       exchangeService,
-      this.symbol,
+      this.ticker,
       1,
       // null,
       [

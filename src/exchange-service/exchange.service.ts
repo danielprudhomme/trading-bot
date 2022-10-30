@@ -6,7 +6,7 @@ import { OrderSide } from '../enums/order-side';
 import TimeFrame from '../enums/timeframe';
 import ExchangeOrder from '../models/exchange-order';
 import { mapFromCcxt, OHLCV } from '../models/ohlcv';
-import { Symbol } from '../models/symbol';
+import Ticker from '../models/ticker';
 
 export default class ExchangeService {
   protected client: ccxt.Exchange;
@@ -26,11 +26,11 @@ export default class ExchangeService {
 
   iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
 
-  fetchOHLCV = async (symbol: Symbol, timeframe: TimeFrame, since: number | undefined = undefined): Promise<OHLCV[]> =>
-    (await this.client.fetchOHLCV(symbol, timeframe as string, since)).map(ohlcv => mapFromCcxt(timeframe, ohlcv));
+  fetchOHLCV = async (ticker: Ticker, timeframe: TimeFrame, since: number | undefined = undefined): Promise<OHLCV[]> =>
+    (await this.client.fetchOHLCV(ticker.toString(), timeframe as string, since)).map(ohlcv => mapFromCcxt(timeframe, ohlcv));
 
   async fetchOHLCVRange(
-    symbol: Symbol,
+    ticker: Ticker,
     timeframe: TimeFrame,
     start: number,
     end: number,
@@ -39,7 +39,7 @@ export default class ExchangeService {
     let ohlcvs: OHLCV[] = [];
 
     while (since < end) {
-      const response = await this.fetchOHLCV(symbol, timeframe, since);
+      const response = await this.fetchOHLCV(ticker, timeframe, since);
       ohlcvs = ohlcvs.concat(response.filter(x => x.timestamp < end));
 
       if (response.length > 0) {
@@ -50,21 +50,21 @@ export default class ExchangeService {
     return ohlcvs;
   }
 
-  createMarketOrder = async (symbol: Symbol, side: OrderSide, quantity: number): Promise<ExchangeOrder> =>
+  createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> =>
     ExchangeOrder.mapCcxtOrder(
-      await this.client.createMarketOrder(symbol, this.toExchangeOrderSide(side), quantity));
+      await this.client.createMarketOrder(ticker.toString(), this.toExchangeOrderSide(side), quantity));
 
-  createLimitOrder = async (symbol: Symbol, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
+  createLimitOrder = async (ticker: Ticker, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
     ExchangeOrder.mapCcxtOrder(
-      await this.client.createLimitOrder(symbol, this.toExchangeOrderSide(side), quantity, limit));
+      await this.client.createLimitOrder(ticker.toString(), this.toExchangeOrderSide(side), quantity, limit));
 
-  cancelOrder = async (symbol: Symbol, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
+  cancelOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
     ExchangeOrder.mapCcxtOrder(
-      await this.client.cancelOrder(exchangeOrderId, symbol));
+      await this.client.cancelOrder(exchangeOrderId, ticker.toString()));
 
-  fetchOrder = async (symbol: Symbol, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
+  fetchOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
     ExchangeOrder.mapCcxtOrder(
-      await this.client.fetchOrder(exchangeOrderId, symbol));
+      await this.client.fetchOrder(exchangeOrderId, ticker.toString()));
 
   async fetchOrders(): Promise<void>  {//Promise<ccxt.Order[]>  {
     const orders = await this.client.fetchOrders('EGLD/BUSD', undefined, 2);
@@ -77,7 +77,7 @@ export default class ExchangeService {
     // const order = await this.client.createLimitBuyOrder('BTCBUSD', 0.001, 22000);
     // const order = await this.client.createMarketOrder('EGLD/BUSD', 'buy', 0.001);
 
-    // const order1 = await this.client.fetchOrder(order.id, order.symbol);
+    // const order1 = await this.client.fetchOrder(order.id, order.ticker);
 
     // await this.client.cancelOrder('5526182628', 'BTC/BUSD');
     // return orders;

@@ -1,10 +1,9 @@
 import BackTest from './backtest';
-import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
 import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
 import Indicator from './indicators/indicator';
 import Chart from './models/chart';
-import { Symbol } from './models/symbol';
+import Ticker from './models/ticker';
 import StrategyOneTimeFrame from './strategies/strategy-one-timeframe';
 
 class EmptyStrategy extends StrategyOneTimeFrame {
@@ -29,11 +28,10 @@ export default class BackTestIndicator extends BackTest {
     timeframe: TimeFrame,
     startDate: string,
     endDate: string,
-    symbol: Symbol,
-    exchangeId: ExchangeId,
+    ticker: Ticker,
     indicator: Indicator
   ) {
-    super(new EmptyStrategy(symbol, timeframe), timeframe, startDate, endDate, exchangeId);
+    super(new EmptyStrategy(ticker, timeframe), timeframe, startDate, endDate);
     this.timeframe = timeframe;
     this.indicator = indicator;
   }
@@ -43,7 +41,7 @@ export default class BackTestIndicator extends BackTest {
     this.endTimestamp = this.exchangeService.parse8601(this.endDate);
     // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
     const startMinus50Periods = this.startTimestamp - TimeFrame.toMilliseconds(this.timeframe) * 50;
-    const data = await this.exchangeService.fetchOHLCVRange(this.symbol, this.timeframe, startMinus50Periods, this.endTimestamp);
+    const data = await this.exchangeService.fetchOHLCVRange(this.ticker, this.timeframe, startMinus50Periods, this.endTimestamp);
 
     const chart = new Chart(this.timeframe, data);
 

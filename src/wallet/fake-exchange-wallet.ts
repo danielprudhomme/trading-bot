@@ -18,7 +18,7 @@ export default class FakeExchangeWallet extends ExchangeWallet {
     this.fees = fees;
   }
 
-  marketOrder(symbol: string, side: OrderSide, amount: number): void {
+  marketOrder(ticker: string, side: OrderSide, amount: number): void {
     const currentPrice = this.chart.currentCandlestick.close;
 
     if (side === OrderSide.Buy) {

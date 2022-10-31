@@ -1,18 +1,14 @@
 import TimeFrame from '../enums/timeframe';
 import ChartWorkspace from '../models/chart-workspace';
 import { OHLCV } from '../models/ohlcv';
+import Trade from '../models/trade';
+import TradeRepository from '../repositories/trade-repository';
 import Strategy from '../strategies/strategy';
-import TradeManager from '../trade-manager';
+import Workspace from '../workspace';
 
 export default abstract class TradingWorker {
   protected tickTimeFrame: TimeFrame;
   protected strategy: Strategy;
-
-  protected _tradeManager: TradeManager | null = null;
-  protected get tradeManager(): TradeManager {
-    if (!this._tradeManager) throw new Error('TradeManager should not be null.');
-    return this._tradeManager;
-  }
 
   protected _chartWorkspace: ChartWorkspace | null = null;
   protected get chartWorkspace(): ChartWorkspace {
@@ -25,16 +21,17 @@ export default abstract class TradingWorker {
     this.strategy = strategy;
   }
 
+  protected get tradeRepository(): TradeRepository {
+    return Workspace.getTradeRepository();
+  }
+
   async init(): Promise<void> {
-    console.log('Trading worker - init');
-    this._tradeManager = this.initTradeManager();
     console.log('Trading worker - chart workspace init start !');
     this._chartWorkspace = await this.initChartWorkspace(this.strategy.timeframes);
     console.log('Trading worker - chart workspace init done !');
-    this.strategy.init(this.chartWorkspace, this.tradeManager);
+    this.strategy.init(this.chartWorkspace);
   }
 
-  protected abstract initTradeManager(): TradeManager;
   protected abstract initChartWorkspace(timeframes: TimeFrame[]): Promise<ChartWorkspace>;
 
   async launch(): Promise<void> {
@@ -43,14 +40,22 @@ export default abstract class TradingWorker {
   }
 
   async onTick() {
+    const trades = await this.tradeRepository.getAllOpen();
+
     const lastOhlcv = await this.fetchLastOHLCV();
     this.chartWorkspace.newOHLCV(lastOhlcv);
- 
-    // update trade manager with orders
-    await this.tradeManager.synchronizeAllWithExchange(lastOhlcv.close);
+
+    await this.synchronizeTradesWithExchange(trades, lastOhlcv.close);
 
     // execute strategy
     await this.strategy.execute();
+  }
+
+  private async synchronizeTradesWithExchange(trades: Trade[], currentPrice: number): Promise<void> {
+    for (const trade of trades) {
+      await trade.synchronizeWithExchange(currentPrice);
+      await this.tradeRepository.set(trade);
+    }
   }
 
   protected abstract fetchLastOHLCV(): Promise<OHLCV>;

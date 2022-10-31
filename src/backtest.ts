@@ -7,7 +7,6 @@ import { OHLCV } from './models/ohlcv';
 import Ticker from './models/ticker';
 import PerformanceCalculator from './performance-calculator';
 import Strategy from './strategies/strategy';
-import { default as TradeManager } from './trade-manager';
 import TradingWorker from './trading-worker/trading-worker';
 import Workspace from './workspace';
 
@@ -45,8 +44,6 @@ export default class BackTest extends TradingWorker {
     return chart;
   }
 
-  protected initTradeManager = (): TradeManager => new TradeManager();
-
   protected initChartWorkspace = async (timeframes: TimeFrame[]): Promise<ChartWorkspace> => {
     if (timeframes.length === 0) throw new Error('At least one timeframe should be defined.');
     timeframes.sort(TimeFrame.compare);
@@ -77,7 +74,8 @@ export default class BackTest extends TradingWorker {
       await this.onTick();
     }
 
-    PerformanceCalculator.getPerformance(this.tradeManager.trades);
+    const trades = await this.tradeRepository.getAll();
+    PerformanceCalculator.getPerformance(trades);
   }
 
   protected async fetchLastOHLCV(): Promise<OHLCV> {

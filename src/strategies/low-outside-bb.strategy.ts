@@ -1,15 +1,17 @@
+import { Guid } from 'guid-typescript';
 import TimeFrame from '../enums/timeframe';
 import BollingerBands from '../indicators/bollinger-bands/bollinger-bands';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import Candlestick from '../models/candlestick';
 import Ticker from '../models/ticker';
 import Trade from '../models/trade';
+import Workspace from '../workspace';
 import Strategy from './strategy';
 
 export default class LowOutsideBBStrategy extends Strategy {
   private bollingerBands = new BollingerBands(20, 2.5);
   private readonly timeframe: TimeFrame;
-  private currentTrade: Trade | null = null;
+  private currentTradeId: Guid | null = null;
 
   private get currentCandlestick(): Candlestick {
     const candlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
@@ -33,9 +35,10 @@ export default class LowOutsideBBStrategy extends Strategy {
   }
 
   async execute(): Promise<void> {
-    if (!this.currentTrade?.isOpen) this.currentTrade = null;
+    const currentTrade: Trade | null = this.currentTradeId ? await Workspace.getTradeRepository().getById(this.currentTradeId) : null;
+    if (!currentTrade?.isOpen) this.currentTradeId = null;
 
-    if (!this.currentTrade) {
+    if (!currentTrade) {
       const buySignal = this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
   
       if (buySignal) {
@@ -47,7 +50,8 @@ export default class LowOutsideBBStrategy extends Strategy {
 
     const sellSignal = this.priceTouchedSMA20;
     if (sellSignal) {
-      await this.currentTrade.closeTrade();
+      await currentTrade.closeTrade();
+      await this.tradeRepository.set(currentTrade);
     }
   }
 
@@ -77,7 +81,7 @@ export default class LowOutsideBBStrategy extends Strategy {
     const currentCandlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
     if (!currentCandlestick) return;
 
-    this.currentTrade = Trade.openTrade(
+    const trade = await Trade.openTrade(
       currentCandlestick,
       this.ticker,
       1,
@@ -88,7 +92,9 @@ export default class LowOutsideBBStrategy extends Strategy {
       this.currentCandlestick.low,
       { condition: 'tp1', newPosition: 'breakEven' }
     );
-    
-    await this.tradeManager.add(this.currentTrade);
+
+    await this.tradeRepository.set(trade);
+
+    this.currentTradeId = trade.id;
   }
 }

@@ -1,3 +1,4 @@
+import { Guid } from 'guid-typescript';
 import { ExchangeOrderStatus } from '../enums/exchange-order-status';
 import { OrderSide } from '../enums/order-side';
 import { OrderStatus } from '../enums/order-status';
@@ -10,6 +11,7 @@ import StopOrder from './orders/stop-order';
 import { StopLossMoveCondition } from './stop-loss-move-condition';
 
 export default class Trade {
+  id: Guid = Guid.create();
   open: MarketOrder | LimitOrder;
   takeProfits: LimitOrder[] = [];
   stopLoss: StopOrder | null = null;
@@ -21,14 +23,14 @@ export default class Trade {
   }
 
   // Actuellement on ne fait que des LONG en Spot
-  static openTrade = (
+  static openTrade = async (
     currentCandlestick: Candlestick,
     ticker: Ticker,
     quantity: number,
     takeProfits: { quantity: number, price: number }[] | null = null,
     stopLoss: number | null = null,
     stopLossMoveCondition: StopLossMoveCondition | null = null,
-  ): Trade => {
+  ): Promise<Trade> => {
     const open = new MarketOrder(ticker, OrderSide.Buy, quantity);
     open.status = OrderStatus.Open;
 
@@ -48,8 +50,8 @@ export default class Trade {
     trade.stopLossMoveCondition = stopLossMoveCondition;
 
     // Transmit open order
-    open.transmitToExchange();
-    trade.synchronizeWithExchange(currentCandlestick.close);
+    await open.transmitToExchange();
+    await trade.synchronizeWithExchange(currentCandlestick.close);
 
     return trade;
   }

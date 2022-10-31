@@ -1,5 +1,4 @@
 import TimeFrame from '../enums/timeframe';
-import ExchangeService from '../exchange-service/exchange.service';
 import ChartWorkspace from '../models/chart-workspace';
 import { OHLCV } from '../models/ohlcv';
 import Strategy from '../strategies/strategy';
@@ -8,12 +7,6 @@ import TradeManager from '../trade-manager';
 export default abstract class TradingWorker {
   protected tickTimeFrame: TimeFrame;
   protected strategy: Strategy;
-
-  protected _exchangeService: ExchangeService | null = null;
-  protected get exchangeService(): ExchangeService {
-    if (!this._exchangeService) throw new Error('ExchangeService should not be null.');
-    return this._exchangeService;
-  }
 
   protected _tradeManager: TradeManager | null = null;
   protected get tradeManager(): TradeManager {
@@ -34,7 +27,6 @@ export default abstract class TradingWorker {
 
   async init(): Promise<void> {
     console.log('Trading worker - init');
-    this._exchangeService = this.initExchangeService();
     this._tradeManager = this.initTradeManager();
     console.log('Trading worker - chart workspace init start !');
     this._chartWorkspace = await this.initChartWorkspace(this.strategy.timeframes);
@@ -42,7 +34,6 @@ export default abstract class TradingWorker {
     this.strategy.init(this.chartWorkspace, this.tradeManager);
   }
 
-  protected abstract initExchangeService(): ExchangeService;
   protected abstract initTradeManager(): TradeManager;
   protected abstract initChartWorkspace(timeframes: TimeFrame[]): Promise<ChartWorkspace>;
 
@@ -59,7 +50,7 @@ export default abstract class TradingWorker {
     await this.tradeManager.synchronizeAllWithExchange(lastOhlcv.close);
 
     // execute strategy
-    await this.strategy.execute(this.exchangeService);
+    await this.strategy.execute();
   }
 
   protected abstract fetchLastOHLCV(): Promise<OHLCV>;

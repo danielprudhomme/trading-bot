@@ -1,5 +1,4 @@
 import { OrderSide } from '../../enums/order-side';
-import ExchangeService from '../../exchange-service/exchange.service';
 import Ticker from '../ticker';
 import Order from './order';
 
@@ -13,7 +12,7 @@ export default class LimitOrder extends Order {
     this.limit = limit;
   }
 
-  async transmitToExchange(exchangeService: ExchangeService): Promise<void> {
-    this.exchangeOrder = await exchangeService.createLimitOrder(this.ticker, this.side, this.limit, this.quantity);
+  async transmitToExchange(): Promise<void> {
+    this.exchangeOrder = await this.exchange.createLimitOrder(this.ticker, this.side, this.limit, this.quantity);
   }
 }

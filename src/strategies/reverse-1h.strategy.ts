@@ -1,5 +1,4 @@
 import TimeFrame from '../enums/timeframe';
-import ExchangeService from '../exchange-service/exchange.service';
 import BollingerBands from '../indicators/bollinger-bands/bollinger-bands';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import MacdZeroLag from '../indicators/macd-zero-lag/macd-zero-lag';
@@ -44,7 +43,7 @@ export default class Reverse1hStrategy extends Strategy {
     this.chartWorkspace.get(this.timeframe)?.addIndicator(this.macdZeroLag);
   }
 
-  async execute(exchangeService: ExchangeService): Promise<void> {
+  async execute(): Promise<void> {
     if (!this.currentTrade?.isOpen) this.currentTrade = null;
 
     if (!this.currentTrade) {
@@ -54,7 +53,7 @@ export default class Reverse1hStrategy extends Strategy {
   
       if (buySignal) {
         this.waitForMacdToBreak = false;
-        await this.openTrade(exchangeService);
+        await this.openTrade();
       }
       
       return;
@@ -62,7 +61,7 @@ export default class Reverse1hStrategy extends Strategy {
 
     const sellSignal = this.priceTouchedSMA20;
     if (sellSignal) {
-      await this.currentTrade.closeTrade(exchangeService);
+      await this.currentTrade.closeTrade();
     }
   }
 
@@ -80,13 +79,12 @@ export default class Reverse1hStrategy extends Strategy {
     return high >= sma;
   }
 
-  private async openTrade(exchangeService: ExchangeService): Promise<void> {
+  private async openTrade(): Promise<void> {
     const currentCandlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
     if (!currentCandlestick) return;
 
     this.currentTrade = Trade.openTrade(
       currentCandlestick,
-      exchangeService,
       this.ticker,
       1,
       // null,

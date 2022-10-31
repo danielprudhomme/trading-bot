@@ -1,6 +1,6 @@
 import BackTest from './backtest';
 import TimeFrame from './enums/timeframe';
-import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
+import ReadOnlyexchange from './exchange-service/read-only-exchange.service';
 import Indicator from './indicators/indicator';
 import Chart from './models/chart';
 import Ticker from './models/ticker';
@@ -37,21 +37,20 @@ export default class BackTestIndicator extends BackTest {
   }
 
   private async initChart(): Promise<Chart> {
-    this.startTimestamp = this.exchangeService.parse8601(this.startDate);
-    this.endTimestamp = this.exchangeService.parse8601(this.endDate);
+    this.startTimestamp = this.exchange.parse8601(this.startDate);
+    this.endTimestamp = this.exchange.parse8601(this.endDate);
     // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
     const startMinus50Periods = this.startTimestamp - TimeFrame.toMilliseconds(this.timeframe) * 50;
-    const data = await this.exchangeService.fetchOHLCVRange(this.ticker, this.timeframe, startMinus50Periods, this.endTimestamp);
+    const data = await this.exchange.fetchOHLCVRange(this.ticker, this.timeframe, startMinus50Periods, this.endTimestamp);
 
     const chart = new Chart(this.timeframe, data);
 
-    (this.exchangeService as ReadOnlyExchangeService).addChart(chart);
+    (this.exchange as ReadOnlyexchange).addChart(chart);
 
     return chart;
   }
 
   async init(): Promise<void> {
-    this._exchangeService = this.initExchangeService();
     this._chart = await this.initChart();
   }
 
@@ -60,7 +59,7 @@ export default class BackTestIndicator extends BackTest {
     this.chart.candlesticks.forEach(candlestick => {
       const indicatorValue = candlestick.getIndicatorValue(this.indicator);
       console.log(
-        `${this.exchangeService.iso8601(candlestick.timestamp)}
+        `${this.exchange.iso8601(candlestick.timestamp)}
         close: ${candlestick.close}
         indicator: ${indicatorValue?.toString()}`
       );

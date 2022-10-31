@@ -1,5 +1,4 @@
 import TimeFrame from '../enums/timeframe';
-import ExchangeService from '../exchange-service/exchange.service';
 import ChartWorkspace from '../models/chart-workspace';
 import Ticker from '../models/ticker';
 import TradeManager from '../trade-manager';
@@ -33,5 +32,5 @@ export default abstract class Strategy {
   
   abstract addIndicators(): void;
 
-  abstract execute(exchangeService: ExchangeService): Promise<void>;
+  abstract execute(): Promise<void>;
 }

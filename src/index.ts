@@ -5,8 +5,11 @@ import TimeFrame from './enums/timeframe';
 import AssetSymbol from './models/asset-symbol';
 import Ticker from './models/ticker';
 import LowOutsideBBStrategy from './strategies/low-outside-bb.strategy';
+import Workspace from './workspace';
 
 ConfigurationManager.load();
+
+Workspace.readOnly = true;
 
 const ticker = new Ticker(AssetSymbol.btc, AssetSymbol.usdt, ExchangeId.binance);
 const strategy = new LowOutsideBBStrategy(ticker, TimeFrame.t1h);

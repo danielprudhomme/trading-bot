@@ -1,5 +1,5 @@
 import TimeFrame from './enums/timeframe';
-import ExchangeService from './exchange-service/exchange.service';
+import exchange from './exchange-service/exchange.service';
 import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
 import Chart from './models/chart';
 import ChartWorkspace from './models/chart-workspace';
@@ -9,6 +9,7 @@ import PerformanceCalculator from './performance-calculator';
 import Strategy from './strategies/strategy';
 import { default as TradeManager } from './trade-manager';
 import TradingWorker from './trading-worker/trading-worker';
+import Workspace from './workspace';
 
 export default class BackTest extends TradingWorker {
   protected ticker: Ticker;
@@ -30,26 +31,28 @@ export default class BackTest extends TradingWorker {
     this.ticker = strategy.ticker;
   }
 
-  protected initExchangeService = (): ExchangeService => new ReadOnlyExchangeService(this.ticker.exchangeId);
+  protected get exchange(): exchange {
+    return Workspace.getExchange(this.ticker.exchangeId);
+  }
 
   private async initChartForTimeframe(timeframe: TimeFrame): Promise<Chart> {
     // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
     const startMinusXPeriods = this.startTimestamp - TimeFrame.toMilliseconds(timeframe) * 50;
-    const data = await this.exchangeService.fetchOHLCVRange(this.ticker, timeframe, startMinusXPeriods, this.startTimestamp);
+    const data = await this.exchange.fetchOHLCVRange(this.ticker, timeframe, startMinusXPeriods, this.startTimestamp);
 
     const chart = new Chart(timeframe, data);
 
     return chart;
   }
 
-  protected initTradeManager = (): TradeManager => new TradeManager(this.exchangeService);
+  protected initTradeManager = (): TradeManager => new TradeManager();
 
   protected initChartWorkspace = async (timeframes: TimeFrame[]): Promise<ChartWorkspace> => {
     if (timeframes.length === 0) throw new Error('At least one timeframe should be defined.');
     timeframes.sort(TimeFrame.compare);
 
-    this.startTimestamp = this.exchangeService.parse8601(this.startDate);
-    this.endTimestamp = this.exchangeService.parse8601(this.endDate);
+    this.startTimestamp = this.exchange.parse8601(this.startDate);
+    this.endTimestamp = this.exchange.parse8601(this.endDate);
 
     const chartWorkspace = new ChartWorkspace();
 
@@ -59,14 +62,14 @@ export default class BackTest extends TradingWorker {
     }
 
     const chartLowestTimeframe = chartWorkspace.get(timeframes[0]);
-    if (chartLowestTimeframe) (this.exchangeService as ReadOnlyExchangeService).addChart(chartLowestTimeframe);
+    if (chartLowestTimeframe) (this.exchange as ReadOnlyExchangeService).addChart(chartLowestTimeframe);
 
     return chartWorkspace;
   }
 
   async launch(): Promise<void> {
     console.log('Backtest - launch');
-    const ticks = await this.exchangeService.fetchOHLCVRange(this.ticker, this.tickTimeFrame, this.startTimestamp, this.endTimestamp);
+    const ticks = await this.exchange.fetchOHLCVRange(this.ticker, this.tickTimeFrame, this.startTimestamp, this.endTimestamp);
     console.log('Fetched : ', ticks.length, 'ticks');
 
     for (const tick of ticks) {

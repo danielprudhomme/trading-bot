@@ -3,6 +3,7 @@ import { ExchangeOrderStatus } from '../../enums/exchange-order-status';
 import { OrderSide } from '../../enums/order-side';
 import { OrderStatus } from '../../enums/order-status';
 import ExchangeService from '../../exchange-service/exchange.service';
+import Workspace from '../../workspace';
 import ExchangeOrder from '../exchange-order';
 import Ticker from '../ticker';
 
@@ -27,19 +28,23 @@ export default abstract class Order {
     this.limit = limit;
   }
 
-  abstract transmitToExchange(exchangeService: ExchangeService, options: { remainingQuantity: number }): Promise<void>;
+  protected get exchange(): ExchangeService {
+    return Workspace.getExchange(this.ticker.exchangeId);
+  }
 
-  async cancel(exchangeService: ExchangeService): Promise<void> {
+  abstract transmitToExchange(options: { remainingQuantity: number }): Promise<void>;
+
+  async cancel(): Promise<void> {
     this.status = OrderStatus.Canceled;
     if (!this.exchangeOrder || this.exchangeOrder.status !== ExchangeOrderStatus.Open) return;
-    await exchangeService.cancelOrder(this.ticker, this.exchangeOrder.id);
+    await this.exchange.cancelOrder(this.ticker, this.exchangeOrder.id);
   }
 
   /* Synchronize order with exchange (checks if closed in exchange) */
-  async synchronizeWithExchange(exchangeService: ExchangeService): Promise<void> {
+  async synchronizeWithExchange(): Promise<void> {
     if (!this.exchangeOrder) return;
 
-    const exchangeOrder = await exchangeService.fetchOrder(this.ticker, this.exchangeOrder.id);
+    const exchangeOrder = await this.exchange.fetchOrder(this.ticker, this.exchangeOrder.id);
     if (!exchangeOrder) return;
     this.exchangeOrder = exchangeOrder;
 

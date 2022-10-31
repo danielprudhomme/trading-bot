@@ -1,7 +1,6 @@
 import { ExchangeOrderStatus } from '../enums/exchange-order-status';
 import { OrderSide } from '../enums/order-side';
 import { OrderStatus } from '../enums/order-status';
-import ExchangeService from '../exchange-service/exchange.service';
 import Ticker from '../models/ticker';
 import Candlestick from './candlestick';
 import LimitOrder from './orders/limit-order';
@@ -24,7 +23,6 @@ export default class Trade {
   // Actuellement on ne fait que des LONG en Spot
   static openTrade = (
     currentCandlestick: Candlestick,
-    exchangeService: ExchangeService,
     ticker: Ticker,
     quantity: number,
     takeProfits: { quantity: number, price: number }[] | null = null,
@@ -50,8 +48,8 @@ export default class Trade {
     trade.stopLossMoveCondition = stopLossMoveCondition;
 
     // Transmit open order
-    open.transmitToExchange(exchangeService);
-    trade.synchronizeWithExchange(currentCandlestick.close, exchangeService);
+    open.transmitToExchange();
+    trade.synchronizeWithExchange(currentCandlestick.close);
 
     return trade;
   }
@@ -78,38 +76,38 @@ export default class Trade {
     return this.orders.findIndex(x => x.status === OrderStatus.Open || x.status === OrderStatus.Waiting) > -1;
   }
 
-  synchronizeWithExchange = async (currentPrice: number, exchangeService: ExchangeService): Promise<void> => {
-    await this.synchronizeOpenOrdersWithExchange(exchangeService);
+  synchronizeWithExchange = async (currentPrice: number): Promise<void> => {
+    await this.synchronizeOpenOrdersWithExchange();
     this.openNextWaitingOrdersIfNoOpenOrders();
-    await this.transmitToExchangeNextOpenOrder(exchangeService);
-    await this.handleStopLoss(currentPrice, exchangeService);
+    await this.transmitToExchangeNextOpenOrder();
+    await this.handleStopLoss(currentPrice);
   }
 
-  async closeTrade(exchangeService: ExchangeService): Promise<void> {
+  async closeTrade(): Promise<void> {
     if (this.close) throw new Error('Close order should not exist yet.');
-    await this.cancelAllOrders(exchangeService);
+    await this.cancelAllOrders();
     this.close = new MarketOrder(this.open.ticker, OrderSide.Sell, this.remaining);
-    await this.close.transmitToExchange(exchangeService);
+    await this.close.transmitToExchange();
   }
 
   /* Synchronize open orders with exchange (are order closed in exchange) */
-  private async synchronizeOpenOrdersWithExchange(exchangeService: ExchangeService): Promise<void> {
+  private async synchronizeOpenOrdersWithExchange(): Promise<void> {
     const ordersToSync = this.orders
       .filter(x => x.status === OrderStatus.Open && x.exchangeOrder?.status === ExchangeOrderStatus.Open);
 
     for (const order of ordersToSync) {
-      await this.synchronizeOrderWithExchange(exchangeService, order);
+      await this.synchronizeOrderWithExchange(order);
     }
   }
 
-  private async synchronizeOrderWithExchange(exchangeService: ExchangeService, order: Order): Promise<void> {
-    await order.synchronizeWithExchange(exchangeService);
+  private async synchronizeOrderWithExchange(order: Order): Promise<void> {
+    await order.synchronizeWithExchange();
 
     if (order.status === OrderStatus.Closed && this.orderIsTP1(order) && this.stopLossMoveCondition?.condition === 'tp1') {
-      await this.moveStopLoss(exchangeService);
+      await this.moveStopLoss();
     }
     
-    if (this.remaining === 0) await this.cancelAllOrders(exchangeService);
+    if (this.remaining === 0) await this.cancelAllOrders();
   }
 
   private openNextWaitingOrdersIfNoOpenOrders(): void {
@@ -126,23 +124,23 @@ export default class Trade {
     }
   }
 
-  private transmitToExchangeNextOpenOrder = async (exchangeService: ExchangeService): Promise<void> => {
+  private transmitToExchangeNextOpenOrder = async (): Promise<void> => {
     if (this.open && this.open.status === OrderStatus.Open && this.open.exchangeOrder === null) {
-      await this.open.transmitToExchange(exchangeService);
+      await this.open.transmitToExchange();
       return;
     }
 
     // On ne transmet pas les stop loss pour l'instant (on ne transmet que les TPs)
     const takeProfit = this.takeProfits.find(x => x.status === OrderStatus.Open && x.exchangeOrder === null)
     if (!takeProfit) return;
-    await takeProfit.transmitToExchange(exchangeService);
+    await takeProfit.transmitToExchange();
   }
 
-  private async moveStopLoss(exchangeService: ExchangeService): Promise<void> {
+  private async moveStopLoss(): Promise<void> {
     if (!this.stopLossMoveCondition) return;
     
     if (this.stopLoss && this.stopLoss.exchangeOrder?.status === ExchangeOrderStatus.Open) {
-      await this.stopLoss?.cancel(exchangeService);
+      await this.stopLoss?.cancel();
     }
 
     if (this.stopLossMoveCondition.newPosition !== 'breakEven' || !this.open.exchangeOrder?.executedPrice) return;
@@ -153,24 +151,24 @@ export default class Trade {
     this.stopLoss.status = OrderStatus.Open;
   }
 
-  private handleStopLoss = async (currentPrice: number, exchangeService: ExchangeService): Promise<void> => {
+  private handleStopLoss = async (currentPrice: number): Promise<void> => {
     if (this.stopLoss?.status !== OrderStatus.Open) return;
 
     if (!this.stopLoss.limit || currentPrice >= this.stopLoss.limit) return;
     
-    await this.cancelAllOrders(exchangeService);
+    await this.cancelAllOrders();
     this.stopLoss.status = OrderStatus.Open;
-    await this.stopLoss.transmitToExchange(exchangeService, { remainingQuantity: this.remaining });
+    await this.stopLoss.transmitToExchange({ remainingQuantity: this.remaining });
   }
 
   /* Cancel all open and waiting orders
    */
-  private cancelAllOrders = async (exchangeService: ExchangeService): Promise<void> => {
+  private cancelAllOrders = async (): Promise<void> => {
     const toBeCanceledOrders = this.orders
       .filter(order => order.status === OrderStatus.Waiting || order.status === OrderStatus.Open);
 
     for (const order of toBeCanceledOrders) {
-      await order.cancel(exchangeService);
+      await order.cancel();
     }
   }
   

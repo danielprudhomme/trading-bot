@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import ccxt from 'ccxt';
-import { Config, ConfigurationManager } from '../configuration-manager';
+import { ConfigurationManager } from '../config/configuration-manager';
 import ExchangeId from '../enums/exchange-id';
 import { OrderSide } from '../enums/order-side';
 import TimeFrame from '../enums/timeframe';
@@ -13,7 +13,7 @@ export default class ExchangeService {
 
   constructor(exchange: ExchangeId) {
     const CCXT = ccxt as any;
-    const config = ConfigurationManager.config[exchange as keyof Config];
+    const config = ConfigurationManager.getExchangeConfig(exchange);
 
     this.client = new CCXT[exchange.toString()]({ 
       apiKey: config.apiKey,

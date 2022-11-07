@@ -17,7 +17,7 @@ export default class Trade {
   stopLoss: StopOrder | null = null;
   stopLossMoveCondition: StopLossMoveCondition | null = null;
   close: MarketOrder | null = null;
-
+ 
   private constructor(open: MarketOrder | LimitOrder) {
     this.open = open;
   }

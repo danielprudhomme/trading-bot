@@ -27,7 +27,7 @@ export default class ExchangeService {
   iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
 
   fetchOHLCV = async (ticker: Ticker, timeframe: TimeFrame, since: number | undefined = undefined): Promise<OHLCV[]> =>
-    (await this.client.fetchOHLCV(ticker.toString(), timeframe as string, since)).map(ohlcv => mapFromCcxt(timeframe, ohlcv));
+    (await this.client.fetchOHLCV(this.tickerToString(ticker), timeframe as string, since)).map(ohlcv => mapFromCcxt(timeframe, ohlcv));
 
   async fetchOHLCVRange(
     ticker: Ticker,
@@ -52,19 +52,19 @@ export default class ExchangeService {
 
   createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> =>
     ExchangeOrder.mapCcxtOrder(
-      await this.client.createMarketOrder(ticker.toString(), this.toExchangeOrderSide(side), quantity));
+      await this.client.createMarketOrder(this.tickerToString(ticker), this.toExchangeOrderSide(side), quantity));
 
   createLimitOrder = async (ticker: Ticker, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
     ExchangeOrder.mapCcxtOrder(
-      await this.client.createLimitOrder(ticker.toString(), this.toExchangeOrderSide(side), quantity, limit));
+      await this.client.createLimitOrder(this.tickerToString(ticker), this.toExchangeOrderSide(side), quantity, limit));
 
   cancelOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
     ExchangeOrder.mapCcxtOrder(
-      await this.client.cancelOrder(exchangeOrderId, ticker.toString()));
+      await this.client.cancelOrder(exchangeOrderId, this.tickerToString(ticker)));
 
   fetchOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
     ExchangeOrder.mapCcxtOrder(
-      await this.client.fetchOrder(exchangeOrderId, ticker.toString()));
+      await this.client.fetchOrder(exchangeOrderId, this.tickerToString(ticker)));
 
   async fetchOrders(): Promise<void>  {//Promise<ccxt.Order[]>  {
     const orders = await this.client.fetchOrders('EGLD/BUSD', undefined, 2);
@@ -84,4 +84,6 @@ export default class ExchangeService {
   }
 
   private toExchangeOrderSide = (side: OrderSide): 'buy' | 'sell' => side === OrderSide.Buy ? 'buy' : 'sell';
+
+  private tickerToString = (ticker: Ticker): string => `${ticker.asset}/${ticker.base}`;
 }

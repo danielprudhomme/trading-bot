@@ -1,9 +1,9 @@
 import { Guid } from 'guid-typescript';
-import { ExchangeOrderStatus } from '../enums/exchange-order-status';
-import { OrderSide } from '../enums/order-side';
-import Chart from '../models/chart';
-import ExchangeOrder from '../models/exchange-order';
-import Ticker from '../models/ticker';
+import { ExchangeOrderStatus } from '../../enums/exchange-order-status';
+import { OrderSide } from '../../enums/order-side';
+import Chart from '../../models/chart';
+import ExchangeOrder from '../../models/exchange-order';
+import Ticker from '../../models/ticker';
 import ExchangeService from './exchange.service';
 
 class ExtendedExchangeOrder extends ExchangeOrder {

@@ -1,6 +1,6 @@
 import TimeFrame from './enums/timeframe';
-import exchange from './exchange-service/exchange.service';
-import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
+import exchange from './infrastructure/exchange-service/exchange.service';
+import ReadOnlyExchangeService from './infrastructure/exchange-service/read-only-exchange.service';
 import Chart from './models/chart';
 import ChartWorkspace from './models/chart-workspace';
 import { OHLCV } from './models/ohlcv';

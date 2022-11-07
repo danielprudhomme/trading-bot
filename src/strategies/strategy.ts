@@ -1,7 +1,7 @@
 import TimeFrame from '../enums/timeframe';
+import TradeRepository from '../infrastructure/repositories/trade-repository';
 import ChartWorkspace from '../models/chart-workspace';
 import Ticker from '../models/ticker';
-import TradeRepository from '../repositories/trade-repository';
 import Workspace from '../workspace';
 
 export default abstract class Strategy {

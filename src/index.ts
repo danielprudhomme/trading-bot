@@ -13,17 +13,64 @@ firebase.initializeApp({
 
 const db = getFirestore();
 
+let t = {
+  ticker: {
+    asset: 'BTC',
+    base: 'USDT',
+    exchangeId: 'binance'
+  }  
+};
+
 const tradesRef = db.collection('trades');
 
-const snapshot = await tradesRef.get();
-snapshot.forEach((doc) => {
-  console.log(doc.id, '=>', doc.data());
-});
+const res = await tradesRef.add(t);
 
-const orders = await tradesRef.doc('z8JXdmfrr7UoMtl1fM3F').collection('orders').get();
-orders.forEach((doc) => {
-  console.log(doc.id, '=>', doc.data());
-});
+const tradeId = res.id;
+const tradeRef = tradesRef.doc(tradeId); // tradesRef.doc('TMVgddXaKPqNWWS9g5y2');
+const trade = await tradeRef.get();
+
+t = trade.data() as any;
+
+console.log('trade t', t);
+
+t = { ...t,
+  orders:
+  [
+    { id: 1, quantity: 1, limit: 1000 },
+    { id: 2, quantity: 20, limit: 1000 },
+    { id: 3, quantity: 30, limit: 1000 },
+  ]
+} as any;
+
+console.log('trade tt', t);
+
+await tradeRef.set(t);
+
+t = { ...t, orders: [
+  { id: 1, quantity: 999, limit: 1000 },
+  { id: 2, quantity:999, limit: 1000 },
+  { id: 3, quantity: 999, limit: 1000 },
+] } as any;
+
+await tradeRef.set(t);
+
+console.log('trade end');
+
+// const snapshot = await tradesRef.get();
+// snapshot.forEach((doc) => {
+//   console.log(doc.id, '=>', doc.data());
+// });
+
+// const orders = await tradesRef.doc('z8JXdmfrr7UoMtl1fM3F').collection('orders').get();
+// orders.forEach((doc) => {
+//   console.log(doc.id, '=>', doc.data());
+// });
+
+// var ordersGroupRef = db.collectionGroup("orders");
+// const ordersSnapshot = await ordersGroupRef.get();
+// ordersSnapshot.forEach((doc) => {
+//   console.log(doc.id, '=>', doc.data());
+// });
 
 // const docRef = db.collection('users').doc('alovelace');
 

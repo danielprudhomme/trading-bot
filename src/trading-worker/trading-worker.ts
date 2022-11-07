@@ -1,8 +1,8 @@
 import TimeFrame from '../enums/timeframe';
+import TradeRepository from '../infrastructure/repositories/trade-repository';
 import ChartWorkspace from '../models/chart-workspace';
 import { OHLCV } from '../models/ohlcv';
 import Trade from '../models/trade';
-import TradeRepository from '../repositories/trade-repository';
 import Strategy from '../strategies/strategy';
 import Workspace from '../workspace';
 

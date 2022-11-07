@@ -1,7 +1,7 @@
 import ExchangeId from './enums/exchange-id';
-import ExchangeService from './exchange-service/exchange.service';
-import ReadOnlyExchangeService from './exchange-service/read-only-exchange.service';
-import { default as TradeInMemoryRepository, default as TradeRepository } from './repositories/trade-in-memory-repository';
+import ExchangeService from './infrastructure/exchange-service/exchange.service';
+import ReadOnlyExchangeService from './infrastructure/exchange-service/read-only-exchange.service';
+import { default as TradeInMemoryRepository, default as TradeRepository } from './infrastructure/repositories/trade-in-memory-repository';
 
 export default class Workspace {
   public static readOnly = false;

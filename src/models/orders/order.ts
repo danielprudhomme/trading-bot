@@ -2,7 +2,7 @@ import { Guid } from 'guid-typescript';
 import { ExchangeOrderStatus } from '../../enums/exchange-order-status';
 import { OrderSide } from '../../enums/order-side';
 import { OrderStatus } from '../../enums/order-status';
-import ExchangeService from '../../exchange-service/exchange.service';
+import ExchangeService from '../../infrastructure/exchange-service/exchange.service';
 import Workspace from '../../workspace';
 import ExchangeOrder from '../exchange-order';
 import Ticker from '../ticker';

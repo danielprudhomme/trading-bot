@@ -51,19 +51,19 @@ export default class ExchangeService {
   }
 
   createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> =>
-    ExchangeOrder.mapCcxtOrder(
-      await this.client.createMarketOrder(this.tickerToString(ticker), this.toExchangeOrderSide(side), quantity));
+    this.mapCcxtOrder(
+      await this.client.createMarketOrder(this.tickerToString(ticker), side, quantity));
 
   createLimitOrder = async (ticker: Ticker, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
-    ExchangeOrder.mapCcxtOrder(
-      await this.client.createLimitOrder(this.tickerToString(ticker), this.toExchangeOrderSide(side), quantity, limit));
+    this.mapCcxtOrder(
+      await this.client.createLimitOrder(this.tickerToString(ticker), side, quantity, limit));
 
   cancelOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
-    ExchangeOrder.mapCcxtOrder(
+    this.mapCcxtOrder(
       await this.client.cancelOrder(exchangeOrderId, this.tickerToString(ticker)));
 
   fetchOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
-    ExchangeOrder.mapCcxtOrder(
+    this.mapCcxtOrder(
       await this.client.fetchOrder(exchangeOrderId, this.tickerToString(ticker)));
 
   async fetchOrders(): Promise<void>  {//Promise<ccxt.Order[]>  {
@@ -83,7 +83,12 @@ export default class ExchangeService {
     // return orders;
   }
 
-  private toExchangeOrderSide = (side: OrderSide): 'buy' | 'sell' => side === OrderSide.Buy ? 'buy' : 'sell';
-
   private tickerToString = (ticker: Ticker): string => `${ticker.asset}/${ticker.base}`;
+
+  private mapCcxtOrder = (order: ccxt.Order): ExchangeOrder => ({
+    id: order.id,
+    timestamp: order.timestamp,
+    status: order.status,
+    executedPrice: order.average
+  });
 }

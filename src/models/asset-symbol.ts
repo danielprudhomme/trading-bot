@@ -3,4 +3,5 @@ export default class AssetSymbol {
   static usd = 'USD';
   static btc = 'BTC';
   static eth = 'ETH';
+  static qnt = 'QNT';
 }

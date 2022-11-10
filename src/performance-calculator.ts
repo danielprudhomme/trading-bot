@@ -1,4 +1,6 @@
-import { OrderStatus } from './enums/order-status';
+import { timestampToString } from './helpers/date';
+import TradeHelper from './helpers/trade.helper';
+import Order from './models/order';
 import Trade from './models/trade';
 
 export default class PerformanceCalculator {
@@ -27,25 +29,23 @@ export default class PerformanceCalculator {
   private static getTradePerformance(trade: Trade): number | null {
     if (trade.isOpen) return null;
     
-    const openAmount = trade.quantity * (trade.open.exchangeOrder?.executedPrice ?? 0);
+    const openAmount = this.getAmount(TradeHelper.openOrders(trade));
+    const finalAmount = this.getAmount([...TradeHelper.takeProfitsOrders(trade), ...TradeHelper.stopLossOrders(trade)]);
 
-    const profitTaken = trade.takeProfits.filter(x => x.status === OrderStatus.Closed)
-      .reduce((sum, order) => sum + order.quantity * (order.exchangeOrder?.executedPrice ?? 0), 0);
-
-    const stopAmount = trade.stopLoss && trade.stopLoss.status === OrderStatus.Closed ?
-      (trade.stopLoss.quantity as number) * (trade.stopLoss?.exchangeOrder?.executedPrice ?? 0) : 0;
-
-    const closeAmount = trade.close && trade.close.status === OrderStatus.Closed ?
-      trade.close.quantity * (trade.close.exchangeOrder?.executedPrice ?? 0) : 0;
-
-    const finalAmount = profitTaken + stopAmount + closeAmount;
-
-    const thisDate = trade.open.exchangeOrder ? new Date(trade.open.exchangeOrder.timestamp).toUTCString(): null;
+    const openOrder = TradeHelper.openOrders(trade)[0];
+    const thisDate = openOrder.exchangeOrder ? timestampToString(openOrder.exchangeOrder.timestamp) : null;
     const performance = (finalAmount / openAmount - 1) * 100;
-    if (thisDate) console.log(`Trade\t${thisDate}\topen: ${openAmount}\ttp: ${profitTaken}\tstop: ${stopAmount}\tclose: ${closeAmount}\t -> ${this.toPercentage(performance)}`);
+    if (thisDate) console.log(`Trade\t${thisDate}\t open: ${openAmount}\tfinal: ${finalAmount}\t -> ${this.toPercentage(performance)}`);
 
     return performance;
   }
+  
+  private static getAmount = (orders: Order[]) => orders
+    .reduce((amount, order) => {
+      const quantity = order.quantity !== 'remaining' ? order.quantity : 0;
+      const price = order.exchangeOrder?.executedPrice ?? 0;
+      return amount + quantity * price;
+    }, 0);
 
-  private static toPercentage = (n: number): string => `${n.toFixed(2)}%`
+  private static toPercentage = (n: number): string => `${n.toFixed(2)}%`;
 }

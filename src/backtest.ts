@@ -63,9 +63,10 @@ export default class BackTest extends TradingWorker {
 
     return chartWorkspace;
   }
-
+    
   async launch(): Promise<void> {
     console.log('Backtest - launch');
+    this.tradeService.deleteAll();
     const ticks = await this.exchange.fetchOHLCVRange(this.ticker, this.tickTimeFrame, this.startTimestamp, this.endTimestamp);
     console.log('Fetched : ', ticks.length, 'ticks');
 
@@ -74,7 +75,7 @@ export default class BackTest extends TradingWorker {
       await this.onTick();
     }
 
-    const trades = await this.tradeRepository.getAll();
+    const trades = await this.tradeService.getAll();
     PerformanceCalculator.getPerformance(trades);
   }
 

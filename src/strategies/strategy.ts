@@ -1,8 +1,7 @@
 import TimeFrame from '../enums/timeframe';
-import TradeRepository from '../infrastructure/repositories/trade-repository';
 import ChartWorkspace from '../models/chart-workspace';
 import Ticker from '../models/ticker';
-import Workspace from '../workspace';
+import Trade from '../models/trade';
 
 export default abstract class Strategy {
   ticker: Ticker;
@@ -11,10 +10,6 @@ export default abstract class Strategy {
   constructor(ticker: Ticker, timeframes: TimeFrame[]) {
     this.ticker = ticker;
     this.timeframes = timeframes;
-  }
-
-  protected get tradeRepository(): TradeRepository {
-    return Workspace.getTradeRepository();
   }
 
   private _chartWorkspace: ChartWorkspace | null = null;
@@ -30,5 +25,5 @@ export default abstract class Strategy {
   
   abstract addIndicators(): void;
 
-  abstract execute(): Promise<void>;
+  abstract execute(trades: Trade[]): Promise<void>;
 }

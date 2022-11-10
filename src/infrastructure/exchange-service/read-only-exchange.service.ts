@@ -1,40 +1,24 @@
 import { Guid } from 'guid-typescript';
-import { ExchangeOrderStatus } from '../../enums/exchange-order-status';
 import { OrderSide } from '../../enums/order-side';
 import Chart from '../../models/chart';
 import ExchangeOrder from '../../models/exchange-order';
 import Ticker from '../../models/ticker';
 import ExchangeService from './exchange.service';
 
-class ExtendedExchangeOrder extends ExchangeOrder {
+interface ReadOnlyExchangeOrder {
+  id: string;
+  ticker: Ticker;
   type: 'market' | 'limit';
   side: OrderSide;
-  limit: number | null;
-  stop: number | null;
+  timestamp: number;
+  status: 'open' | 'closed' | 'canceled';
   quantity: number;
-
-  constructor(
-    type: 'market' | 'limit',
-    id: string,
-    timestamp: number,
-    status: ExchangeOrderStatus,
-    side: OrderSide,
-    limit: number | null,
-    stop: number | null,
-    quantity: number,
-    executedPrice: number | null
-  ) {
-    super(id, timestamp, status, executedPrice);
-    this.type = type;
-    this.side = side;
-    this.limit = limit;
-    this.stop = stop;
-    this.quantity = quantity;
-  }
+  executedPrice?: number;
+  limit?: number;
 }
 
 export default class ReadOnlyExchangeService extends ExchangeService {
-  private orders = new Map<string, ExtendedExchangeOrder>();
+  private orders = new Map<string, ReadOnlyExchangeOrder>();
 
   private _chart: Chart | null = null;
   protected get chart(): Chart {
@@ -46,56 +30,63 @@ export default class ReadOnlyExchangeService extends ExchangeService {
 
   // TODO : ajouter des checks sur la quantité, s'il est possible de passer les ordres ou non (il faut avoir acheter avant de vendre)
   createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> => {
-    const order = new ExtendedExchangeOrder(
-      'market',
-      Guid.create().toString(),
-      this.chart.currentCandlestick.timestamp,
-      ExchangeOrderStatus.Closed,
+    const order: ReadOnlyExchangeOrder = {
+      id: Guid.create().toString(),
+      ticker,
+      type: 'market',
       side,
-      null,
-      null,
+      timestamp: Date.now(),
+      status: 'closed',
       quantity,
-      this.chart.currentCandlestick.close
-    );
+      executedPrice: this.chart.currentCandlestick.close,
+    };
+
     this.orders.set(order.id, order);
-    return order;
+    return this.mapToExchangeOrder(order);
   }
 
   createLimitOrder = async (ticker: Ticker, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> => {
-    const order = new ExtendedExchangeOrder(
-      'limit',
-      Guid.create().toString(),
-      this.chart.currentCandlestick.timestamp,
-      ExchangeOrderStatus.Open,
+    const order: ReadOnlyExchangeOrder = {
+      id: Guid.create().toString(),
+      ticker,
+      type: 'limit',
       side,
-      limit,
-      null,
+      timestamp: Date.now(),
+      status: 'open',
       quantity,
-      this.chart.currentCandlestick.close
-    );
+      limit,
+    };
+
     this.orders.set(order.id, order);
-    return order;
+    return this.mapToExchangeOrder(order);
   }
 
   cancelOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> => {
     const order = this.orders.get(exchangeOrderId);
     if (!order) return null;
-    order.status = ExchangeOrderStatus.Canceled;
-    return order;
+    order.status = 'canceled';
+    return this.mapToExchangeOrder(order);
   }
 
   fetchOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> => {
     const order = this.orders.get(exchangeOrderId);
     if (!order) return null;
-    if (order.status !== ExchangeOrderStatus.Open) return order;
+    if (order.status !== 'open') return order;
 
     if (order.type === 'limit' && order.limit &&
-      ((order.side === OrderSide.Sell && this.chart.currentCandlestick.high >= order.limit) 
-        || (order.side === OrderSide.Buy && this.chart.currentCandlestick.low <= order.limit))) {
-        order.status = ExchangeOrderStatus.Closed;
+      ((order.side === 'sell' && this.chart.currentCandlestick.high >= order.limit) 
+        || (order.side === 'buy' && this.chart.currentCandlestick.low <= order.limit))) {
+        order.status = 'closed';
         order.executedPrice = order.limit;
     }
     
-    return order;
+    return this.mapToExchangeOrder(order);
   }
+
+  mapToExchangeOrder = (order: ReadOnlyExchangeOrder): ExchangeOrder => ({
+    id: order.id,
+    timestamp: order.timestamp,
+    status: order.status,
+    executedPrice: order.executedPrice,
+  })
 }

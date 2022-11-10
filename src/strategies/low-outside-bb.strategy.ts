@@ -1,17 +1,17 @@
-import { Guid } from 'guid-typescript';
 import TimeFrame from '../enums/timeframe';
 import BollingerBands from '../indicators/bollinger-bands/bollinger-bands';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import Candlestick from '../models/candlestick';
 import Ticker from '../models/ticker';
 import Trade from '../models/trade';
+import TradeService from '../services/trade.service';
 import Workspace from '../workspace';
 import Strategy from './strategy';
 
 export default class LowOutsideBBStrategy extends Strategy {
   private bollingerBands = new BollingerBands(20, 2.5);
   private readonly timeframe: TimeFrame;
-  private currentTradeId: Guid | null = null;
+  private currentTradeId: string | null = null;
 
   private get currentCandlestick(): Candlestick {
     const candlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
@@ -25,6 +25,10 @@ export default class LowOutsideBBStrategy extends Strategy {
     return bb;
   }
 
+  private get tradeService(): TradeService {
+    return Workspace.tradeService;
+  }
+
   constructor(ticker: Ticker, timeframe: TimeFrame) {
     super(ticker, [timeframe]);
     this.timeframe = timeframe;
@@ -34,25 +38,22 @@ export default class LowOutsideBBStrategy extends Strategy {
     this.chartWorkspace.get(this.timeframe)?.addIndicator(this.bollingerBands);
   }
 
-  async execute(): Promise<void> {
-    const currentTrade: Trade | null = this.currentTradeId ? await Workspace.getTradeRepository().getById(this.currentTradeId) : null;
-    if (!currentTrade?.isOpen) this.currentTradeId = null;
-
+  async execute(trades: Trade[]): Promise<void> {
+    const currentTrade: Trade | null = this.currentTradeId ? trades.find(trade => trade.id === this.currentTradeId) ?? null : null;
+    
     if (!currentTrade) {
+      this.currentTradeId = null;
       const buySignal = this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
   
       if (buySignal) {
-        await this.openTrade();
+        trades.push(await this.openTrade());
       }
       
       return;
     }
 
     const sellSignal = this.priceTouchedSMA20;
-    if (sellSignal) {
-      await currentTrade.closeTrade();
-      await this.tradeRepository.set(currentTrade);
-    }
+    if (sellSignal) this.tradeService.closeTrade(currentTrade, this.currentCandlestick.close);
   }
 
   private get bbFlat(): boolean {
@@ -77,24 +78,22 @@ export default class LowOutsideBBStrategy extends Strategy {
     return high >= sma;
   }
 
-  private async openTrade(): Promise<void> {
+  private async openTrade(): Promise<Trade> {
     const currentCandlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
-    if (!currentCandlestick) return;
+    if (!currentCandlestick) throw new Error('Should have a current candlestick.');
 
-    const trade = await Trade.openTrade(
-      currentCandlestick,
+    const trade = await this.tradeService.openTrade(
+      currentCandlestick.close,
       this.ticker,
       1,
-      // null,
       [
         { quantity: 0.5, price: currentCandlestick.close * 1.005 },
       ],
       this.currentCandlestick.low,
-      { condition: 'tp1', newPosition: 'breakEven' }
-    );
-
-    await this.tradeRepository.set(trade);
-
+      { condition: 'tp1', newPosition: 'breakEven' });
+    
     this.currentTradeId = trade.id;
+
+    return trade;
   }
 }

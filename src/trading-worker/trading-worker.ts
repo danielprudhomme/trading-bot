@@ -1,8 +1,8 @@
 import TimeFrame from '../enums/timeframe';
-import TradeRepository from '../infrastructure/repositories/trade-repository';
 import ChartWorkspace from '../models/chart-workspace';
 import { OHLCV } from '../models/ohlcv';
 import Trade from '../models/trade';
+import TradeService from '../services/trade.service';
 import Strategy from '../strategies/strategy';
 import Workspace from '../workspace';
 
@@ -21,8 +21,8 @@ export default abstract class TradingWorker {
     this.strategy = strategy;
   }
 
-  protected get tradeRepository(): TradeRepository {
-    return Workspace.getTradeRepository();
+  protected get tradeService(): TradeService {
+    return Workspace.tradeService;
   }
 
   async init(): Promise<void> {
@@ -40,21 +40,21 @@ export default abstract class TradingWorker {
   }
 
   async onTick() {
-    const trades = await this.tradeRepository.getAllOpen();
+    const trades = await this.tradeService.getAllOpen();
 
     const lastOhlcv = await this.fetchLastOHLCV();
     this.chartWorkspace.newOHLCV(lastOhlcv);
 
     await this.synchronizeTradesWithExchange(trades, lastOhlcv.close);
 
-    // execute strategy
-    await this.strategy.execute();
+    await this.strategy.execute(trades); // stocker les stratégies dans la DB, et repo, etc etc
+
+    await this.tradeService.persistUpdatedTrades(trades);
   }
 
   private async synchronizeTradesWithExchange(trades: Trade[], currentPrice: number): Promise<void> {
     for (const trade of trades) {
-      await trade.synchronizeWithExchange(currentPrice);
-      await this.tradeRepository.set(trade);
+      await this.tradeService.synchronizeWithExchange(trade, currentPrice);
     }
   }
 

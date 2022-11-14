@@ -4,7 +4,7 @@ import Trade from '../models/trade';
 import OrderService from './order.service';
 
 export default class StopLossService {
-  orderService: OrderService;
+  private orderService: OrderService;
 
   constructor(orderService: OrderService) {
     this.orderService = orderService;

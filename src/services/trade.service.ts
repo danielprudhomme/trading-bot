@@ -8,9 +8,9 @@ import OrderService from './order.service';
 import StopLossService from './stop-loss.service';
 
 export default class TradeService {
-  orderService: OrderService;
-  stopLossService: StopLossService;
-  tradeRepository: TradeRepository;
+  private orderService: OrderService;
+  private stopLossService: StopLossService;
+  private tradeRepository: TradeRepository;
 
   constructor(
     orderService: OrderService,

@@ -1,6 +1,6 @@
-import TimeFrame from '../enums/timeframe';
 import Chart from '../models/chart-old';
 import Ticker from '../models/ticker';
+import TimeFrame from '../timeframe/timeframe';
 import Strategy from './strategy';
 
 export default abstract class StrategyOneTimeFrame extends Strategy {

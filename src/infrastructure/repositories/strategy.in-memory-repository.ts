@@ -1,4 +1,4 @@
-import Strategy from '../../models/strategy';
+import Strategy from '../../strategies/strategy';
 import StrategyRepository from './strategy.repository';
 
 export default class StrategyInMemoryRepository extends StrategyRepository {

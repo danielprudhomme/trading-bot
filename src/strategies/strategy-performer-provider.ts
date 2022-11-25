@@ -1,4 +1,4 @@
-import Strategy from '../models/strategy';
+import Strategy from './strategy';
 import StrategyPerformerService from './strategy-performer.service';
 
 export default class StrategyPerformerProvider {

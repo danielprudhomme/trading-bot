@@ -1,5 +1,5 @@
-import TimeFrame from '../enums/timeframe';
 import Indicator from '../indicators/indicator';
+import { TimeFrame } from '../timeframe/timeframe';
 import Candlestick from './candlestick';
 import Ticker from './ticker';
 

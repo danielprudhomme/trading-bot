@@ -1,7 +1,6 @@
 import BackTest from './backtest';
 import { ConfigurationManager } from './config/configuration-manager';
 import ExchangeId from './enums/exchange-id';
-import TimeFrame from './enums/timeframe';
 import AssetSymbol from './models/asset-symbol';
 import Ticker from './models/ticker';
 import LowOutsideBBStrategy from './strategies/low-outside-bb.service';

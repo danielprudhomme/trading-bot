@@ -1,9 +1,9 @@
-import TimeFrame from '../enums/timeframe';
 import Trade from '../models/trade';
 import ChartService from '../services/chart.service';
 import TradeService from '../services/trade.service';
 import StrategyPerformerProvider from '../strategies/strategy-performer-provider';
 import StrategyService from '../strategies/strategy.service';
+import { TimeFrame } from '../timeframe/timeframe';
 import Workspace from '../workspace';
 
 export default abstract class TradingWorker {

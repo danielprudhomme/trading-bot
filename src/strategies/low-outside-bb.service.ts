@@ -1,10 +1,10 @@
-import TimeFrame from '../enums/timeframe';
 import BollingerBands from '../indicators/bollinger-bands/bollinger-bands';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import Candlestick from '../models/candlestick-old';
 import Ticker from '../models/ticker';
 import Trade from '../models/trade';
 import TradeService from '../services/trade.service';
+import TimeFrame from '../timeframe/timeframe';
 import Workspace from '../workspace';
 import StrategyPerformerService from './strategy-performer.service';
 

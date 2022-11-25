@@ -2,7 +2,6 @@ import firebase from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { ConfigurationManager } from './config/configuration-manager';
 import ExchangeId from './enums/exchange-id';
-import TimeFrame from './enums/timeframe';
 import ExchangeService from './infrastructure/exchange-service/exchange.service';
 import ReadOnlyExchangeService from './infrastructure/exchange-service/read-only-exchange.service';
 import ChartInMemoryRepository from './infrastructure/repositories/chart.in-memory-repository';
@@ -19,6 +18,8 @@ import OrderService from './services/order.service';
 import StopLossService from './services/stop-loss.service';
 import TradeService from './services/trade.service';
 import StrategyService from './strategies/strategy.service';
+import { TimeFrame } from './timeframe/timeframe';
+import TimeFrameHelper from './timeframe/timeframe.helper';
 
 export default class Workspace {
   private static _readOnlyExchange = false;
@@ -65,9 +66,7 @@ export default class Workspace {
     if (!chartsByTimeframe || chartsByTimeframe.size === 0) return undefined;
 
     if (!timeframe) {
-      timeframe = Array.from(chartsByTimeframe.keys())
-        .sort((t1, t2) => TimeFrame.toMilliseconds(t1) - TimeFrame.toMilliseconds(t2))
-        [0];
+      timeframe = Array.from(chartsByTimeframe.keys()).sort(TimeFrameHelper.compare)[0];
     }
     
     return chartsByTimeframe.get(timeframe);

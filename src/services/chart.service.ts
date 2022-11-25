@@ -1,11 +1,12 @@
-import TimeFrame from '../enums/timeframe';
 import Indicator from '../indicators/indicator';
 import IndicatorServiceProvider from '../indicators/indicator-service-provider';
 import ChartRepository from '../infrastructure/repositories/chart.repository';
 import Candlestick from '../models/candlestick';
 import Chart from '../models/chart';
 import { OHLCV } from '../models/ohlcv';
-import Strategy from '../models/strategy';
+import Strategy from '../strategies/strategy';
+import { TimeFrame } from '../timeframe/timeframe';
+import TimeFrameHelper from '../timeframe/timeframe.helper';
 import Workspace from '../workspace';
 
 export default class ChartService {
@@ -27,10 +28,12 @@ export default class ChartService {
     // strategy ticker et indicator (timeframe)
     // get chart for ticker and timeframe, and add indicator
     strategies.forEach(strategy => {
-      strategy.indicators.forEach(indicator => {
-        const chart = Workspace.getChart(strategy.ticker, indicator.timeframe);
-        if (chart) this.addIndicator(chart, indicator);
-      });
+      for (const [timeframe, indicators] of Object.entries(strategy.indicators)) {
+        indicators.forEach(indicator => {
+          const chart = Workspace.getChart(strategy.ticker, timeframe as TimeFrame);
+          if (chart) this.addIndicator(chart, indicator);
+        });
+      }
     });
   }
 
@@ -63,7 +66,7 @@ export default class ChartService {
   }
 
   private update = (chart: Chart, ohlcv: OHLCV): void => {
-    const isNewCandle = Number.isInteger(ohlcv.timestamp / TimeFrame.toMilliseconds(chart.timeframe));
+    const isNewCandle = Number.isInteger(ohlcv.timestamp / TimeFrameHelper.toMilliseconds(chart.timeframe));
 
     if (!isNewCandle) chart.candlesticks.shift();
     // TODO : si c'est un update (pas newCandle), il ne faut pas forcément tout mettre à jour (open, high, low)
@@ -74,7 +77,7 @@ export default class ChartService {
       low: ohlcv.low,
       close: ohlcv.close,
       volume: ohlcv.volume,
-      isClosed: Number.isInteger((ohlcv.timestamp + TimeFrame.toMilliseconds(ohlcv.timeframe)) / TimeFrame.toMilliseconds(chart.timeframe)),
+      isClosed: Number.isInteger((ohlcv.timestamp + TimeFrameHelper.toMilliseconds(ohlcv.timeframe)) / TimeFrameHelper.toMilliseconds(chart.timeframe)),
       indicators: {}
     };
     chart.candlesticks.unshift(candlestick);

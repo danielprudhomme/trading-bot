@@ -1,4 +1,4 @@
-import TimeFrame from '../enums/timeframe';
+import TimeFrame from '../timeframe/timeframe';
 
 export interface OHLCV {
   timeframe: TimeFrame;

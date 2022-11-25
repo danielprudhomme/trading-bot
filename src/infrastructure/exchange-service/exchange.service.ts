@@ -3,10 +3,10 @@ import ccxt from 'ccxt';
 import { ConfigurationManager } from '../../config/configuration-manager';
 import ExchangeId from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
-import TimeFrame from '../../enums/timeframe';
 import ExchangeOrder from '../../models/exchange-order';
 import { OHLCV } from '../../models/ohlcv';
 import Ticker from '../../models/ticker';
+import TimeFrame from '../../timeframe/timeframe';
 
 export default class ExchangeService {
   protected client: ccxt.Exchange;

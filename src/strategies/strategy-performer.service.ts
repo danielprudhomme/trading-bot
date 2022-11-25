@@ -1,5 +1,5 @@
-import Strategy from '../models/strategy';
 import Trade from '../models/trade';
+import Strategy from './strategy';
 
 export default abstract class StrategyPerformerService {
   strategy: Strategy;

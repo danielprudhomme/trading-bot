@@ -1,10 +1,10 @@
-import TimeFrame from './enums/timeframe';
 import exchange from './infrastructure/exchange-service/exchange.service';
 import ReadOnlyExchangeService from './infrastructure/exchange-service/read-only-exchange.service';
 import { OHLCV } from './models/ohlcv';
 import Ticker from './models/ticker';
 import PerformanceCalculator from './performance-calculator';
 import Strategy from './strategies/strategy';
+import TimeFrame from './timeframe/timeframe';
 import TradingWorker from './trading-worker/trading-worker';
 import Workspace from './workspace';
 

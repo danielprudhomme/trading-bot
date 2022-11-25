@@ -20,15 +20,15 @@ export default class RsiService extends IndicatorService {
   getDependencies = (): Indicator[] => [this.upRma, this.downRma];
   
   calculate(chart: chart): void {
-    const up = this.getIndicatorValue(chart, 0, this.upRma);
-    const down = this.getIndicatorValue(chart, 0, this.downRma);
+    const up = this.getIndicatorValue(chart, 0, this.upRma)?.value;
+    const down = this.getIndicatorValue(chart, 0, this.downRma)?.value;
 
     if (up && down) {
       const rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down));
       this.setValue(chart, new IndicatorValue(rsi));
     }
 
-    this.setValue(chart, null);
+    this.setValue(chart, undefined);
   }
 }
 

@@ -9,6 +9,6 @@ export default interface Candlestick {
   volume: number;
   isClosed: boolean;
   indicators: {
-    [indicator: string]: IndicatorValue | null
+    [indicator: string]: IndicatorValue | undefined
   }
 }

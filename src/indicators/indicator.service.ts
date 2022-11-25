@@ -16,7 +16,7 @@ export abstract class IndicatorService {
   /* Calculate indicator value for last candlestick of chart */
   abstract calculate(chart: Chart): void;
 
-  protected setValue(chart: Chart, value: IndicatorValue | null) {
+  protected setValue(chart: Chart, value: IndicatorValue | undefined) {
     chart.candlesticks[0].indicators[this.getIndicatorString()] = value;
   }
 
@@ -30,10 +30,10 @@ export abstract class IndicatorService {
   protected getSourceValue = (chart: Chart, index: number = 0): number | undefined =>
     this.getCandlestickSourceValue(chart.candlesticks[index]);
 
-  protected getCandlestickIndicatorValue = (candlestick: Candlestick, indicator: Indicator = this.indicator): number | undefined =>
-    candlestick.indicators[this.getIndicatorString(indicator)]?.value;
+  protected getCandlestickIndicatorValue = (candlestick: Candlestick, indicator: Indicator = this.indicator): IndicatorValue | undefined =>
+    candlestick.indicators[this.getIndicatorString(indicator)];
 
-  protected getIndicatorValue = (chart: Chart, index: number = 0, indicator: Indicator = this.indicator): number | undefined =>
+  protected getIndicatorValue = (chart: Chart, index: number = 0, indicator: Indicator = this.indicator): IndicatorValue | undefined =>
     this.getCandlestickIndicatorValue(chart.candlesticks[index], indicator);
 
   private getIndicatorString = (indicator: Indicator = this.indicator) => JSON.stringify(indicator);

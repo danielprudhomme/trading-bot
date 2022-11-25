@@ -14,7 +14,7 @@ export default class SmaService extends IndicatorService {
   }
   
   calculate(chart: Chart): void {
-    if (chart.candlesticks.length < this.length) this.setValue(chart, null);
+    if (chart.candlesticks.length < this.length) this.setValue(chart, undefined);
     
     const sum = chart.candlesticks.slice(0, this.length)
       .reduce((partialSum, candlestick) => {
@@ -23,7 +23,7 @@ export default class SmaService extends IndicatorService {
       }, 0);
 
     const value = sum / this.length;
-    const previousValue = this.getIndicatorValue(chart, 1) ?? 0;
+    const previousValue = this.getIndicatorValue(chart, 1)?.value ?? 0;
     const direction: MovingAverageDirection = value >= previousValue ? 'up': 'down';
     
     this.setValue(chart, new MovingAverageValue(value, direction));

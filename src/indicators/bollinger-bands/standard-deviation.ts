@@ -1,37 +1,14 @@
-import Indicator from '../indicator-service-provider';
-import IndicatorValue from '../indicator-value';
-import SMA from '../moving-average/sma.service';
+import Indicator from '../indicator';
+import { Sma, sma } from '../moving-average/sma';
 
-export default class StandardDeviation extends Indicator {
-  private length: number;
-  private avg: SMA;
-
-  constructor(length: number) {
-    super();
-    this.length = length;
-    this.avg = new SMA(length);
-    this.addDependency(this.avg);
-  }
-
-  protected calculateAtIndex(index: number): IndicatorValue | null {
-    const avg = this.chart.getIndicatorValueAtIndex(index, this.avg)?.value ?? 0;
-
-    const sumOfSquareDeviations = this.chart.candlesticks.slice(index - this.length + 1, index + 1)
-      .reduce((sumOfSquareDeviations, candlestick) => {
-        const sum = this.sum(candlestick.close, -avg);
-        return sumOfSquareDeviations + sum * sum;
-      }, 0);
-
-    const stdev = Math.sqrt(sumOfSquareDeviations / this.length);
-    return new IndicatorValue(stdev);
-  }
-
-  private isZero = (value: number, epsilon: number = Number.EPSILON): boolean => Math.abs(value) <= epsilon;
-
-  private sum(first: number, second: number): number {
-    const result = first + second;
-    if (this.isZero(result)) return 0;
-    if (!this.isZero(result, Math.pow(1, -4))) return result;
-    return 15;
-  }
+export default interface StandardDeviation extends Indicator {
+  length: number;
+  avg: Sma;
 }
+
+export const stdev = (length: number, source?: Indicator): StandardDeviation => ({
+  type: 'stdev',
+  source: source ?? 'close',
+  length,
+  avg: sma(length, source),
+});

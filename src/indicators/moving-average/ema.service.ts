@@ -20,7 +20,7 @@ export default class EmaService extends IndicatorService {
       return;
     }
 
-    const lastEma = this.getIndicatorValue(chart, 1) ?? 0;
+    const lastEma = this.getIndicatorValue(chart, 1)?.value ?? 0;
     const ema = alpha * (this.getSourceValue(chart) ?? 0) + (1 - alpha) * lastEma;
     const direction = ema >= lastEma ? 'up' : 'down';
 

@@ -18,13 +18,13 @@ export default class RsiRmaService extends IndicatorService {
   getDependencies = (): Indicator[] => [this.sma];
   
   calculate(chart: chart): void {
-    if (chart.candlesticks.length < this.length) this.setValue(chart, null);
+    if (chart.candlesticks.length < this.length) this.setValue(chart, undefined);
 
     const alpha = 1 / this.length;
 
     const sourceValue = this.getSourceValue(chart) ?? 0;
-    const smaValue = this.getIndicatorValue(chart, 0, this.sma);
-    const previousRMAValue = this.getIndicatorValue(chart, 1);
+    const smaValue = this.getIndicatorValue(chart, 0, this.sma)?.value;
+    const previousRMAValue = this.getIndicatorValue(chart, 1)?.value;
 
     const value = previousRMAValue ?
       alpha * sourceValue + (1 - alpha) * previousRMAValue :

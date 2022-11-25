@@ -15,18 +15,13 @@ export interface RsiRma extends Indicator {
   sma: Sma;
 }
 
-export const rsi = (length: number, source?: Indicator): Rsi => {
-  const upRma = rma(length, sma(length, up(source)), source);
-  const downRma = rma(length, sma(length, down(source)), source);
-
-  return {
-    type: 'rsi',
-    source: source ?? 'close',
-    length,
-    upRma,
-    downRma,
-  }
-};
+export const rsi = (length: number, source?: Indicator): Rsi => ({
+  type: 'rsi',
+  source: source ?? 'close',
+  length,
+  upRma: rma(length, sma(length, up(source)), source),
+  downRma: rma(length, sma(length, down(source)), source),
+});
 
 const up = (source?: Indicator): RsiUp => ({
   type: 'rsiUp',

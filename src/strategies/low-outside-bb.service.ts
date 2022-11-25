@@ -1,5 +1,5 @@
-import BollingerBands from '../indicators/bollinger-bands/bollinger-bands';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
+import BollingerBands from '../indicators/bollinger-bands/bollinger-bands.service';
 import Candlestick from '../models/candlestick-old';
 import Ticker from '../models/ticker';
 import Trade from '../models/trade';

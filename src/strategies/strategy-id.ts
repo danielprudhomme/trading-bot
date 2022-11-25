@@ -1,0 +1,1 @@
+export type StrategyId = 'low-outside-bb';

@@ -1,5 +1,5 @@
-import Chart from '../models/chart';
-import Indicator from './indicator';
+import Chart from '../models/chart-old';
+import Indicator from './indicator-service-provider';
 import { IndicatorSource } from './indicator-source';
 import IndicatorValue from './indicator-value';
 

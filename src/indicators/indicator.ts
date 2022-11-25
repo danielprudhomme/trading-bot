@@ -1,5 +1,8 @@
-import IndicatorValue from './indicator-value';
-import IndicatorWithValue from './indicator-with-value';
+import TimeFrame from '../enums/timeframe';
+import { IndicatorType } from './indicator-type';
 
-export default abstract class Indicator extends IndicatorWithValue<IndicatorValue> {
+export default interface Indicator {
+  type: IndicatorType;
+  timeframe: TimeFrame;
+  source: 'close' | Indicator;
 }

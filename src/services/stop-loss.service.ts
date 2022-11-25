@@ -1,6 +1,7 @@
 import TradeHelper from '../helpers/trade.helper';
 import Order from '../models/order';
 import Trade from '../models/trade';
+import Workspace from '../workspace';
 import OrderService from './order.service';
 
 export default class StopLossService {
@@ -20,13 +21,16 @@ export default class StopLossService {
     if (orderWasTp1) await this.moveStopLoss(trade);
   }
 
-  async handleStopLoss(trade: Trade, currentPrice: number): Promise<void> {
+  async handleStopLoss(trade: Trade): Promise<void> {
     // On ne prend en compte que les cas où on a un seul stop loss
     const stopLossOrders = TradeHelper.stopLossOrders(trade);
     const stopLoss = stopLossOrders.length > 0 ? stopLossOrders[0] : null;
 
     if (stopLoss?.status !== 'open') return;
 
+    const chart = Workspace.getChart(trade.ticker);
+    if (!chart) return;
+    const currentPrice = chart.candlesticks[0].close;
     if (!stopLoss.limit || currentPrice >= stopLoss.limit) return;
     
     // Cancel all 

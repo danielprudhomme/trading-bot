@@ -1,8 +1,8 @@
 import BackTest from './backtest';
 import TimeFrame from './enums/timeframe';
-import Indicator from './indicators/indicator';
+import Indicator from './indicators/indicator-service-provider';
 import ReadOnlyexchange from './infrastructure/exchange-service/read-only-exchange.service';
-import Chart from './models/chart';
+import Chart from './models/chart-old';
 import Ticker from './models/ticker';
 import StrategyOneTimeFrame from './strategies/strategy-one-timeframe';
 

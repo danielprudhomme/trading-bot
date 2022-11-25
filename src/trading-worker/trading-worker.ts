@@ -1,62 +1,48 @@
 import TimeFrame from '../enums/timeframe';
-import ChartWorkspace from '../models/chart-workspace';
-import { OHLCV } from '../models/ohlcv';
 import Trade from '../models/trade';
+import ChartService from '../services/chart.service';
 import TradeService from '../services/trade.service';
-import Strategy from '../strategies/strategy';
+import StrategyPerformerProvider from '../strategies/strategy-performer-provider';
+import StrategyService from '../strategies/strategy.service';
 import Workspace from '../workspace';
 
 export default abstract class TradingWorker {
   protected tickTimeFrame: TimeFrame;
-  protected strategy: Strategy;
 
-  protected _chartWorkspace: ChartWorkspace | null = null;
-  protected get chartWorkspace(): ChartWorkspace {
-    if (!this._chartWorkspace) throw new Error('ChartWorkspace should not be null.');
-    return this._chartWorkspace;
-  }
-
-  constructor(tickTimeFrame: TimeFrame, strategy: Strategy) {
+  constructor(tickTimeFrame: TimeFrame) {
     this.tickTimeFrame = tickTimeFrame;
-    this.strategy = strategy;
   }
 
   protected get tradeService(): TradeService {
     return Workspace.tradeService;
   }
 
-  async init(): Promise<void> {
-    console.log('Trading worker - chart workspace init start !');
-    this._chartWorkspace = await this.initChartWorkspace(this.strategy.timeframes);
-    console.log('Trading worker - chart workspace init done !');
-    this.strategy.init(this.chartWorkspace);
+  protected get chartService(): ChartService {
+    return Workspace.chartService;
   }
 
-  protected abstract initChartWorkspace(timeframes: TimeFrame[]): Promise<ChartWorkspace>;
-
-  async launch(): Promise<void> {
-    // CRON qui appelle onTick toutes les x secondes
-    // override si backtest
+  protected get strategyService(): StrategyService {
+    return Workspace.strategyService;
   }
-
+  
   async onTick() {
     const trades = await this.tradeService.getAllOpen();
+    const strategies = await this.strategyService.getAll();
+    
+    await this.chartService.fetchAll();
+    this.chartService.addStrategyIndicators(strategies);
+    await this.chartService.updateAllWithExchange(this.tickTimeFrame);
 
-    const lastOhlcv = await this.fetchLastOHLCV();
-    this.chartWorkspace.newOHLCV(lastOhlcv);
+    await this.synchronizeTradesWithExchange(trades);
 
-    await this.synchronizeTradesWithExchange(trades, lastOhlcv.close);
-
-    await this.strategy.execute(trades); // stocker les stratégies dans la DB, et repo, etc etc
+    strategies.forEach(strategy => StrategyPerformerProvider.get(strategy).execute(trades));
 
     await this.tradeService.persistUpdatedTrades(trades);
   }
 
-  private async synchronizeTradesWithExchange(trades: Trade[], currentPrice: number): Promise<void> {
+  private async synchronizeTradesWithExchange(trades: Trade[]): Promise<void> {
     for (const trade of trades) {
-      await this.tradeService.synchronizeWithExchange(trade, currentPrice);
+      await this.tradeService.synchronizeWithExchange(trade);
     }
   }
-
-  protected abstract fetchLastOHLCV(): Promise<OHLCV>;
 }

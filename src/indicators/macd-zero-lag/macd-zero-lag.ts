@@ -1,6 +1,6 @@
 import { IndicatorSource } from '../indicator-source';
 import IndicatorWithValue from '../indicator-with-value';
-import EMA from '../moving-average/ema';
+import EMA from '../moving-average/ema.service';
 import MovingAverageValue from '../moving-average/moving-average-value';
 import MacdZeroLagValue from './macd-zero-lag-value';
 

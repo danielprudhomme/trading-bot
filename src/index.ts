@@ -4,7 +4,7 @@ import ExchangeId from './enums/exchange-id';
 import TimeFrame from './enums/timeframe';
 import AssetSymbol from './models/asset-symbol';
 import Ticker from './models/ticker';
-import LowOutsideBBStrategy from './strategies/low-outside-bb.strategy';
+import LowOutsideBBStrategy from './strategies/low-outside-bb.service';
 import Workspace from './workspace';
 
 ConfigurationManager.load();

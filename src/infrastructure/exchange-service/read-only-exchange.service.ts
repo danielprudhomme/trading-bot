@@ -1,6 +1,6 @@
 import { Guid } from 'guid-typescript';
 import { OrderSide } from '../../enums/order-side';
-import Chart from '../../models/chart';
+import Chart from '../../models/chart-old';
 import ExchangeOrder from '../../models/exchange-order';
 import Ticker from '../../models/ticker';
 import ExchangeService from './exchange.service';

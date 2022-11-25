@@ -1,8 +1,6 @@
 import TimeFrame from './enums/timeframe';
 import exchange from './infrastructure/exchange-service/exchange.service';
 import ReadOnlyExchangeService from './infrastructure/exchange-service/read-only-exchange.service';
-import Chart from './models/chart';
-import ChartWorkspace from './models/chart-workspace';
 import { OHLCV } from './models/ohlcv';
 import Ticker from './models/ticker';
 import PerformanceCalculator from './performance-calculator';
@@ -63,10 +61,11 @@ export default class BackTest extends TradingWorker {
 
     return chartWorkspace;
   }
-    
+  
   async launch(): Promise<void> {
     console.log('Backtest - launch');
     this.tradeService.deleteAll();
+    
     const ticks = await this.exchange.fetchOHLCVRange(this.ticker, this.tickTimeFrame, this.startTimestamp, this.endTimestamp);
     console.log('Fetched : ', ticks.length, 'ticks');
 
@@ -77,10 +76,5 @@ export default class BackTest extends TradingWorker {
 
     const trades = await this.tradeService.getAll();
     PerformanceCalculator.getPerformance(trades);
-  }
-
-  protected async fetchLastOHLCV(): Promise<OHLCV> {
-    if (!this.lastOhlcv) throw new Error('Last OHLCV should not be null');
-    return this.lastOhlcv;
   }
 }

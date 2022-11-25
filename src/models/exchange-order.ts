@@ -1,4 +1,3 @@
-
 export default interface ExchangeOrder {
   id: string;
   timestamp: number;

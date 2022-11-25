@@ -1,5 +1,5 @@
 import IndicatorWithValue from '../indicator-with-value';
-import SMA from '../moving-average/sma';
+import SMA from '../moving-average/sma.service';
 import { BollingerBandsPhase } from './bollinger-bands-phase';
 import BollingerBandsValue from './bollinger-bands-value';
 import StandardDeviation from './standard-deviation';

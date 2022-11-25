@@ -5,7 +5,7 @@ import ExchangeId from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
 import TimeFrame from '../../enums/timeframe';
 import ExchangeOrder from '../../models/exchange-order';
-import { mapFromCcxt, OHLCV } from '../../models/ohlcv';
+import { OHLCV } from '../../models/ohlcv';
 import Ticker from '../../models/ticker';
 
 export default class ExchangeService {
@@ -27,7 +27,7 @@ export default class ExchangeService {
   iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
 
   fetchOHLCV = async (ticker: Ticker, timeframe: TimeFrame, since: number | undefined = undefined): Promise<OHLCV[]> =>
-    (await this.client.fetchOHLCV(this.tickerToString(ticker), timeframe as string, since)).map(ohlcv => mapFromCcxt(timeframe, ohlcv));
+    (await this.client.fetchOHLCV(this.tickerToString(ticker), timeframe as string, since)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
 
   async fetchOHLCVRange(
     ticker: Ticker,
@@ -84,6 +84,16 @@ export default class ExchangeService {
   }
 
   private tickerToString = (ticker: Ticker): string => `${ticker.asset}/${ticker.base}`;
+
+  private mapCcxtOhlcv = (timeframe: TimeFrame, ohlcv: ccxt.OHLCV): OHLCV => ({
+    timeframe,
+    timestamp: ohlcv[0],
+    open: ohlcv[1],
+    high: ohlcv[2],
+    low: ohlcv[3],
+    close: ohlcv[4],
+    volume: ohlcv[5],
+  });
 
   private mapCcxtOrder = (order: ccxt.Order): ExchangeOrder => ({
     id: order.id,

@@ -30,7 +30,6 @@ export default class TradeService {
   
   // Actuellement on ne fait que des LONG en Spot
   openTrade = async (
-    currentPrice: number,
     ticker: Ticker,
     quantity: number,
     takeProfits: { quantity: number, price: number }[] | null = null,
@@ -86,7 +85,7 @@ export default class TradeService {
 
     // Transmit open order
     await this.orderService.transmitToExchange(trade, open);
-    await this.synchronizeWithExchange(trade, currentPrice);
+    await this.synchronizeWithExchange(trade);
 
     trade.id = await this.tradeRepository.insert(trade);
 
@@ -113,7 +112,7 @@ export default class TradeService {
     trade.updated = true;
   }
 
-  synchronizeWithExchange = async (trade: Trade, currentPrice: number): Promise<void> => {
+  synchronizeWithExchange = async (trade: Trade): Promise<void> => {
     await this.synchronizeOpenOrdersWithExchange(trade);
 
     if (trade.updated) {
@@ -128,7 +127,7 @@ export default class TradeService {
       }
     }
 
-    await this.stopLossService.handleStopLoss(trade, currentPrice);
+    await this.stopLossService.handleStopLoss(trade);
   }
 
   /* Synchronize open orders with exchange (are order closed in exchange) */

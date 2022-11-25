@@ -1,14 +1,15 @@
 import TimeFrame from '../enums/timeframe';
 import BollingerBands from '../indicators/bollinger-bands/bollinger-bands';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
-import Candlestick from '../models/candlestick';
+import Candlestick from '../models/candlestick-old';
 import Ticker from '../models/ticker';
 import Trade from '../models/trade';
 import TradeService from '../services/trade.service';
 import Workspace from '../workspace';
-import Strategy from './strategy';
+import StrategyPerformerService from './strategy-performer.service';
 
-export default class LowOutsideBBStrategy extends Strategy {
+export default class LowOutsideBBService extends StrategyPerformerService {
+
   private bollingerBands = new BollingerBands(20, 2.5);
   private readonly timeframe: TimeFrame;
   private currentTradeId: string | null = null;
@@ -83,7 +84,6 @@ export default class LowOutsideBBStrategy extends Strategy {
     if (!currentCandlestick) throw new Error('Should have a current candlestick.');
 
     const trade = await this.tradeService.openTrade(
-      currentCandlestick.close,
       this.ticker,
       1,
       [

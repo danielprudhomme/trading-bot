@@ -1,6 +1,6 @@
-import Indicator from '../indicator';
+import Indicator from '../indicator-service-provider';
 import IndicatorValue from '../indicator-value';
-import SMA from '../moving-average/sma';
+import SMA from '../moving-average/sma.service';
 
 export default class StandardDeviation extends Indicator {
   private length: number;

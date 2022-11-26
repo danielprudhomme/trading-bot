@@ -1,4 +1,4 @@
-import chart from '../../models/chart';
+import Chart from '../../models/chart';
 import Indicator from '../indicator';
 import IndicatorValue from '../indicator-value';
 import { IndicatorService } from '../indicator.service';
@@ -18,7 +18,7 @@ export default class StandardDeviationService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.avg];
 
-  calculate(chart: chart): void {
+  calculate(chart: Chart): void {
     if (chart.candlesticks.length < this.length) this.setValue(chart, undefined);
 
     const avg = this.getIndicatorValue(chart, 0, this.avg);

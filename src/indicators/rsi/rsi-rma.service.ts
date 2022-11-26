@@ -1,4 +1,4 @@
-import chart from '../../models/chart';
+import Chart from '../../models/chart';
 import Indicator from '../indicator';
 import IndicatorValue from '../indicator-value';
 import { IndicatorService } from '../indicator.service';
@@ -17,7 +17,7 @@ export default class RsiRmaService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.sma];
   
-  calculate(chart: chart): void {
+  calculate(chart: Chart): void {
     if (chart.candlesticks.length < this.length) this.setValue(chart, undefined);
 
     const alpha = 1 / this.length;

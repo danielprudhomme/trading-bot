@@ -1,4 +1,4 @@
-import chart from '../../models/chart';
+import Chart from '../../models/chart';
 import IndicatorValue from '../indicator-value';
 import { IndicatorService } from '../indicator.service';
 import { RsiDown } from './rsi';
@@ -8,7 +8,7 @@ export default class RsiDownService extends IndicatorService {
     super(rsiDown);
   }
 
-  calculate(chart: chart): void {
+  calculate(chart: Chart): void {
     const value = this.getSourceValue(chart);
     const previousValue = this.getSourceValue(chart, 1);
 

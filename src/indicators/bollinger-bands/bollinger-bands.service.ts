@@ -1,4 +1,4 @@
-import chart from '../../models/chart';
+import Chart from '../../models/chart';
 import Indicator from '../indicator';
 import { IndicatorService } from '../indicator.service';
 import { Sma } from '../moving-average/sma';
@@ -24,7 +24,7 @@ export default class BollingerBandsService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.basis, this.stdev];
 
-  calculate(chart: chart): void {
+  calculate(chart: Chart): void {
     const basis = this.getIndicatorValue(chart, 0, this.basis)?.value ?? 0;
     const dev = this.mult * (this.getIndicatorValue(chart, 0, this.stdev)?.value ?? 0);
     const upper = basis + dev;

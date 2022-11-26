@@ -1,5 +1,13 @@
+import BollingerBands from './bollinger-bands/bollinger-bands';
+import BollingerBandsService from './bollinger-bands/bollinger-bands.service';
+import StandardDeviation from './bollinger-bands/standard-deviation';
+import StandardDeviationService from './bollinger-bands/standard-deviation.service';
 import Indicator from './indicator';
 import { IndicatorService } from './indicator.service';
+import Dema from './macd-zero-lag/dema';
+import DemaService from './macd-zero-lag/dema.service';
+import MacdZeroLag from './macd-zero-lag/macd-zero-lag';
+import MacdZeroLagService from './macd-zero-lag/macd-zero-lag.service';
 import { Ema } from './moving-average/ema';
 import EmaService from './moving-average/ema.service';
 import { Sma } from './moving-average/sma';
@@ -25,6 +33,14 @@ export default class IndicatorServiceProvider {
         return new RsiDownService(indicator as RsiDown);
       case 'rsiRma':
         return new RsiRmaService(indicator as RsiRma);
+      case 'bb':
+        return new BollingerBandsService(indicator as BollingerBands);
+      case 'stdev':
+        return new StandardDeviationService(indicator as StandardDeviation);
+      case 'macd-zero-lag':
+        return new MacdZeroLagService(indicator as MacdZeroLag);
+      case 'dema':
+        return new DemaService(indicator as Dema);
       default:
         throw new Error(`Indicator service not found for id : ${indicator}`);
     }

@@ -3,4 +3,5 @@ export type IndicatorType =
   | 'ema'
   | 'rsi' | 'rsiUp' | 'rsiDown' | 'rsiRma'
   | 'bb'  | 'stdev'
+  | 'macd-zero-lag' | 'dema'
 ;

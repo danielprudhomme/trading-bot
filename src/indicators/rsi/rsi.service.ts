@@ -1,4 +1,4 @@
-import chart from '../../models/chart';
+import Chart from '../../models/chart';
 import Indicator from '../indicator';
 import IndicatorValue from '../indicator-value';
 import { IndicatorService } from '../indicator.service';
@@ -19,7 +19,7 @@ export default class RsiService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.upRma, this.downRma];
   
-  calculate(chart: chart): void {
+  calculate(chart: Chart): void {
     const up = this.getIndicatorValue(chart, 0, this.upRma)?.value;
     const down = this.getIndicatorValue(chart, 0, this.downRma)?.value;
 

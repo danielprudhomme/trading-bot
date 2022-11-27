@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import firebase from 'firebase-admin';
-import ExchangeId from '../enums/exchange-id';
+import { ExchangeId } from '../enums/exchange-id';
 import Config from './config';
 import ExchangeConfig from './exchange-config';
 
@@ -18,14 +18,9 @@ export class ConfigurationManager {
     ConfigurationManager._config = {
       exchanges: new Map<ExchangeId, ExchangeConfig>([
         [
-          ExchangeId.binance,
+          'binance',
           { apiKey: process.env.BINANCE_API_KEY as string,
             secretKey: process.env.BINANCE_API_SECRET as string }
-        ],
-        [
-          ExchangeId.ftx,
-          { apiKey: process.env.FTX_API_KEY as string,
-            secretKey: process.env.FTX_API_SECRET as string }
         ],
       ]),
       firebaseAdminSdk: {

@@ -1,12 +1,12 @@
 /* eslint-disable no-await-in-loop */
 import ccxt from 'ccxt';
 import { ConfigurationManager } from '../../config/configuration-manager';
-import ExchangeId from '../../enums/exchange-id';
+import { ExchangeId } from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
 import ExchangeOrder from '../../models/exchange-order';
 import { OHLCV } from '../../models/ohlcv';
 import Ticker from '../../models/ticker';
-import TimeFrame from '../../timeframe/timeframe';
+import { TimeFrame } from '../../timeframe/timeframe';
 
 export default class ExchangeService {
   protected client: ccxt.Exchange;
@@ -27,7 +27,7 @@ export default class ExchangeService {
   iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
 
   fetchOHLCV = async (ticker: Ticker, timeframe: TimeFrame, since: number | undefined = undefined): Promise<OHLCV[]> =>
-    (await this.client.fetchOHLCV(this.tickerToString(ticker), timeframe as string, since)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
+    (await this.client.fetchOHLCV(this.tickerToString(ticker), timeframe, since)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
 
   async fetchOHLCVRange(
     ticker: Ticker,

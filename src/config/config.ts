@@ -1,4 +1,4 @@
-import ExchangeId from '../enums/exchange-id';
+import { ExchangeId } from '../enums/exchange-id';
 import ExchangeConfig from './exchange-config';
 import { FirebaseAdminSdkConfig } from './firebase-adminsdk-config';
 

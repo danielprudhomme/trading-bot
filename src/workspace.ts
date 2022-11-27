@@ -1,7 +1,7 @@
 import firebase from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { ConfigurationManager } from './config/configuration-manager';
-import ExchangeId from './enums/exchange-id';
+import { ExchangeId } from './enums/exchange-id';
 import ExchangeService from './infrastructure/exchange-service/exchange.service';
 import ReadOnlyExchangeService from './infrastructure/exchange-service/read-only-exchange.service';
 import ChartInMemoryRepository from './infrastructure/repositories/chart.in-memory-repository';

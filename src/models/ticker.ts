@@ -1,4 +1,4 @@
-import ExchangeId from '../enums/exchange-id';
+import { ExchangeId } from '../enums/exchange-id';
 import AssetSymbol from './asset-symbol';
 
 export default interface Ticker {

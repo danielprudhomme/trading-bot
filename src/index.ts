@@ -1,4 +1,5 @@
 import { ConfigurationManager } from './config/configuration-manager';
+import { timestampToString } from './helpers/date';
 import AssetSymbol from './models/asset-symbol';
 import Ticker from './models/ticker';
 import Workspace from './workspace';
@@ -13,7 +14,8 @@ const ticker: Ticker = {
   exchangeId: 'binance',
 };
 
-Workspace.getExchange('binance')
+const ohlcv = await Workspace.getExchange('binance').fetch(ticker, '15m');
+console.log('ohldv', timestampToString(ohlcv.timestamp), ohlcv.close);
 
 // const strategy = new LowOutsideBBStrategy(ticker, TimeFrame.t1h);
 

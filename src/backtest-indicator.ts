@@ -4,7 +4,7 @@ import ReadOnlyexchange from './infrastructure/exchange-service/read-only-exchan
 import Chart from './models/chart-old';
 import Ticker from './models/ticker';
 import StrategyOneTimeFrame from './strategies/strategy-one-timeframe';
-import TimeFrame from './timeframe/timeframe';
+import { TimeFrame } from './timeframe/timeframe';
 
 class EmptyStrategy extends StrategyOneTimeFrame {
   addIndicators(): void {

@@ -4,7 +4,7 @@ import { OHLCV } from './models/ohlcv';
 import Ticker from './models/ticker';
 import PerformanceCalculator from './performance-calculator';
 import Strategy from './strategies/strategy';
-import TimeFrame from './timeframe/timeframe';
+import { TimeFrame } from './timeframe/timeframe';
 import TradingWorker from './trading-worker/trading-worker';
 import Workspace from './workspace';
 

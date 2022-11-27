@@ -1,8 +1,9 @@
 import { Guid } from 'guid-typescript';
 import { OrderSide } from '../../enums/order-side';
-import Chart from '../../models/chart-old';
+import Candlestick from '../../models/candlestick';
 import ExchangeOrder from '../../models/exchange-order';
 import Ticker from '../../models/ticker';
+import Workspace from '../../workspace';
 import ExchangeService from './exchange.service';
 
 interface ReadOnlyExchangeOrder {
@@ -20,14 +21,6 @@ interface ReadOnlyExchangeOrder {
 export default class ReadOnlyExchangeService extends ExchangeService {
   private orders = new Map<string, ReadOnlyExchangeOrder>();
 
-  private _chart: Chart | null = null;
-  protected get chart(): Chart {
-    if (!this._chart) throw new Error('Chart should not be null.');
-    return this._chart;
-  }
-
-  addChart = (chart: Chart) => this._chart = chart;
-
   // TODO : ajouter des checks sur la quantité, s'il est possible de passer les ordres ou non (il faut avoir acheter avant de vendre)
   createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> => {
     const order: ReadOnlyExchangeOrder = {
@@ -38,7 +31,7 @@ export default class ReadOnlyExchangeService extends ExchangeService {
       timestamp: Date.now(),
       status: 'closed',
       quantity,
-      executedPrice: this.chart.currentCandlestick.close,
+      executedPrice: this.currentCandlestick(ticker).close,
     };
 
     this.orders.set(order.id, order);
@@ -73,9 +66,11 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     if (!order) return null;
     if (order.status !== 'open') return order;
 
+    const currentCandlestick = this.currentCandlestick(ticker);
+
     if (order.type === 'limit' && order.limit &&
-      ((order.side === 'sell' && this.chart.currentCandlestick.high >= order.limit) 
-        || (order.side === 'buy' && this.chart.currentCandlestick.low <= order.limit))) {
+      ((order.side === 'sell' && currentCandlestick.high >= order.limit) 
+        || (order.side === 'buy' && currentCandlestick.low <= order.limit))) {
         order.status = 'closed';
         order.executedPrice = order.limit;
     }
@@ -83,10 +78,16 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     return this.mapToExchangeOrder(order);
   }
 
-  mapToExchangeOrder = (order: ReadOnlyExchangeOrder): ExchangeOrder => ({
+  private currentCandlestick = (ticker: Ticker): Candlestick => {
+    const chart = Workspace.getChart(ticker);
+    if (!chart) throw new Error('Chart should be defined');
+    return chart.candlesticks[0];
+  }
+
+  private mapToExchangeOrder = (order: ReadOnlyExchangeOrder): ExchangeOrder => ({
     id: order.id,
     timestamp: order.timestamp,
     status: order.status,
     executedPrice: order.executedPrice,
-  })
+  });
 }

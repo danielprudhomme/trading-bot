@@ -26,10 +26,10 @@ export default class ExchangeService {
 
   iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
 
-  fetchOHLCV = async (ticker: Ticker, timeframe: TimeFrame, since: number | undefined = undefined): Promise<OHLCV[]> =>
-    (await this.client.fetchOHLCV(this.tickerToString(ticker), timeframe, since)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
+  fetch = async (ticker: Ticker, timeframe: TimeFrame): Promise<OHLCV> => 
+    (await this.fetchOHLCV(ticker, timeframe, undefined, 1))[0];
 
-  async fetchOHLCVRange(
+  async fetchRange(
     ticker: Ticker,
     timeframe: TimeFrame,
     start: number,
@@ -82,6 +82,13 @@ export default class ExchangeService {
     // await this.client.cancelOrder('5526182628', 'BTC/BUSD');
     // return orders;
   }
+
+  private fetchOHLCV = async (
+    ticker: Ticker,
+    timeframe: TimeFrame,
+    since: number | undefined = undefined,
+    limit: number | undefined = undefined): Promise<OHLCV[]> =>
+    (await this.client.fetchOHLCV(this.tickerToString(ticker), timeframe, since, limit)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
 
   private tickerToString = (ticker: Ticker): string => `${ticker.asset}/${ticker.base}`;
 

@@ -40,9 +40,9 @@ export default class ChartService {
     const updatedCharts: Chart[] = [];
     for (const chartsByTicker of Array.from(charts.values()).map(c => Array.from(c.values()))) {
       const ticker = chartsByTicker[0].ticker;
-      const ohlcvs = await Workspace.getExchange(ticker.exchangeId).fetchOHLCV(ticker, tickTimeframe); // TODO: avec limit = 1, car on a besoin que d'une bougie
+      const ohlcv = await Workspace.getExchange(ticker.exchangeId).fetch(ticker, tickTimeframe);
       chartsByTicker.forEach(chart => {
-        this.update(chart, ohlcvs[ohlcvs.length - 1]);
+        this.update(chart, ohlcv);
         updatedCharts.push(chart);
       });
     }

@@ -7,6 +7,6 @@ export default class StrategyInMemoryRepository extends StrategyRepository {
   getAll = async (): Promise<Strategy[]> => Array.from(this._strategies.values());
 
   async update(strategy: Strategy): Promise<void> {
-    this._strategies.set(strategy.id, strategy);
+    this._strategies.set(JSON.stringify(strategy), strategy);
   }
 }

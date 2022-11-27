@@ -1,49 +1,39 @@
+import ChartHelper from '../helpers/chart.helper';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
-import BollingerBands from '../indicators/bollinger-bands/bollinger-bands.service';
-import Candlestick from '../models/candlestick-old';
-import Ticker from '../models/ticker';
 import Trade from '../models/trade';
 import TradeService from '../services/trade.service';
-import TimeFrame from '../timeframe/timeframe';
 import Workspace from '../workspace';
-import StrategyPerformerService from './strategy-performer.service';
+import BaseStrategyService from './base-strategy.service';
+import LowOutsideBBStrategy from './low-outside-bb.strategy';
 
-export default class LowOutsideBBService extends StrategyPerformerService {
+export default class LowOutsideBBService extends BaseStrategyService {
 
-  private bollingerBands = new BollingerBands(20, 2.5);
-  private readonly timeframe: TimeFrame;
-  private currentTradeId: string | null = null;
-
-  private get currentCandlestick(): Candlestick {
-    const candlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
-    if (!candlestick) throw new Error('Chart should have been defined for this timeframe.');
-    return candlestick;
+  constructor(strategy: LowOutsideBBStrategy) {
+    super(strategy);
   }
 
   private get bb(): BollingerBandsValue {
-    const bb = this.currentCandlestick.getIndicatorValue(this.bollingerBands);
-    if (!bb) throw new Error('Bollinger bands should have been defined.');
-    return bb;
+    const { indicator: bb, timeframe } = this.strategy.indicators.find(x => x.indicator.type === 'bb') ?? {};
+    if (!timeframe) throw new Error('Timeframe should be defined');
+    if (!bb) throw new Error('BB should be defined');
+
+    const chart = Workspace.getChart(this.strategy.ticker, timeframe);
+    if (!chart) throw new Error('Chart should be defined');
+
+    const value = ChartHelper.getIndicatorValue(chart, 0, bb);
+    if (!value) throw new Error('Bollinger bands value should be defined');
+    return value as BollingerBandsValue;
   }
 
   private get tradeService(): TradeService {
     return Workspace.tradeService;
   }
 
-  constructor(ticker: Ticker, timeframe: TimeFrame) {
-    super(ticker, [timeframe]);
-    this.timeframe = timeframe;
-  }
-  
-  addIndicators(): void {
-    this.chartWorkspace.get(this.timeframe)?.addIndicator(this.bollingerBands);
-  }
-
   async execute(trades: Trade[]): Promise<void> {
-    const currentTrade: Trade | null = this.currentTradeId ? trades.find(trade => trade.id === this.currentTradeId) ?? null : null;
+    const currentTrade: Trade | null = this.strategy.currentTradeId ? trades.find(trade => trade.id === this.strategy.currentTradeId) ?? null : null;
     
     if (!currentTrade) {
-      this.currentTradeId = null;
+      this.strategy.currentTradeId = null;
       const buySignal = this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
   
       if (buySignal) {
@@ -54,11 +44,11 @@ export default class LowOutsideBBService extends StrategyPerformerService {
     }
 
     const sellSignal = this.priceTouchedSMA20;
-    if (sellSignal) this.tradeService.closeTrade(currentTrade, this.currentCandlestick.close);
+    if (sellSignal) this.tradeService.closeTrade(currentTrade);
   }
 
   private get bbFlat(): boolean {
-    return (this.bb.phase === 'flat' || this.bb.phase === 'narrowing');
+    return this.bb.phase === 'flat' || this.bb.phase === 'narrowing';
   }
 
   private get lowOutsideBB(): boolean {
@@ -70,7 +60,7 @@ export default class LowOutsideBBService extends StrategyPerformerService {
   }
 
   private get lowWickIsLong(): boolean {
-    return this.currentCandlestick.lowWickSize * 100 > 0.3;
+    return ChartHelper.getLowWickSize(this.currentCandlestick) * 100 > 0.3;
   }
 
   private get priceTouchedSMA20(): boolean {
@@ -80,20 +70,16 @@ export default class LowOutsideBBService extends StrategyPerformerService {
   }
 
   private async openTrade(): Promise<Trade> {
-    const currentCandlestick = this.chartWorkspace.get(this.timeframe)?.currentCandlestick;
-    if (!currentCandlestick) throw new Error('Should have a current candlestick.');
-
     const trade = await this.tradeService.openTrade(
-      this.ticker,
+      this.strategy.ticker,
       1,
       [
-        { quantity: 0.5, price: currentCandlestick.close * 1.005 },
+        { quantity: 0.5, price: this.currentCandlestick.close * 1.005 },
       ],
       this.currentCandlestick.low,
       { condition: 'tp1', newPosition: 'breakEven' });
     
-    this.currentTradeId = trade.id;
-
+    this.strategy.currentTradeId = trade.id;
     return trade;
   }
 }

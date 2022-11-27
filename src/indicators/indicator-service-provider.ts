@@ -42,7 +42,7 @@ export default class IndicatorServiceProvider {
       case 'dema':
         return new DemaService(indicator as Dema);
       default:
-        throw new Error(`Indicator service not found for id : ${indicator}`);
+        throw new Error(`Indicator service not found for type : ${indicator.type}`);
     }
   }
 }

@@ -1,13 +1,11 @@
 import Indicator from '../indicators/indicator';
 import Ticker from '../models/ticker';
 import { TimeFrame } from '../timeframe/timeframe';
-import { StrategyId } from './strategy-id';
+import { StrategyType } from './strategy-type';
 
 export default interface Strategy {
-  id: StrategyId;
+  type: StrategyType;
   ticker: Ticker;
-  currentTradeId: string;
-  indicators: {
-    [timeframe in TimeFrame]: Indicator[];
-  }
+  currentTradeId: string | null;
+  indicators: { indicator: Indicator, timeframe: TimeFrame }[];
 }

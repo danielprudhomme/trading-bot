@@ -25,14 +25,10 @@ export default class ChartService {
   }
 
   addStrategyIndicators(strategies: Strategy[]): void {
-    // strategy ticker et indicator (timeframe)
-    // get chart for ticker and timeframe, and add indicator
     strategies.forEach(strategy => {
-      for (const [timeframe, indicators] of Object.entries(strategy.indicators)) {
-        indicators.forEach(indicator => {
-          const chart = Workspace.getChart(strategy.ticker, timeframe as TimeFrame);
-          if (chart) this.addIndicator(chart, indicator);
-        });
+      for (const { timeframe, indicator } of strategy.indicators) {
+        const chart = Workspace.getChart(strategy.ticker, timeframe as TimeFrame);
+        if (chart) this.addIndicator(chart, indicator);
       }
     });
   }
@@ -54,6 +50,7 @@ export default class ChartService {
     await this.chartRepository.updateMultiple(updatedCharts);
   }
 
+  // TODO : vérifier que les 2 mêmes indicateurs ne s'ajoute pas 2 fois (sinon faire JSON.stringify)
   addIndicator = (chart: Chart, indicator: Indicator): void => {
     const indicators = new Set(chart.indicators);
 

@@ -4,6 +4,7 @@ import Order from '../models/order';
 import { StopLossMoveCondition } from '../models/stop-loss-move-condition';
 import Ticker from '../models/ticker';
 import Trade from '../models/trade';
+import Workspace from '../workspace';
 import OrderService from './order.service';
 import StopLossService from './stop-loss.service';
 
@@ -92,11 +93,15 @@ export default class TradeService {
     return trade;
   }
 
-  async closeTrade(trade: Trade, currentPrice: number): Promise<void> {
+  async closeTrade(trade: Trade): Promise<void> {
     const entryPrice = TradeHelper.entryPrice(trade);
     if (!entryPrice) throw new Error('Cannot close a not opened order.');
 
     await this.cancelAllOrders(trade);
+
+    const chart = Workspace.getChart(trade.ticker);
+    if (!chart) return;
+    const currentPrice = chart.candlesticks[0].close;
 
     const closeOrder: Order = {
       step: currentPrice >= entryPrice ? 'takeProfit' : 'stopLoss',

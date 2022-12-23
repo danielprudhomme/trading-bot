@@ -19,23 +19,23 @@ export const rsi = (length: number, source?: Indicator): Rsi => ({
   type: 'rsi',
   source: source ?? 'close',
   length,
-  upRma: rma(length, sma(length, up(source)), source),
-  downRma: rma(length, sma(length, down(source)), source),
+  upRma: rma(length, up(source)),
+  downRma: rma(length, down(source)),
 });
 
-const up = (source?: Indicator): RsiUp => ({
+export const up = (source?: Indicator): RsiUp => ({
   type: 'rsiUp',
   source: source ?? 'close'
 });
 
-const down = (source?: Indicator): RsiDown => ({
+export const down = (source?: Indicator): RsiDown => ({
   type: 'rsiDown',
   source: source ?? 'close'
 });
 
-const rma = (length: number, sma: Sma, source?: Indicator): RsiRma => ({
+export const rma = (length: number, source?: Indicator): RsiRma => ({
   type: 'rsiRma',
   source: source ?? 'close',
   length,
-  sma,
-})
+  sma: sma(length, source),
+});

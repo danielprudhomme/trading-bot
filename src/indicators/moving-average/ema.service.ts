@@ -12,18 +12,19 @@ export default class EmaService extends IndicatorService {
     this.length = ema.length;
   }
   
-  calculate(chart: Chart): void {
-    const alpha = 2 / (this.length + 1);
+  calculateAtIndex(chart: Chart, index: number): void {
+    if (chart.candlesticks.length < this.length) throw new Error('Not enough candlesticks to calculate EMA.');
 
-    if (chart.candlesticks.length === 1) {
-      this.setValue(chart, new MovingAverageValue(this.getSourceValue(chart) ?? 0, 'up'));
+    if (index === chart.candlesticks.length - 1) {
+      this.setValue(chart, index, undefined);
       return;
     }
 
-    const lastEma = this.getIndicatorValue(chart, 1)?.value ?? 0;
-    const ema = alpha * (this.getSourceValue(chart) ?? 0) + (1 - alpha) * lastEma;
+    const alpha = 2 / (this.length + 1);
+    const lastEma = this.getIndicatorValue(chart, index + 1)?.value ?? this.getSourceValue(chart, index + 1) ?? 0;
+    const ema = alpha * (this.getSourceValue(chart, index) ?? 0) + (1 - alpha) * lastEma;
     const direction = ema >= lastEma ? 'up' : 'down';
 
-    this.setValue(chart, new MovingAverageValue(ema, direction));
+    this.setValue(chart, index, new MovingAverageValue(ema, direction));
   }
 }

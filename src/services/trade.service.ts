@@ -1,3 +1,4 @@
+import { Guid } from 'guid-typescript';
 import TradeHelper from '../helpers/trade.helper';
 import TradeRepository from '../infrastructure/repositories/trade.repository';
 import Order from '../models/order';
@@ -46,7 +47,7 @@ export default class TradeService {
     };
 
     const trade: Trade = {
-      id: 'WILL BE DEFINED AFTER',
+      id: Guid.create().toString(),
       ticker,
       isOpen: true,
       orders: [ open ],
@@ -88,7 +89,7 @@ export default class TradeService {
     await this.orderService.transmitToExchange(trade, open);
     await this.synchronizeWithExchange(trade);
 
-    trade.id = await this.tradeRepository.insert(trade);
+    await this.tradeRepository.insert(trade);
 
     return trade;
   }

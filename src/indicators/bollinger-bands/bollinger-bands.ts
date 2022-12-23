@@ -10,7 +10,7 @@ export default interface BollingerBands extends Indicator {
 }
 
 export const bb = (length: number, mult: number, source?: Indicator): BollingerBands => ({
-  type: 'rsi',
+  type: 'bb',
   source: source ?? 'close',
   length,
   mult,

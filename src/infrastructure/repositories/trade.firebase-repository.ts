@@ -21,11 +21,10 @@ export default class TradeFirebaseRepository extends TradeRepository {
     return this.mapSnapshot(snapshot);
   }
 
-  async insert(trade: Trade): Promise<string> {
+  async insert(trade: Trade): Promise<void> {
     const entity = this.mapToDatabaseEntity(trade);
-    const res = await this.collectionRef.add(entity);
-    return res.id;
-  }     
+    const res = await this.collectionRef.doc(trade.id).set(entity);
+  }
 
   async updateMultiple(trades: Trade[]): Promise<void> {
     if (trades.length === 0) return;

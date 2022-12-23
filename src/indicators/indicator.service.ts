@@ -15,23 +15,26 @@ export abstract class IndicatorService {
   /* Get indicators that should be calculated before this one (except source) */
   getDependencies = (): Indicator[] => [];
 
-  /* Calculate indicator value for last candlestick of chart */
-  abstract calculate(chart: Chart): void;
+  /* Calculate indicator value at index */
+  calculate = (chart: Chart, index: number = 0): void => this.calculateAtIndex(chart, index);
 
-  protected setValue(chart: Chart, value: IndicatorValue | undefined) {
-    chart.candlesticks[0].indicators[IndicatorHelper.getIndicatorString(this.indicator)] = value;
+  /* Calculate indicator value at index */
+  abstract calculateAtIndex(chart: Chart, index: number): void;
+
+  protected setValue(chart: Chart, index: number, value: IndicatorValue | null | undefined) {
+    chart.candlesticks[index].indicators[IndicatorHelper.toString(this.indicator)] = value;
   }
 
-  protected getSourceValue = (chart: Chart, index: number = 0): number | undefined =>
-    this.getCandlestickSourceValue(chart.candlesticks[index]);
+  protected getSourceValue = (chart: Chart, index: number): number | undefined =>
+    index < chart.candlesticks.length ? this.getCandlestickSourceValue(chart.candlesticks[index]) : undefined;
 
   protected getCandlestickSourceValue = (candlestick: Candlestick): number | undefined => {
     if (this.indicator.source === 'close') return candlestick.close;
 
-    const sourceIndicator = IndicatorHelper.getIndicatorString(this.indicator.source);
+    const sourceIndicator = IndicatorHelper.toString(this.indicator.source);
     return candlestick.indicators[sourceIndicator]?.value;
   }
 
-  protected getIndicatorValue = (chart: Chart, index: number = 0, indicator: Indicator = this.indicator): IndicatorValue | undefined =>
+  protected getIndicatorValue = (chart: Chart, index: number, indicator: Indicator = this.indicator): IndicatorValue | null | undefined =>
     ChartHelper.getIndicatorValue(chart, index, indicator);
 }

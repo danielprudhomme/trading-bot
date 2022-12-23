@@ -8,11 +8,11 @@ export default class RsiDownService extends IndicatorService {
     super(rsiDown);
   }
 
-  calculate(chart: Chart): void {
-    const value = this.getSourceValue(chart);
-    const previousValue = this.getSourceValue(chart, 1);
+  calculateAtIndex(chart: Chart, index: number): void {
+    const value = this.getSourceValue(chart, index);
+    const previousValue = this.getSourceValue(chart, index + 1);
 
-    const upValue = value && previousValue ? -Math.min(value - previousValue, 0) : 0;
-    this.setValue(chart, new IndicatorValue(upValue));
+    const upValue = value && previousValue ? Math.max(previousValue - value, 0) : 0;
+    this.setValue(chart, index, new IndicatorValue(upValue));
   }
 }

@@ -24,21 +24,21 @@ export default class BollingerBandsService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.basis, this.stdev];
 
-  calculate(chart: Chart): void {
-    const basis = this.getIndicatorValue(chart, 0, this.basis)?.value ?? 0;
-    const dev = this.mult * (this.getIndicatorValue(chart, 0, this.stdev)?.value ?? 0);
+  calculateAtIndex(chart: Chart, index: number): void {
+    const basis = this.getIndicatorValue(chart, index, this.basis)?.value ?? 0;
+    const dev = this.mult * (this.getIndicatorValue(chart, index, this.stdev)?.value ?? 0);
     const upper = basis + dev;
     const lower = basis - dev;
 
-    const percentB = ((this.getSourceValue(chart) ?? 0) - lower)/(upper - lower);
+    const percentB = ((this.getSourceValue(chart, index) ?? 0) - lower)/(upper - lower);
     const width = (upper - lower) / basis;
 
-    const previousWidth = (this.getIndicatorValue(chart, 1) as BollingerBandsValue | undefined)?.width;
+    const previousWidth = (this.getIndicatorValue(chart, index + 1) as BollingerBandsValue | undefined)?.width;
     const diffPreviousWidth = previousWidth ? 1 - previousWidth / width : 0;
     let phase: BollingerBandsPhase = 'flat';
     if (diffPreviousWidth > 0.05) phase = 'widening';
     if (diffPreviousWidth < -0.05) phase = 'narrowing';
 
-    this.setValue(chart, new BollingerBandsValue(basis, upper, lower, percentB, width, phase));
+    this.setValue(chart, index, new BollingerBandsValue(basis, upper, lower, percentB, width, phase));
   }
 }

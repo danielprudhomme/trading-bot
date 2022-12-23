@@ -1,68 +1,49 @@
-import BackTest from './backtest';
-import Indicator from './indicators/indicator-service-provider';
-import ReadOnlyexchange from './infrastructure/exchange-service/read-only-exchange.service';
-import Chart from './models/chart-old';
+import ChartHelper from './helpers/chart.helper';
+import { timestampToString } from './helpers/date';
+import Indicator from './indicators/indicator';
+import IndicatorOnChart from './indicators/indicator-on-chart';
 import Ticker from './models/ticker';
-import StrategyOneTimeFrame from './strategies/strategy-one-timeframe';
+import ChartService from './services/chart.service';
 import { TimeFrame } from './timeframe/timeframe';
+import Workspace from './workspace';
 
-class EmptyStrategy extends StrategyOneTimeFrame {
-  addIndicators(): void {
-  }
+export default class BackTestIndicator {
 
-  async execute(): Promise<void> {
-  }
-}
+  protected timeFrame: TimeFrame;
+  protected indicator: Indicator;
+  protected ticker: Ticker;
 
-export default class BackTestIndicator extends BackTest {
-  indicator: Indicator;
-  timeframe: TimeFrame;
-
-  protected _chart: Chart | null = null;
-  protected get chart(): Chart {
-    if (!this._chart) throw new Error('Chart should not be null.');
-    return this._chart;
-  }
-
-  constructor(
-    timeframe: TimeFrame,
-    startDate: string,
-    endDate: string,
-    ticker: Ticker,
-    indicator: Indicator
-  ) {
-    super(new EmptyStrategy(ticker, timeframe), timeframe, startDate, endDate);
-    this.timeframe = timeframe;
+  constructor(timeFrame: TimeFrame, indicator: Indicator, ticker: Ticker) {
+    this.timeFrame = timeFrame;
     this.indicator = indicator;
+    this.ticker = ticker;
   }
 
-  private async initChart(): Promise<Chart> {
-    this.startTimestamp = this.exchange.parse8601(this.startDate);
-    this.endTimestamp = this.exchange.parse8601(this.endDate);
-    // récupérer en plus les 50 périodes précédentes pour être tranquilles sur les calculs
-    const startMinus50Periods = this.startTimestamp - TimeFrame.toMilliseconds(this.timeframe) * 50;
-    const data = await this.exchange.fetchOHLCVRange(this.ticker, this.timeframe, startMinus50Periods, this.endTimestamp);
+  protected get chartService(): ChartService {
+    return Workspace.chartService;
+  }
+  
+  async launch() {
+    const indicatorOnChart: IndicatorOnChart = {
+      indicator: this.indicator,
+      ticker: this.ticker,
+      timeframe: this.timeFrame,
+    }
+    await this.chartService.fetchAndUpdate([indicatorOnChart], this.timeFrame);
 
-    const chart = new Chart(this.timeframe, data);
-
-    (this.exchange as ReadOnlyexchange).addChart(chart);
-
-    return chart;
+    this.print(0);
+    this.print(1);
+    this.print(2);
+    this.print(3);
+    this.print(4);
   }
 
-  async init(): Promise<void> {
-    this._chart = await this.initChart();
-  }
+  private print(index: number = 0) {
+    const chart = Workspace.getChart(this.ticker, this.timeFrame);
+    const currentCandlestick = chart?.candlesticks[index];
+    if (!currentCandlestick) return;
 
-  async launch(): Promise<void> {
-    this.chart.addIndicator(this.indicator);
-    this.chart.candlesticks.forEach(candlestick => {
-      const indicatorValue = candlestick.getIndicatorValue(this.indicator);
-      console.log(
-        `${this.exchange.iso8601(candlestick.timestamp)}
-        close: ${candlestick.close}
-        indicator: ${indicatorValue?.toString()}`
-      );
-    }) 
+    const indicatorValue = ChartHelper.getCandlestickIndicatorValue(currentCandlestick, this.indicator);
+    console.log(`${index}\t${timestampToString(currentCandlestick.timestamp)}\t${currentCandlestick.close}\t${indicatorValue?.toString()}`);
   }
 }

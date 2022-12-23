@@ -1,0 +1,1 @@
+export const CHART_CANDLESTICKS_COUNT = 200; // Nombre de bougies sur chaque chart

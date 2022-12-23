@@ -19,16 +19,17 @@ export default class RsiService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.upRma, this.downRma];
   
-  calculate(chart: Chart): void {
-    const up = this.getIndicatorValue(chart, 0, this.upRma)?.value;
-    const down = this.getIndicatorValue(chart, 0, this.downRma)?.value;
+  calculateAtIndex(chart: Chart, index: number): void {
+    const up = this.getIndicatorValue(chart, index, this.upRma)?.value;
+    const down = this.getIndicatorValue(chart, index, this.downRma)?.value;
 
     if (up && down) {
       const rsi = down == 0 ? 100 : up == 0 ? 0 : 100 - (100 / (1 + up / down));
-      this.setValue(chart, new IndicatorValue(rsi));
+      this.setValue(chart, index, new IndicatorValue(rsi));
+      return;
     }
 
-    this.setValue(chart, undefined);
+    this.setValue(chart, index, undefined);
   }
 }
 

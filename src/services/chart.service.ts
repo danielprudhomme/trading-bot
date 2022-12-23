@@ -1,10 +1,15 @@
+import { Guid } from 'guid-typescript';
+import { CHART_CANDLESTICKS_COUNT } from '../config/constants';
+import TickerHelper from '../helpers/ticker.helper';
 import Indicator from '../indicators/indicator';
+import IndicatorOnChart from '../indicators/indicator-on-chart';
 import IndicatorServiceProvider from '../indicators/indicator-service-provider';
+import IndicatorHelper from '../indicators/indicator.helper';
 import ChartRepository from '../infrastructure/repositories/chart.repository';
 import Candlestick from '../models/candlestick';
 import Chart from '../models/chart';
 import { OHLCV } from '../models/ohlcv';
-import Strategy from '../strategies/strategy';
+import Ticker from '../models/ticker';
 import { TimeFrame } from '../timeframe/timeframe';
 import TimeFrameHelper from '../timeframe/timeframe.helper';
 import Workspace from '../workspace';
@@ -18,66 +23,98 @@ export default class ChartService {
     this.chartRepository = chartRepository;
   }
 
-  /* Fetch all charts */
-  async fetchAll(): Promise<void> {
+  async fetchAndUpdate(indicators: IndicatorOnChart[], tickTimeframe: TimeFrame) {
+    // Get all charts
     const charts = await this.chartRepository.getAll();
+
+    // Add indicators to charts
+    for (const { timeframe, indicator, ticker } of indicators) {
+      let chart = charts.find(c => c.timeframe === timeframe && TickerHelper.toString(c.ticker) === TickerHelper.toString(ticker));
+
+      if (!chart) {
+        chart = await this.createChart(timeframe, ticker);
+        charts.push(chart);
+      }
+
+      this.addIndicator(chart, indicator);
+    }
+
+    const chartsByTicker = charts.reduce((map, chart) => {
+      const tickerStr = TickerHelper.toString(chart.ticker);
+      const c: Chart[] = map.get(tickerStr) ?? [];
+      c.push(chart);
+      return map.set(tickerStr, c);
+    }, new Map<string, Chart[]>());
+
+    for (const charts of Array.from(chartsByTicker.values())) {
+      const ticker = charts[0].ticker;
+      const ohlcv = await Workspace.getExchange(ticker.exchangeId).fetchOne(ticker, tickTimeframe);
+      charts.forEach(chart => this.addOrUpdateCandlestick(chart, ohlcv));
+    }
+
+    await this.chartRepository.updateMultiple(charts);
     Workspace.addCharts(charts);
   }
 
-  addStrategyIndicators(strategies: Strategy[]): void {
-    strategies.forEach(strategy => {
-      for (const { timeframe, indicator } of strategy.indicators) {
-        const chart = Workspace.getChart(strategy.ticker, timeframe as TimeFrame);
-        if (chart) this.addIndicator(chart, indicator);
-      }
-    });
+  private async createChart(timeframe: TimeFrame, ticker: Ticker): Promise<Chart> {
+    const chart: Chart = {
+      id: Guid.create().toString(),
+      ticker,
+      timeframe,
+      indicators: [],
+      candlesticks: []
+    };
+
+    const ohlcvs = await Workspace.getExchange(ticker.exchangeId).fetch(ticker, timeframe, CHART_CANDLESTICKS_COUNT);
+    ohlcvs.forEach(ohlcv => this.addOrUpdateCandlestick(chart, ohlcv));
+
+    return chart;
   }
-
-  /* Update all charts with exchange */
-  async updateAllWithExchange(tickTimeframe: TimeFrame): Promise<void> {
-    const charts = Workspace.getCharts();
-
-    const updatedCharts: Chart[] = [];
-    for (const chartsByTicker of Array.from(charts.values()).map(c => Array.from(c.values()))) {
-      const ticker = chartsByTicker[0].ticker;
-      const ohlcv = await Workspace.getExchange(ticker.exchangeId).fetch(ticker, tickTimeframe);
-      chartsByTicker.forEach(chart => {
-        this.update(chart, ohlcv);
-        updatedCharts.push(chart);
-      });
-    }
-
-    await this.chartRepository.updateMultiple(updatedCharts);
-  }
-
-  // TODO : vérifier que les 2 mêmes indicateurs ne s'ajoute pas 2 fois (sinon faire JSON.stringify)
+  
   addIndicator = (chart: Chart, indicator: Indicator): void => {
-    const indicators = new Set(chart.indicators);
+    if (chart.indicators.findIndex(x => IndicatorHelper.areEqual(x, indicator)) > -1) return;
 
     if (indicator.source !== 'close') this.addIndicator(chart, indicator.source);
     IndicatorServiceProvider.get(indicator).getDependencies()
-      .forEach(dependencyIndicator =>  this.addIndicator(chart, dependencyIndicator));
-    indicators.add(indicator);
+      .forEach(dependencyIndicator => this.addIndicator(chart, dependencyIndicator));
+ 
+    chart.indicators = [...new Set(chart.indicators).add(indicator)];
 
-    chart.indicators = [...indicators];
+    for (let index = chart.candlesticks.length - 1; index >= 0; index--) {
+      IndicatorServiceProvider.get(indicator).calculate(chart, index);
+    }
   }
 
-  private update = (chart: Chart, ohlcv: OHLCV): void => {
-    const isNewCandle = Number.isInteger(ohlcv.timestamp / TimeFrameHelper.toMilliseconds(chart.timeframe));
+  private addOrUpdateCandlestick = (chart: Chart, ohlcv: OHLCV): void => {
+    const isNewCandle = chart.candlesticks[0]?.timestamp !== ohlcv.timestamp;
+    const isClosed = Number.isInteger(ohlcv.timestamp / TimeFrameHelper.toMilliseconds(chart.timeframe));
 
-    if (!isNewCandle) chart.candlesticks.shift();
-    // TODO : si c'est un update (pas newCandle), il ne faut pas forcément tout mettre à jour (open, high, low)
-    const candlestick: Candlestick = {
-      timestamp: ohlcv.timestamp,
-      open: ohlcv.open,
-      high: ohlcv.high,
-      low: ohlcv.low,
-      close: ohlcv.close,
-      volume: ohlcv.volume,
-      isClosed: Number.isInteger((ohlcv.timestamp + TimeFrameHelper.toMilliseconds(ohlcv.timeframe)) / TimeFrameHelper.toMilliseconds(chart.timeframe)),
-      indicators: {}
-    };
-    chart.candlesticks.unshift(candlestick);
+    if (isNewCandle) {
+      if (chart.candlesticks.length === CHART_CANDLESTICKS_COUNT) chart.candlesticks.pop(); // Remove last element to always have same number of elements in candlesticks array
+      const newCandlestick: Candlestick = {
+        timestamp: ohlcv.timestamp,
+        open: ohlcv.open,
+        high: ohlcv.high,
+        low: ohlcv.low,
+        close: ohlcv.close,
+        volume: ohlcv.volume,
+        isClosed,
+        indicators: {}
+      };
+      chart.candlesticks.unshift(newCandlestick);
+    }
+    else {
+      const existingCandlestick = chart.candlesticks[0];
+      chart.candlesticks[0] = {
+        ...existingCandlestick,
+        timestamp: ohlcv.timestamp,
+        high: Math.max(existingCandlestick.high, ohlcv.high),
+        low: Math.min(existingCandlestick.low, ohlcv.low),
+        close: ohlcv.close,
+        volume: ohlcv.volume, // TODO : si la timeframe est différente alors le volume n'est pas le bon
+        isClosed,
+      };
+    }
 
     chart.indicators.forEach(indicator => IndicatorServiceProvider.get(indicator).calculate(chart));
   }

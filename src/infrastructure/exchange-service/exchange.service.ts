@@ -26,8 +26,12 @@ export default class ExchangeService {
 
   iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
 
-  fetch = async (ticker: Ticker, timeframe: TimeFrame): Promise<OHLCV> => 
-    (await this.fetchOHLCV(ticker, timeframe, undefined, 1))[0];
+  /* Returns OHLCV array : first is oldest, last is most recent */
+  fetch = async (ticker: Ticker, timeframe: TimeFrame, limit: number): Promise<OHLCV[]> => 
+    await this.fetchOHLCV(ticker, timeframe, undefined, limit);
+
+  fetchOne = async (ticker: Ticker, timeframe: TimeFrame): Promise<OHLCV> => 
+    (await this.fetch(ticker, timeframe, 1))[0];
 
   async fetchRange(
     ticker: Ticker,
@@ -52,19 +56,19 @@ export default class ExchangeService {
 
   createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> =>
     this.mapCcxtOrder(
-      await this.client.createMarketOrder(this.tickerToString(ticker), side, quantity));
+      await this.client.createMarketOrder(this.toString(ticker), side, quantity));
 
   createLimitOrder = async (ticker: Ticker, side: OrderSide, limit: number, quantity: number): Promise<ExchangeOrder> =>
     this.mapCcxtOrder(
-      await this.client.createLimitOrder(this.tickerToString(ticker), side, quantity, limit));
+      await this.client.createLimitOrder(this.toString(ticker), side, quantity, limit));
 
   cancelOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
     this.mapCcxtOrder(
-      await this.client.cancelOrder(exchangeOrderId, this.tickerToString(ticker)));
+      await this.client.cancelOrder(exchangeOrderId, this.toString(ticker)));
 
   fetchOrder = async (ticker: Ticker, exchangeOrderId: string): Promise<ExchangeOrder | null> =>
     this.mapCcxtOrder(
-      await this.client.fetchOrder(exchangeOrderId, this.tickerToString(ticker)));
+      await this.client.fetchOrder(exchangeOrderId, this.toString(ticker)));
 
   async fetchOrders(): Promise<void>  {//Promise<ccxt.Order[]>  {
     const orders = await this.client.fetchOrders('EGLD/BUSD', undefined, 2);
@@ -88,9 +92,9 @@ export default class ExchangeService {
     timeframe: TimeFrame,
     since: number | undefined = undefined,
     limit: number | undefined = undefined): Promise<OHLCV[]> =>
-    (await this.client.fetchOHLCV(this.tickerToString(ticker), timeframe, since, limit)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
+    (await this.client.fetchOHLCV(this.toString(ticker), timeframe, since, limit)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
 
-  private tickerToString = (ticker: Ticker): string => `${ticker.asset}/${ticker.base}`;
+  private toString = (ticker: Ticker): string => `${ticker.asset}/${ticker.base}`;
 
   private mapCcxtOhlcv = (timeframe: TimeFrame, ohlcv: ccxt.OHLCV): OHLCV => ({
     timeframe,

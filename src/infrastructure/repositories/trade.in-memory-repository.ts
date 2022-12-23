@@ -10,11 +10,10 @@ export default class TradeInMemoryRepository extends TradeRepository {
   getAllOpen = async (): Promise<Trade[]> => (await this.getAll())
     .filter(trade => trade.isOpen);
 
-  async insert(trade: Trade): Promise<string> {
+  async insert(trade: Trade): Promise<void> {
     const id = Guid.create().toString();
     const entity = this.mapToDatabaseEntity(trade);
     this._trades.set(id, entity);
-    return id;
   }
 
   async updateMultiple(trades: Trade[]): Promise<void> {

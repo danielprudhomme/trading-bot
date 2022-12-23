@@ -2,6 +2,7 @@ import firebase from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { ConfigurationManager } from './config/configuration-manager';
 import { ExchangeId } from './enums/exchange-id';
+import TickerHelper from './helpers/ticker.helper';
 import ExchangeService from './infrastructure/exchange-service/exchange.service';
 import ReadOnlyExchangeService from './infrastructure/exchange-service/read-only-exchange.service';
 import ChartInMemoryRepository from './infrastructure/repositories/chart.in-memory-repository';
@@ -62,7 +63,7 @@ export default class Workspace {
   static getCharts = (): Map<string, Map<TimeFrame, Chart>> => this._charts;
 
   static getChart(ticker: Ticker, timeframe?: TimeFrame): Chart | undefined {
-    const chartsByTimeframe = this._charts.get(this.tickerToString(ticker));
+    const chartsByTimeframe = this._charts.get(TickerHelper.toString(ticker));
     if (!chartsByTimeframe || chartsByTimeframe.size === 0) return undefined;
 
     if (!timeframe) {
@@ -92,10 +93,10 @@ export default class Workspace {
   }
 
   private static addChart(ticker: Ticker, timeframe: TimeFrame, chart: Chart) {
-    let chartsByTimeframe = this._charts.get(this.tickerToString(ticker));
+    let chartsByTimeframe = this._charts.get(TickerHelper.toString(ticker));
     if (!chartsByTimeframe) chartsByTimeframe = new Map<TimeFrame, Chart>();
     chartsByTimeframe.set(timeframe, chart);
-    this._charts.set(this.tickerToString(ticker), chartsByTimeframe);
+    this._charts.set(TickerHelper.toString(ticker), chartsByTimeframe);
   }
 
   private static initFirestore() {
@@ -120,6 +121,4 @@ export default class Workspace {
     if (!this._tradeRepository) this._tradeRepository = this._inMemoryDatabase ? new TradeInMemoryRepository() : new TradeFirebaseRepository(this.firestore);
     return this._tradeRepository;
   }
-
-  private static tickerToString = (ticker: Ticker): string => `${ticker.exchangeId}/${ticker.asset}/${ticker.base}`;
 }

@@ -18,19 +18,19 @@ export default class StandardDeviationService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.avg];
 
-  calculate(chart: Chart): void {
-    if (chart.candlesticks.length < this.length) this.setValue(chart, undefined);
+  calculateAtIndex(chart: Chart, index: number): void {
+    if (chart.candlesticks.length < this.length) throw new Error('Not enough candlesticks to calculate Standard Deviation.');
 
-    const avg = this.getIndicatorValue(chart, 0, this.avg);
-    if (avg === undefined) throw new Error('SMA should be defined.');
+    const avg = this.getIndicatorValue(chart, index, this.avg)?.value ?? 0;
 
-    const sumOfSquareDeviations = chart.candlesticks.slice(0, this.length).reduce((sumOfSquareDeviations, candlestick) => {
-      const sum = this.sum(candlestick.close, -avg.value);
+    const sumOfSquareDeviations = chart.candlesticks.slice(index, index + this.length).reduce((sumOfSquareDeviations, candlestick) => {
+      const sum = this.sum(candlestick.close, -avg);
       return sumOfSquareDeviations + sum * sum;
     }, 0);
 
     const stdev = Math.sqrt(sumOfSquareDeviations / this.length);
-    this.setValue(chart, new IndicatorValue(stdev));
+    
+    this.setValue(chart, index, new IndicatorValue(stdev));
   }
 
   private isZero = (value: number, epsilon: number = Number.EPSILON): boolean => Math.abs(value) <= epsilon;

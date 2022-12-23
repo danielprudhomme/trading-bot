@@ -3,7 +3,7 @@ import Trade from '../../models/trade';
 export default abstract class TradeRepository {
   abstract getAll(): Promise<Trade[]>;
   abstract getAllOpen(): Promise<Trade[]>;
-  abstract insert(trade: Trade): Promise<string>;
+  abstract insert(trade: Trade): Promise<void>;
   abstract updateMultiple(trades: Trade[]): Promise<void>;
   abstract deleteAll(): Promise<void>;
 

@@ -20,9 +20,9 @@ export default class MacdZeroLagService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.fastDema, this.slowDema, this.signal];
 
-  calculate(chart: Chart): void {
-    const macdZeroLag = (this.getIndicatorValue(chart, 0, this.fastDema)?.value ?? 0) - (this.getIndicatorValue(chart, 0, this.slowDema)?.value ?? 0);
-    const signal = this.getIndicatorValue(chart, 0, this.signal)?.value ?? 0;
-    this.setValue(chart, new MacdZeroLagValue(macdZeroLag, signal));
+  calculateAtIndex(chart: Chart, index: number): void {
+    const macdZeroLag = (this.getIndicatorValue(chart, index, this.fastDema)?.value ?? 0) - (this.getIndicatorValue(chart, index, this.slowDema)?.value ?? 0);
+    const signal = this.getIndicatorValue(chart, index, this.signal)?.value ?? 0;
+    this.setValue(chart, index, new MacdZeroLagValue(macdZeroLag, signal));
   }
 }

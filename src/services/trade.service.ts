@@ -89,8 +89,6 @@ export default class TradeService {
     await this.orderService.transmitToExchange(trade, open);
     await this.synchronizeWithExchange(trade);
 
-    await this.tradeRepository.insert(trade);
-
     return trade;
   }
 

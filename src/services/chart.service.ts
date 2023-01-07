@@ -30,7 +30,6 @@ export default class ChartService {
     // Add indicators to charts
     for (const { timeframe, indicator, ticker } of indicators) {
       let chart = charts.find(c => c.timeframe === timeframe && TickerHelper.toString(c.ticker) === TickerHelper.toString(ticker));
-
       if (!chart) {
         chart = await this.createChart(timeframe, ticker);
         charts.push(chart);
@@ -65,7 +64,7 @@ export default class ChartService {
       candlesticks: []
     };
 
-    const ohlcvs = await Workspace.getExchange(ticker.exchangeId).fetch(ticker, timeframe, CHART_CANDLESTICKS_COUNT);
+    const ohlcvs = await Workspace.getExchange(ticker.exchangeId).fetchChartInit(ticker, timeframe);
     ohlcvs.forEach(ohlcv => this.addOrUpdateCandlestick(chart, ohlcv));
 
     return chart;

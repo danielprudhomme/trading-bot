@@ -4,7 +4,6 @@ import { ConfigurationManager } from './config/configuration-manager';
 import { ExchangeId } from './enums/exchange-id';
 import TickerHelper from './helpers/ticker.helper';
 import ExchangeService from './infrastructure/exchange-service/exchange.service';
-import ReadOnlyExchangeService from './infrastructure/exchange-service/read-only-exchange.service';
 import ChartInMemoryRepository from './infrastructure/repositories/chart.in-memory-repository';
 import ChartRepository from './infrastructure/repositories/chart.repository';
 import StrategyInMemoryRepository from './infrastructure/repositories/strategy.in-memory-repository';
@@ -23,7 +22,7 @@ import { TimeFrame } from './timeframe/timeframe';
 import TimeFrameHelper from './timeframe/timeframe.helper';
 
 export default class Workspace {
-  private static _readOnlyExchange = false;
+  private static _backtest = false;
   private static _inMemoryDatabase = false;
 
   private static _exchanges = new Map<ExchangeId, ExchangeService>();
@@ -38,8 +37,8 @@ export default class Workspace {
   private static _strategyRepository: StrategyRepository | null = null;
   private static _chartRepository: ChartRepository | null = null;
 
-  static init(readOnlyExchange: boolean = false, inMemoryDatabase: boolean = false) {
-    this._readOnlyExchange = readOnlyExchange;
+  static init(backtest: boolean = false, inMemoryDatabase: boolean = false) {
+    this._backtest = backtest;
     this._inMemoryDatabase = inMemoryDatabase;
 
     if (!this._inMemoryDatabase) {
@@ -47,10 +46,15 @@ export default class Workspace {
     }
   }
 
+  static setExchange(exchangeId: ExchangeId, exchange: ExchangeService): void {
+    this._exchanges.set(exchangeId, exchange);
+  }
+
   static getExchange(exchangeId: ExchangeId): ExchangeService {
     let exchange = this._exchanges.get(exchangeId);
     if (!exchange) {
-      exchange = this._readOnlyExchange ? new ReadOnlyExchangeService(exchangeId) : new ExchangeService(exchangeId);
+      if (this._backtest) throw new Error('Exchange should have been set for backtest.');
+      exchange = new ExchangeService(exchangeId);
       this._exchanges.set(exchangeId, exchange);
     }
     return exchange;
@@ -112,12 +116,12 @@ export default class Workspace {
     return this._chartRepository;
   }
 
-  private static get strategyRepository(): StrategyRepository {
+  static get strategyRepository(): StrategyRepository {
     if (!this._strategyRepository) this._strategyRepository = new StrategyInMemoryRepository();
     return this._strategyRepository;
   }
 
-  private static get tradeRepository(): TradeRepository {
+  static get tradeRepository(): TradeRepository {
     if (!this._tradeRepository) this._tradeRepository = this._inMemoryDatabase ? new TradeInMemoryRepository() : new TradeFirebaseRepository(this.firestore);
     return this._tradeRepository;
   }

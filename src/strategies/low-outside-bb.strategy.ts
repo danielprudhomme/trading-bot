@@ -11,6 +11,6 @@ export const lowOutsideBBStrategy = (ticker: Ticker, timeframe: TimeFrame): LowO
   ticker,
   currentTradeId: null,
   indicators: [
-    { indicator: bb(2, 2.5), timeframe }
+    { indicator: bb(20, 2.5), timeframe }
   ]
 });

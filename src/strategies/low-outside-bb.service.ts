@@ -31,12 +31,13 @@ export default class LowOutsideBBService extends BaseStrategyService {
 
   async execute(trades: Trade[]): Promise<void> {
     const currentTrade: Trade | null = this.strategy.currentTradeId ? trades.find(trade => trade.id === this.strategy.currentTradeId) ?? null : null;
-    
+
     if (!currentTrade) {
       this.strategy.currentTradeId = null;
       const buySignal = this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
   
       if (buySignal) {
+        console.log('buy signal')
         trades.push(await this.openTrade());
       }
       

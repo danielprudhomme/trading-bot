@@ -1,27 +1,24 @@
-import BackTestIndicator from './backtest-indicator';
+import BackTest from './backtest';
 import { ConfigurationManager } from './config/configuration-manager';
-import { macdZeroLag } from './indicators/macd-zero-lag/macd-zero-lag';
 import AssetSymbol from './models/asset-symbol';
+import Ticker from './models/ticker';
+import { lowOutsideBBStrategy } from './strategies/low-outside-bb.strategy';
+import Strategy from './strategies/strategy';
 import Workspace from './workspace';
 
 ConfigurationManager.load();
 
+const start = Date.UTC(2022, 11, 10, 10);
+const end = Date.UTC(2022, 11, 15, 11);
 Workspace.init(true, true);
 
-// const ticker: Ticker = {
-//   asset: AssetSymbol.btc,
-//   base: AssetSymbol.usdt,
-//   exchangeId: 'binance',
-// };
+const ticker: Ticker = { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchangeId: 'binance' };
+const strategy: Strategy = lowOutsideBBStrategy(ticker, '1h');
+const backtest = new BackTest('15m', strategy, start, end);
+await backtest.launch();
 
-// const ohlcv = await Workspace.getExchange('binance').fetchOne(ticker, '15m');
-// console.log('one', timestampToString(ohlcv.timestamp), ohlcv.close); 
+console.log('---> END');
 
-// const ohlcvs = await Workspace.getExchange('binance').fetch(ticker, '15m', 200);
-// console.log('all', ohlcvs.length);
-// console.log('first', timestampToString(ohlcvs[0].timestamp), ohlcvs[0].close);
-// console.log('last', timestampToString(ohlcvs[ohlcvs.length - 1].timestamp), ohlcvs[ohlcvs.length - 1].close);
-
-const indicator = macdZeroLag(12, 26, 9);
-const backtest = new BackTestIndicator('15m', indicator, { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchangeId: 'binance' });
-backtest.launch();
+// const indicator = macdZeroLag(12, 26, 9);
+// const backtest = new BackTestIndicator('15m', indicator, { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchangeId: 'binance' });
+// backtest.launch();

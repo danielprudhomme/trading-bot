@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import ccxt from 'ccxt';
 import { ConfigurationManager } from '../../config/configuration-manager';
+import { CHART_CANDLESTICKS_COUNT } from '../../config/constants';
 import { ExchangeId } from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
 import ExchangeOrder from '../../models/exchange-order';
@@ -22,37 +23,12 @@ export default class ExchangeService {
     });
   }
 
-  parse8601 = (date: string) => this.client.parse8601(date);
-
-  iso8601 = (timestamp: number) => this.client.iso8601(timestamp);
-
   /* Returns OHLCV array : first is oldest, last is most recent */
-  fetch = async (ticker: Ticker, timeframe: TimeFrame, limit: number): Promise<OHLCV[]> => 
-    await this.fetchOHLCV(ticker, timeframe, undefined, limit);
+  fetchChartInit = async (ticker: Ticker, timeframe: TimeFrame): Promise<OHLCV[]> => 
+    await this.fetchOHLCV(ticker, timeframe, undefined, CHART_CANDLESTICKS_COUNT);
 
   fetchOne = async (ticker: Ticker, timeframe: TimeFrame): Promise<OHLCV> => 
-    (await this.fetch(ticker, timeframe, 1))[0];
-
-  async fetchRange(
-    ticker: Ticker,
-    timeframe: TimeFrame,
-    start: number,
-    end: number,
-  ): Promise<OHLCV[]> {
-    let since = start;
-    let ohlcvs: OHLCV[] = [];
-
-    while (since < end) {
-      const response = await this.fetchOHLCV(ticker, timeframe, since);
-      ohlcvs = ohlcvs.concat(response.filter(x => x.timestamp < end));
-
-      if (response.length > 0) {
-        since = response[response.length - 1].timestamp + 1;
-      }
-    }
-
-    return ohlcvs;
-  }
+    (await this.fetchOHLCV(ticker, timeframe, undefined, 1))[0];
 
   createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> =>
     this.mapCcxtOrder(
@@ -87,12 +63,36 @@ export default class ExchangeService {
     // return orders;
   }
 
-  private fetchOHLCV = async (
+  protected fetchOHLCV = async (
     ticker: Ticker,
     timeframe: TimeFrame,
     since: number | undefined = undefined,
     limit: number | undefined = undefined): Promise<OHLCV[]> =>
     (await this.client.fetchOHLCV(this.toString(ticker), timeframe, since, limit)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
+
+  protected async fetchRange(
+    ticker: Ticker,
+    timeframe: TimeFrame,
+    start: number,
+    end: number,
+  ): Promise<OHLCV[]> {
+    let since = start;
+    let ohlcvs: OHLCV[] = [];
+
+    while (since < end) {
+      const response = await this.fetchOHLCV(ticker, timeframe, since);
+      ohlcvs = ohlcvs.concat(response.filter(x => x.timestamp < end));
+
+      if (response.length > 0) {
+        since = response[response.length - 1].timestamp + 1;
+      }
+      else {
+        break;
+      }
+    }
+
+    return ohlcvs;
+  }
 
   private toString = (ticker: Ticker): string => `${ticker.asset}/${ticker.base}`;
 

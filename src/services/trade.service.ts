@@ -95,7 +95,7 @@ export default class TradeService {
   async closeTrade(trade: Trade): Promise<void> {
     const entryPrice = TradeHelper.entryPrice(trade);
     if (!entryPrice) throw new Error('Cannot close a not opened order.');
-
+    
     await this.cancelAllOrders(trade);
 
     const chart = Workspace.getChart(trade.ticker);
@@ -113,6 +113,7 @@ export default class TradeService {
     
     await this.orderService.transmitToExchange(trade, closeOrder);
 
+    trade.isOpen = false;
     trade.updated = true;
   }
 

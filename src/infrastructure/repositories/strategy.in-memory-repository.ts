@@ -4,9 +4,17 @@ import StrategyRepository from './strategy.repository';
 export default class StrategyInMemoryRepository extends StrategyRepository {
   private _strategies = new Map<string, Strategy>();
 
-  getAll = async (): Promise<Strategy[]> => Array.from(this._strategies.values());
+  getAll = async (): Promise<Strategy[]> => Array.from(this._strategies.values()).map(this.mapToDomainObject);
 
-  async addOrUpdate(strategy: Strategy): Promise<void> {
-    this._strategies.set(JSON.stringify(strategy), strategy);
+  addOrUpdate = async (strategy: Strategy): Promise<void> => { this.setStrategy(strategy); }
+
+  async updateMultiple(strategies: Strategy[]): Promise<void> {
+    if (strategies.length === 0) return;
+    strategies.forEach(strategy => {
+      const entity = this.mapToDatabaseEntity(strategy);
+      this.setStrategy(entity);
+    });
   }
+
+  private setStrategy = (strategy: Strategy) => this._strategies.set(strategy.id, strategy);
 }

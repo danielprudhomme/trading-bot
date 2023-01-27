@@ -38,6 +38,7 @@ export default class ChartService {
       this.addIndicator(chart, indicator);
     }
 
+    // Group charts by ticker, to do only fetch data once per ticker
     const chartsByTicker = charts.reduce((map, chart) => {
       const tickerStr = TickerHelper.toString(chart.ticker);
       const c: Chart[] = map.get(tickerStr) ?? [];
@@ -85,13 +86,17 @@ export default class ChartService {
   }
 
   private addOrUpdateCandlestick = (chart: Chart, ohlcv: OHLCV): void => {
-    const isNewCandle = chart.candlesticks[0]?.timestamp !== ohlcv.timestamp;
-    const isClosed = Number.isInteger(ohlcv.timestamp / TimeFrameHelper.toMilliseconds(chart.timeframe));
+    // We remove additional time to have the timestamp corresponding to the timeframe of the chart
+    const ohlcvTimestamp = ohlcv.timestamp - ohlcv.timestamp % TimeFrameHelper.toMilliseconds(chart.timeframe);
+
+    const currentCandlestick = chart.candlesticks[0];
+    const isNewCandle = currentCandlestick?.timestamp !== ohlcvTimestamp;
+    const isClosed = chart.timeframe === ohlcv.timeframe || ohlcv.timestamp + TimeFrameHelper.toMilliseconds(ohlcv.timeframe) === currentCandlestick.timestamp + TimeFrameHelper.toMilliseconds(chart.timeframe);
 
     if (isNewCandle) {
       if (chart.candlesticks.length === CHART_CANDLESTICKS_COUNT) chart.candlesticks.pop(); // Remove last element to always have same number of elements in candlesticks array
       const newCandlestick: Candlestick = {
-        timestamp: ohlcv.timestamp,
+        timestamp: ohlcvTimestamp,
         open: ohlcv.open,
         high: ohlcv.high,
         low: ohlcv.low,
@@ -106,7 +111,6 @@ export default class ChartService {
       const existingCandlestick = chart.candlesticks[0];
       chart.candlesticks[0] = {
         ...existingCandlestick,
-        timestamp: ohlcv.timestamp,
         high: Math.max(existingCandlestick.high, ohlcv.high),
         low: Math.min(existingCandlestick.low, ohlcv.low),
         close: ohlcv.close,

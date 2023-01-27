@@ -1,3 +1,4 @@
+import TickerHelper from '../helpers/ticker.helper';
 import { bb } from '../indicators/bollinger-bands/bollinger-bands';
 import Ticker from '../models/ticker';
 import { TimeFrame } from '../timeframe/timeframe';
@@ -6,8 +7,10 @@ import Strategy from './strategy';
 export default interface LowOutsideBBStrategy extends Strategy {
 }
 
+const type = 'low-outside-bb';
 export const lowOutsideBBStrategy = (ticker: Ticker, timeframe: TimeFrame): LowOutsideBBStrategy => ({
-  type: 'low-outside-bb',
+  id: `${type}::${TickerHelper.toString(ticker)}::${timeframe}`,
+  type,
   ticker,
   currentTradeId: null,
   indicators: [

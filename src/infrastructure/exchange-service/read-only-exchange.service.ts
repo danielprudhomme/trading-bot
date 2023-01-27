@@ -23,15 +23,16 @@ export default class ReadOnlyExchangeService extends ExchangeService {
 
   // TODO : ajouter des checks sur la quantité, s'il est possible de passer les ordres ou non (il faut avoir acheter avant de vendre)
   createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> => {
+    const currentCandlestick = this.currentCandlestick(ticker);
     const order: ReadOnlyExchangeOrder = {
       id: Guid.create().toString(),
       ticker,
       type: 'market',
       side,
-      timestamp: Date.now(),
+      timestamp: currentCandlestick.timestamp,
       status: 'closed',
       quantity,
-      executedPrice: this.currentCandlestick(ticker).close,
+      executedPrice: currentCandlestick.close,
     };
 
     this.orders.set(order.id, order);

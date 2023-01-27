@@ -1,4 +1,5 @@
 import ChartHelper from '../helpers/chart.helper';
+import { timestampToString } from '../helpers/date';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import Trade from '../models/trade';
 import TradeService from '../services/trade.service';
@@ -30,22 +31,29 @@ export default class LowOutsideBBService extends BaseStrategyService {
   }
 
   async execute(trades: Trade[]): Promise<void> {
-    const currentTrade: Trade | null = this.strategy.currentTradeId ? trades.find(trade => trade.id === this.strategy.currentTradeId) ?? null : null;
+    const currentTrade: Trade | null = this.strategy.currentTradeId ? trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) ?? null : null;
 
     if (!currentTrade) {
-      this.strategy.currentTradeId = null;
       const buySignal = this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
-  
+
       if (buySignal) {
-        console.log('buy signal')
-        trades.push(await this.openTrade());
+        console.log('-- BUY', timestampToString(this.currentCandlestick.timestamp));
+        const trade = await this.openTrade();
+        trades.push(trade);
+        this.strategy.currentTradeId = trade.id;
+        this.strategy.updated = true;
       }
       
       return;
     }
 
-    const sellSignal = this.priceTouchedSMA20;
-    if (sellSignal) this.tradeService.closeTrade(currentTrade);
+    const sellSignal = currentTrade && this.priceTouchedSMA20;
+    if (sellSignal) {
+      console.log('-- SELL', timestampToString(this.currentCandlestick.timestamp));
+      await this.tradeService.closeTrade(currentTrade);
+      this.strategy.currentTradeId = null;
+      this.strategy.updated = true;
+    }
   }
 
   private get bbFlat(): boolean {

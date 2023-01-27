@@ -23,7 +23,7 @@ export default class PerformanceCalculator {
     const totalPerformance = (capital / initialAmount - 1) * 100;
     const winRate = (wonTrades / (wonTrades + lostTrades)) * 100;
 
-    console.log(`Performance totale: ${this.toPercentage(totalPerformance)}\tWin: ${wonTrades}\tLoss: ${lostTrades}\tWinRate: ${this.toPercentage(winRate)}`);
+    console.log(`Total performance: ${this.toPercentage(totalPerformance)}\tWin: ${wonTrades}\tLoss: ${lostTrades}\tWinRate: ${this.toPercentage(winRate)}`);
   }
 
   private static getTradePerformance(trade: Trade): number | null {
@@ -33,9 +33,9 @@ export default class PerformanceCalculator {
     const finalAmount = this.getAmount([...TradeHelper.takeProfitsOrders(trade), ...TradeHelper.stopLossOrders(trade)]);
 
     const openOrder = TradeHelper.openOrders(trade)[0];
-    const thisDate = openOrder.exchangeOrder ? timestampToString(openOrder.exchangeOrder.timestamp) : null;
+    const openOrderDate = openOrder.exchangeOrder ? timestampToString(openOrder.exchangeOrder.timestamp) : null;
     const performance = (finalAmount / openAmount - 1) * 100;
-    if (thisDate) console.log(`Trade\t${thisDate}\t open: ${openAmount}\tfinal: ${finalAmount}\t -> ${this.toPercentage(performance)}`);
+    if (openOrderDate) console.log(`Trade\t${openOrderDate}\t open: ${openAmount}\tfinal: ${finalAmount}\t -> ${this.toPercentage(performance)}`);
 
     return performance;
   }

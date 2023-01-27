@@ -8,13 +8,13 @@ import Workspace from './workspace';
 
 ConfigurationManager.load();
 
-const start = Date.UTC(2022, 11, 10, 10);
-const end = Date.UTC(2022, 11, 15, 11);
+const start = Date.UTC(2022, 10, 16);
+const end = Date.UTC(2022, 10, 22);
 Workspace.init(true, true);
 
 const ticker: Ticker = { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchangeId: 'binance' };
 const strategy: Strategy = lowOutsideBBStrategy(ticker, '1h');
-const backtest = new BackTest('15m', strategy, start, end);
+const backtest = new BackTest('1h', strategy, start, end);
 await backtest.launch();
 
 console.log('---> END');

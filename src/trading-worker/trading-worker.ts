@@ -29,7 +29,7 @@ export default abstract class TradingWorker {
   }
   
   async onTick() {
-    const trades = await this.tradeService.getAllOpen();
+    let trades = await this.tradeService.getAllOpen();
     const strategies = await this.strategyRepository.getAll();
     
     const indicatorsOnChart = strategies.reduce((indicators, strategy) => {
@@ -50,6 +50,8 @@ export default abstract class TradingWorker {
     for (const strategy of strategies) {
       await StrategyServiceProvider.get(strategy).execute(trades);
     }
+
+    await this.strategyRepository.updateMultiple(strategies.filter(strategy => strategy.updated));
 
     await this.tradeService.persistUpdatedTrades(trades);
   }

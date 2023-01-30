@@ -1,5 +1,4 @@
 import ChartHelper from '../helpers/chart.helper';
-import { timestampToString } from '../helpers/date';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import Trade from '../models/trade';
 import TradeService from '../services/trade.service';
@@ -34,10 +33,9 @@ export default class LowOutsideBBService extends BaseStrategyService {
     const currentTrade: Trade | null = this.strategy.currentTradeId ? trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) ?? null : null;
 
     if (!currentTrade) {
-      const buySignal = this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
+      const buySignal =this.currentCandlestick.isClosed && this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
 
       if (buySignal) {
-        console.log('-- BUY', timestampToString(this.currentCandlestick.timestamp));
         const trade = await this.openTrade();
         trades.push(trade);
         this.strategy.currentTradeId = trade.id;
@@ -49,7 +47,6 @@ export default class LowOutsideBBService extends BaseStrategyService {
 
     const sellSignal = currentTrade && this.priceTouchedSMA20;
     if (sellSignal) {
-      console.log('-- SELL', timestampToString(this.currentCandlestick.timestamp));
       await this.tradeService.closeTrade(currentTrade);
       this.strategy.currentTradeId = null;
       this.strategy.updated = true;

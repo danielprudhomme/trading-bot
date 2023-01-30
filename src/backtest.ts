@@ -9,14 +9,14 @@ import Workspace from './workspace';
 
 export default class BackTest extends TradingWorker {
   ticker: Ticker;
-  strategy: Strategy;
+  strategies: Strategy[];
   start: number;
   end: number;
 
-  constructor(tickTimeFrame: TimeFrame, strategy: Strategy, start: number, end: number) {
+  constructor(tickTimeFrame: TimeFrame, strategies: Strategy[], start: number, end: number) {
     super(tickTimeFrame);
-    this.ticker = strategy.ticker;
-    this.strategy = strategy;
+    this.ticker = strategies[0].ticker;
+    this.strategies = strategies;
     this.start = start;
     this.end = end;
     console.log('start', timestampToString(start));
@@ -29,7 +29,7 @@ export default class BackTest extends TradingWorker {
     Workspace.setExchange(this.ticker.exchangeId, backtestExchangeService);
     console.log('ticks', backtestExchangeService.ohlcvs.length);
 
-    await this.strategyRepository.addOrUpdate(this.strategy);
+    await this.strategyRepository.updateMultiple(this.strategies);
 
     while (backtestExchangeService.ohlcvs.length > 0) {
       await this.onTick();

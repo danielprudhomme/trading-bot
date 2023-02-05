@@ -26,6 +26,9 @@ export default class TimeFrameHelper {
     if (tf === '1h') {
       return 60 * this.toMilliseconds('1m');
     }
+    if (tf === '2h') {
+      return 2 * this.toMilliseconds('1h');
+    }
     if (tf === '4h') {
       return 4 * this.toMilliseconds('1h');
     }

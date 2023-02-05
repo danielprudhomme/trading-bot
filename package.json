@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q --es-module-specifier-resolution=node dist/index.js\""
+    "start": "npx tsc && node --es-module-specifier-resolution=node dist/index.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q --es-module-specifier-resolution=node dist/index.js\"",
+    "get-backtest-data": "npx tsc && node --es-module-specifier-resolution=node dist/backtest/get-backtest-data.js",
+    "check-backtest-data": "npx tsc && node --es-module-specifier-resolution=node dist/backtest/check-backtest-data.js"
   },
   "author": "",
   "license": "ISC",

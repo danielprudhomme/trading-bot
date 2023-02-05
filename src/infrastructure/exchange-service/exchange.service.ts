@@ -70,7 +70,7 @@ export default class ExchangeService {
     limit: number | undefined = undefined): Promise<OHLCV[]> =>
     (await this.client.fetchOHLCV(this.toString(ticker), timeframe, since, limit)).map(ohlcv => this.mapCcxtOhlcv(timeframe, ohlcv));
 
-  protected async fetchRange(
+  async fetchRange(
     ticker: Ticker,
     timeframe: TimeFrame,
     start: number,

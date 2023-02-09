@@ -8,8 +8,8 @@ import Workspace from './workspace';
 
 ConfigurationManager.load();
 
-const start = Date.UTC(2022, 0, 1);
-const end = Date.UTC(2022, 0, 2);
+const start = Date.UTC(2020, 0, 1);
+const end = Date.UTC(2023, 0, 1);
 Workspace.init(true, true);
 
 const ticker: Ticker = { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchangeId: 'binance' };

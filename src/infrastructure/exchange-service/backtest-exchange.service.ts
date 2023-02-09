@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { getBacktestDataFile } from '../../backtest/backtest-data-file.helper';
 import { CHART_CANDLESTICKS_COUNT } from '../../config/constants';
-import { timestampToString } from '../../helpers/date';
 import { OHLCV } from '../../models/ohlcv';
 import Ticker from '../../models/ticker';
 import { TimeFrame } from '../../timeframe/timeframe';
@@ -40,8 +39,12 @@ export default class BacktestExchangeService extends ReadOnlyExchangeService {
   }
 
   private getOhlcvs(start: number, end: number, timeframe: TimeFrame): OHLCV[] {
-    const startYear = new Date(start).getFullYear();
-    const endYear = new Date(end).getFullYear();
+    const startYear = new Date(start).getUTCFullYear();
+    
+    let endYear = new Date(end).getUTCFullYear();
+    if (new Date(end - TimeFrameHelper.toMilliseconds(timeframe)).getUTCFullYear() === endYear - 1)
+      endYear = endYear - 1;
+    
 
     let ohlcvs: OHLCV[] = [];
     for (let year = startYear; year <= endYear; year++) {
@@ -49,11 +52,6 @@ export default class BacktestExchangeService extends ReadOnlyExchangeService {
         .filter(ohlcv => ohlcv.timestamp >= start && ohlcv.timestamp <= end);
         ohlcvs = ohlcvs.concat(filteredOhlcvs);
     }
-
-    const data = ohlcvs;
-    console.log('ohlcvs number : ', data.length);
-    console.log('first : ', timestampToString(data[0].timestamp), data[0].close);
-    console.log('last : ', timestampToString(data[data.length - 1].timestamp), data[data.length - 1].close);
 
     return ohlcvs;
   }

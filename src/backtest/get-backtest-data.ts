@@ -12,18 +12,10 @@ ConfigurationManager.load();
 console.log('Start get backtest data');
 
 const tickers: Ticker[] = [
-  { asset: AssetSymbol.bnb, base: AssetSymbol.usdt, exchangeId: 'binance' },
-  { asset: AssetSymbol.xrp, base: AssetSymbol.usdt, exchangeId: 'binance' },
-  { asset: AssetSymbol.ada, base: AssetSymbol.usdt, exchangeId: 'binance' },
-  { asset: AssetSymbol.doge, base: AssetSymbol.usdt, exchangeId: 'binance' },
-  { asset: AssetSymbol.matic, base: AssetSymbol.usdt, exchangeId: 'binance' },
-  { asset: AssetSymbol.shib, base: AssetSymbol.usdt, exchangeId: 'binance' },
-  { asset: AssetSymbol.dot, base: AssetSymbol.usdt, exchangeId: 'binance' },
-  { asset: AssetSymbol.ltc, base: AssetSymbol.usdt, exchangeId: 'binance' },
-  { asset: AssetSymbol.avax, base: AssetSymbol.usdt, exchangeId: 'binance' },
+  { asset: AssetSymbol.eth, base: AssetSymbol.usdt, exchangeId: 'binance' },
 ];
 const timeframes: TimeFrame[] = ['5m', '15m', '30m', '1h', '2h', '4h', '1d'];
-const years = [2020, 2021, 2022];
+const years = [2023];
 
 for (const ticker of tickers) {
   for (const year of years) {
@@ -35,7 +27,11 @@ for (const ticker of tickers) {
 
 async function getAndStoreOhlcvs(ticker: Ticker, year: number, timeframe: TimeFrame) {
   const start = Date.UTC(year, 0, 1);
-  const end = Date.UTC(year + 1, 0, 1);
+
+  let end = Date.UTC(year + 1, 0, 1);
+  if (new Date().getUTCFullYear() === year) {
+    end = new Date().getTime();
+  }
   
   // Get Data from exchange
   console.log('Retrieve OHLCVS from exchange');

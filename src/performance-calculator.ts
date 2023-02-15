@@ -32,9 +32,11 @@ export default class PerformanceCalculator {
     const openAmount = this.getAmount(TradeHelper.openOrders(trade));
     const finalAmount = this.getAmount([...TradeHelper.takeProfitsOrders(trade), ...TradeHelper.stopLossOrders(trade)]);
 
+    const fees = 0//0.01 / 100; // comme sur binance
+
     const openOrder = TradeHelper.openOrders(trade)[0];
     const openOrderDate = openOrder.exchangeOrder ? timestampToString(openOrder.exchangeOrder.timestamp) : null;
-    const performance = (finalAmount / openAmount - 1) * 100;
+    const performance = ((finalAmount * (1 - fees)) / (openAmount * (1 + fees)) - 1) * 100;
     if (openOrderDate) console.log(`Trade\t${openOrderDate}\t open: ${openAmount}\tfinal: ${finalAmount}\t -> ${this.toPercentage(performance)}`);
 
     return performance;

@@ -1,1 +1,1 @@
-export type StrategyType = 'low-outside-bb';
+export type StrategyType = 'low-outside-bb' | 'bb-widening-long';

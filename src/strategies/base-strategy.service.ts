@@ -13,8 +13,12 @@ export default abstract class BaseStrategyService {
   abstract execute(trades: Trade[]): Promise<void>;
 
   protected get currentCandlestick(): Candlestick {
+    return this.getCandlestick();
+  }
+
+  protected getCandlestick(index: number = 0): Candlestick {
     const chart = Workspace.getChart(this.strategy.ticker);
     if (!chart) throw new Error('Chart should be defined');
-    return chart.candlesticks[0];
+    return chart.candlesticks[index];
   }
 }

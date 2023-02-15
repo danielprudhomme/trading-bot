@@ -33,7 +33,7 @@ export default class LowOutsideBBService extends BaseStrategyService {
     const currentTrade: Trade | null = this.strategy.currentTradeId ? trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) ?? null : null;
 
     if (!currentTrade) {
-      const buySignal =this.currentCandlestick.isClosed && this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
+      const buySignal = this.currentCandlestick.isClosed && this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
 
       if (buySignal) {
         const trade = await this.openTrade();

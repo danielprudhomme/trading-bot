@@ -44,7 +44,6 @@ export default class BacktestExchangeService extends ReadOnlyExchangeService {
     let endYear = new Date(end).getUTCFullYear();
     if (new Date(end - TimeFrameHelper.toMilliseconds(timeframe)).getUTCFullYear() === endYear - 1)
       endYear = endYear - 1;
-    
 
     let ohlcvs: OHLCV[] = [];
     for (let year = startYear; year <= endYear; year++) {

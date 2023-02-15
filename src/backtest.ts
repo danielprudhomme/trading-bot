@@ -26,6 +26,10 @@ export default class BackTest extends TradingWorker {
   async launch() {
     const backtestExchangeService = new BacktestExchangeService(this.ticker, this.tickTimeFrame, this.start, this.end);
     await backtestExchangeService.init();
+
+    const buyAndHoldPerformance = (backtestExchangeService.ohlcvs[backtestExchangeService.ohlcvs.length - 1].close / backtestExchangeService.ohlcvs[0].close
+       - 1) * 100;
+
     Workspace.setExchange(this.ticker.exchangeId, backtestExchangeService);
     console.log('ticks', backtestExchangeService.ohlcvs.length);
 
@@ -38,5 +42,7 @@ export default class BackTest extends TradingWorker {
     const trades = await Workspace.tradeRepository.getAll();
     console.log('Trades taken', trades.length);
     PerformanceCalculator.getPerformance(trades);
+
+    console.log('Buy & hold performance', `${buyAndHoldPerformance.toFixed(2)}%`);
   }
 }

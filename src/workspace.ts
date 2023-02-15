@@ -32,7 +32,7 @@ export default class Workspace {
   private static _strategyService: StrategyService | null = null;
   private static _chartService: ChartService | null = null;
   
-  private static firestore: FirebaseFirestore.Firestore;
+  private static _firestore: FirebaseFirestore.Firestore;
   private static _tradeRepository: TradeRepository | null = null;
   private static _strategyRepository: StrategyRepository | null = null;
   private static _chartRepository: ChartRepository | null = null;
@@ -107,8 +107,8 @@ export default class Workspace {
     firebase.initializeApp({
       credential: firebase.credential.cert(ConfigurationManager.getFirebaseServiceAccount()),
     });
-    this.firestore = getFirestore();
-    this.firestore.settings({ ignoreUndefinedProperties: true });
+    this._firestore = getFirestore();
+    this._firestore.settings({ ignoreUndefinedProperties: true });
   }
 
   private static get chartRepository(): ChartRepository {
@@ -122,7 +122,7 @@ export default class Workspace {
   }
 
   static get tradeRepository(): TradeRepository {
-    if (!this._tradeRepository) this._tradeRepository = this._inMemoryDatabase ? new TradeInMemoryRepository() : new TradeFirebaseRepository(this.firestore);
+    if (!this._tradeRepository) this._tradeRepository = this._inMemoryDatabase ? new TradeInMemoryRepository() : new TradeFirebaseRepository(this._firestore);
     return this._tradeRepository;
   }
 }

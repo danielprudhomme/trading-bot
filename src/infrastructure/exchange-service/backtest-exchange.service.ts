@@ -14,8 +14,8 @@ export default class BacktestExchangeService extends ReadOnlyExchangeService {
   start: number;
   end: number;
 
-  constructor(ticker: Ticker, timeframe: TimeFrame, start: number, end: number) {
-    super(ticker.exchangeId);
+  constructor(ticker: Ticker, timeframe: TimeFrame, start: number, end: number, fees: { maker: number, taker: number }) {
+    super(ticker.exchangeId, fees);
     this.ticker = ticker;
     this.timeframe = timeframe;
     this.start = start;

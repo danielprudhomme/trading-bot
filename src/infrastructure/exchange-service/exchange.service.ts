@@ -110,6 +110,10 @@ export default class ExchangeService {
     id: order.id,
     timestamp: order.timestamp,
     status: order.status,
-    executedPrice: order.average
+    executedPrice: order.average,
+    fee: {
+      asset: order.fee.currency,
+      amount: order.fee.cost
+    }
   });
 }

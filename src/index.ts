@@ -1,9 +1,11 @@
 import BackTest from './backtest';
 import { ConfigurationManager } from './config/configuration-manager';
+import BacktestExchangeService from './infrastructure/exchange-service/backtest-exchange.service';
 import AssetSymbol from './models/asset-symbol';
 import Ticker from './models/ticker';
 import { bbWideningLongStrategy } from './strategies/bb-widening-long.strategy';
 import Strategy from './strategies/strategy';
+import { TimeFrame } from './timeframe/timeframe';
 import Workspace from './workspace';
 
 ConfigurationManager.load();
@@ -18,9 +20,12 @@ const ticker: Ticker = { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchang
 const strategies: Strategy[] = [
   bbWideningLongStrategy(ticker, '1h', 20, 2.5, 0.009, 7, 0.4 / 100),
   bbWideningLongStrategy(ticker, '4h', 20, 2.5, 0.02, 7, 0.4 / 100),
-  // bbWideningLongStrategy(ticker, '1d', 20, 2.5, 7),
 ];
-const backtest = new BackTest('15m', strategies, start, end);
+const tickTimeFrame: TimeFrame = '15m';
+const fees = { maker: 0.01, taker: 0.01 };
+const exchangeService = new BacktestExchangeService(ticker, tickTimeFrame, start, end, fees);
+
+const backtest = new BackTest(tickTimeFrame, strategies, start, end, exchangeService);
 await backtest.launch();
 
 console.log('---> END');

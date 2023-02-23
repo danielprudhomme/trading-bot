@@ -12,30 +12,33 @@ export default class BackTest extends TradingWorker {
   strategies: Strategy[];
   start: number;
   end: number;
+  exchangeService: BacktestExchangeService;
 
-  constructor(tickTimeFrame: TimeFrame, strategies: Strategy[], start: number, end: number) {
+  constructor(tickTimeFrame: TimeFrame, strategies: Strategy[], start: number, end: number, exchangeService: BacktestExchangeService) {
     super(tickTimeFrame);
     this.ticker = strategies[0].ticker;
     this.strategies = strategies;
     this.start = start;
     this.end = end;
+    this.exchangeService = exchangeService;
     console.log('start', timestampToString(start));
     console.log('end', timestampToString(end));
   }
 
   async launch() {
-    const backtestExchangeService = new BacktestExchangeService(this.ticker, this.tickTimeFrame, this.start, this.end);
-    await backtestExchangeService.init();
+    await this.exchangeService.init();
 
-    const buyAndHoldPerformance = (backtestExchangeService.ohlcvs[backtestExchangeService.ohlcvs.length - 1].close / backtestExchangeService.ohlcvs[0].close
-       - 1) * 100;
+    const buyAndHoldPerformance = (
+        this.exchangeService.ohlcvs[this.exchangeService.ohlcvs.length - 1].close
+        / this.exchangeService.ohlcvs[0].close - 1
+      ) * 100;
 
-    Workspace.setExchange(this.ticker.exchangeId, backtestExchangeService);
-    console.log('ticks', backtestExchangeService.ohlcvs.length);
+    Workspace.setExchange(this.ticker.exchangeId, this.exchangeService);
+    console.log('ticks', this.exchangeService.ohlcvs.length);
 
     await this.strategyRepository.updateMultiple(this.strategies);
 
-    while (backtestExchangeService.ohlcvs.length > 0) {
+    while (this.exchangeService.ohlcvs.length > 0) {
       await this.onTick();
     }
 

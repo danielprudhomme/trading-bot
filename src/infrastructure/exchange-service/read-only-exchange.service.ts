@@ -1,5 +1,7 @@
 import { Guid } from 'guid-typescript';
+import { ExchangeId } from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
+import AssetSymbol from '../../models/asset-symbol';
 import Candlestick from '../../models/candlestick';
 import ExchangeOrder from '../../models/exchange-order';
 import Ticker from '../../models/ticker';
@@ -16,10 +18,17 @@ interface ReadOnlyExchangeOrder {
   quantity: number;
   executedPrice?: number;
   limit?: number;
+  fee?: { asset: AssetSymbol; amount: number };
 }
 
 export default class ReadOnlyExchangeService extends ExchangeService {
   private orders = new Map<string, ReadOnlyExchangeOrder>();
+  private fees: { maker: number, taker: number };
+
+  constructor(exchangeId: ExchangeId, fees: { maker: number, taker: number }) {
+    super(exchangeId);
+    this.fees = fees;
+  }
 
   // TODO : ajouter des checks sur la quantité, s'il est possible de passer les ordres ou non (il faut avoir acheter avant de vendre)
   createMarketOrder = async (ticker: Ticker, side: OrderSide, quantity: number): Promise<ExchangeOrder> => {
@@ -33,6 +42,7 @@ export default class ReadOnlyExchangeService extends ExchangeService {
       status: 'closed',
       quantity,
       executedPrice: currentCandlestick.close,
+      fee: { asset: ticker.base, amount: currentCandlestick.close * this.fees.maker }
     };
 
     this.orders.set(order.id, order);
@@ -68,12 +78,12 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     if (order.status !== 'open') return order;
 
     const currentCandlestick = this.currentCandlestick(ticker);
-
     if (order.type === 'limit' && order.limit &&
       ((order.side === 'sell' && currentCandlestick.high >= order.limit) 
         || (order.side === 'buy' && currentCandlestick.low <= order.limit))) {
         order.status = 'closed';
         order.executedPrice = order.limit;
+        order.fee = { asset: ticker.base, amount: order.executedPrice * this.fees.taker }
     }
     
     return this.mapToExchangeOrder(order);
@@ -90,5 +100,6 @@ export default class ReadOnlyExchangeService extends ExchangeService {
     timestamp: order.timestamp,
     status: order.status,
     executedPrice: order.executedPrice,
+    fee: order.fee
   });
 }

@@ -1,7 +1,7 @@
 import TickerHelper from '../helpers/ticker.helper';
 import IndicatorOnChart from '../indicators/indicator-on-chart';
 import IndicatorHelper from '../indicators/indicator.helper';
-import StrategyRepository from '../infrastructure/repositories/strategy.repository';
+import StrategyRepository from '../infrastructure/repositories/strategy/strategy.repository';
 import Trade from '../models/trade';
 import ChartService from '../services/chart.service';
 import TradeService from '../services/trade.service';
@@ -29,9 +29,12 @@ export default abstract class TradingWorker {
   }
   
   async onTick() {
+    // Get open trades
     let trades = await this.tradeService.getAllOpen();
+    // Get running strategies
     const strategies = await this.strategyRepository.getAll();
     
+    // Update chart with indicator needed on strategies
     const indicatorsOnChart = strategies.reduce((indicators, strategy) => {
       strategy.indicators.forEach(({ indicator, timeframe }) => {
         const alreadyAdded = indicators.findIndex(x =>
@@ -45,14 +48,16 @@ export default abstract class TradingWorker {
     }, [] as IndicatorOnChart[]);
     await this.chartService.fetchAndUpdate(indicatorsOnChart, this.tickTimeFrame);
  
+    // Synchronize trades with exchange (i.e. if limit orders have been completed)
     await this.synchronizeTradesWithExchange(trades);
 
+    // Execute strategies
     for (const strategy of strategies) {
       await StrategyServiceProvider.get(strategy).execute(trades);
     }
 
+    // Update strategies and trades in DB
     await this.strategyRepository.updateMultiple(strategies.filter(strategy => strategy.updated));
-
     await this.tradeService.persistUpdatedTrades(trades);
   }
 
@@ -60,5 +65,11 @@ export default abstract class TradingWorker {
     for (const trade of trades) {
       await this.tradeService.synchronizeWithExchange(trade);
     }
+  }
+
+  private async updateWallet(trades: Trade[]) {
+    // Update wallet
+    const closedTrades = trades.filter(trade => !trade.isOpen);
+    
   }
 }

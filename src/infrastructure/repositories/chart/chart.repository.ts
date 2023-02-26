@@ -1,4 +1,4 @@
-import Chart from '../../models/chart';
+import Chart from '../../../models/chart';
 
 export default abstract class ChartRepository {
   abstract getAll(): Promise<Chart[]>;

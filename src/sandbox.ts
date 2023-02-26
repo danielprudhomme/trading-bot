@@ -1,0 +1,13 @@
+import { ConfigurationManager } from './config/configuration-manager';
+import ExchangeService from './infrastructure/exchange-service/exchange.service';
+import AssetSymbol from './models/asset-symbol';
+import Workspace from './workspace';
+
+ConfigurationManager.load();
+Workspace.init(true, true);
+
+const exchangeService = new ExchangeService('binance');
+
+const b = await exchangeService.fetchFreeBalance(AssetSymbol.bnb);
+
+console.log('done', b);

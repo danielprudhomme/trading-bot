@@ -4,6 +4,7 @@ import { ConfigurationManager } from '../../config/configuration-manager';
 import { CHART_CANDLESTICKS_COUNT } from '../../config/constants';
 import { ExchangeId } from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
+import AssetSymbol from '../../models/asset-symbol';
 import ExchangeOrder from '../../models/exchange-order';
 import { OHLCV } from '../../models/ohlcv';
 import Ticker from '../../models/ticker';
@@ -61,6 +62,11 @@ export default class ExchangeService {
 
     // await this.client.cancelOrder('5526182628', 'BTC/BUSD');
     // return orders;
+  }
+
+  fetchFreeBalance = async (asset: AssetSymbol) => {
+    const balance = await this.client.fetchBalance(); // returns huge object with all balances
+    return balance[asset as string].free;
   }
 
   protected fetchOHLCV = async (

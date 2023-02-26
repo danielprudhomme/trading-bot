@@ -1,5 +1,5 @@
 import { Guid } from 'guid-typescript';
-import Trade from '../../models/trade';
+import Trade from '../../../models/trade';
 import TradeRepository from './trade.repository';
 
 export default class TradeInMemoryRepository extends TradeRepository {

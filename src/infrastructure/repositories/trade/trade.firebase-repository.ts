@@ -1,4 +1,4 @@
-import Trade from '../../models/trade';
+import Trade from '../../../models/trade';
 import TradeRepository from './trade.repository';
 
 export default class TradeFirebaseRepository extends TradeRepository {

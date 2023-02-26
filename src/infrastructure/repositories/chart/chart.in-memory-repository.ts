@@ -1,4 +1,4 @@
-import Chart from '../../models/chart';
+import Chart from '../../../models/chart';
 import ChartRepository from './chart.repository';
 
 export default class ChartInMemoryRepository extends ChartRepository {

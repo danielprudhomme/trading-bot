@@ -5,7 +5,7 @@ import Indicator from '../indicators/indicator';
 import IndicatorOnChart from '../indicators/indicator-on-chart';
 import IndicatorServiceProvider from '../indicators/indicator-service-provider';
 import IndicatorHelper from '../indicators/indicator.helper';
-import ChartRepository from '../infrastructure/repositories/chart.repository';
+import ChartRepository from '../infrastructure/repositories/chart/chart.repository';
 import Candlestick from '../models/candlestick';
 import Chart from '../models/chart';
 import { OHLCV } from '../models/ohlcv';

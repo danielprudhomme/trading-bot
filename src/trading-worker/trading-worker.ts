@@ -1,3 +1,4 @@
+import BalanceManager from '../balance-manager';
 import TickerHelper from '../helpers/ticker.helper';
 import IndicatorOnChart from '../indicators/indicator-on-chart';
 import IndicatorHelper from '../indicators/indicator.helper';
@@ -9,10 +10,11 @@ import StrategyServiceProvider from '../strategies/strategy-service-provider';
 import { TimeFrame } from '../timeframe/timeframe';
 import Workspace from '../workspace';
 
-export default abstract class TradingWorker {
+export default abstract class TradingWorker extends BalanceManager {
   protected tickTimeFrame: TimeFrame;
 
   constructor(tickTimeFrame: TimeFrame) {
+    super();
     this.tickTimeFrame = tickTimeFrame;
   }
 
@@ -59,6 +61,9 @@ export default abstract class TradingWorker {
     // Update strategies and trades in DB
     await this.strategyRepository.updateMultiple(strategies.filter(strategy => strategy.updated));
     await this.tradeService.persistUpdatedTrades(trades);
+
+    // Update balance when trades are closed
+    await this.updateBalanceWhenTradesAreClosed(trades);
   }
 
   private async synchronizeTradesWithExchange(trades: Trade[]): Promise<void> {
@@ -67,9 +72,16 @@ export default abstract class TradingWorker {
     }
   }
 
-  private async updateWallet(trades: Trade[]) {
-    // Update wallet
-    const closedTrades = trades.filter(trade => !trade.isOpen);
+  private async updateBalanceWhenTradesAreClosed(trades: Trade[]) {
+    const exchangesToUpdate = [...new Set(trades.filter(trade => !trade.isOpen).map(trade => trade.ticker.exchangeId))];
+    
+    // pour chaque trade closed récupérer le PNL
+    // puis grouper par exchange
+    // pour chaque exchange faire balance + PNL
+
+
+
+
     
   }
 }

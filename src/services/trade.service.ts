@@ -1,6 +1,6 @@
 import { Guid } from 'guid-typescript';
 import TradeHelper from '../helpers/trade.helper';
-import TradeRepository from '../infrastructure/repositories/trade.repository';
+import TradeRepository from '../infrastructure/repositories/trade/trade.repository';
 import Order from '../models/order';
 import { StopLossMoveCondition } from '../models/stop-loss-move-condition';
 import Ticker from '../models/ticker';

@@ -4,6 +4,8 @@ import { ConfigurationManager } from './config/configuration-manager';
 import { ExchangeId } from './enums/exchange-id';
 import TickerHelper from './helpers/ticker.helper';
 import ExchangeService from './infrastructure/exchange-service/exchange.service';
+import BalanceInMemoryRepository from './infrastructure/repositories/balance/balance.in-memory-repository';
+import BalanceRepository from './infrastructure/repositories/balance/balance.repository';
 import ChartInMemoryRepository from './infrastructure/repositories/chart/chart.in-memory-repository';
 import ChartRepository from './infrastructure/repositories/chart/chart.repository';
 import StrategyInMemoryRepository from './infrastructure/repositories/strategy/strategy.in-memory-repository';
@@ -36,6 +38,7 @@ export default class Workspace {
   private static _tradeRepository: TradeRepository | null = null;
   private static _strategyRepository: StrategyRepository | null = null;
   private static _chartRepository: ChartRepository | null = null;
+  private static _balanceRepository: BalanceRepository | null = null;
 
   static init(backtest: boolean = false, inMemoryDatabase: boolean = false) {
     this._backtest = backtest;
@@ -124,5 +127,10 @@ export default class Workspace {
   static get tradeRepository(): TradeRepository {
     if (!this._tradeRepository) this._tradeRepository = this._inMemoryDatabase ? new TradeInMemoryRepository() : new TradeFirebaseRepository(this._firestore);
     return this._tradeRepository;
+  }
+
+  static get balanceRepository(): BalanceRepository {
+    if (!this._balanceRepository) this._balanceRepository = new BalanceInMemoryRepository();
+    return this._balanceRepository;
   }
 }

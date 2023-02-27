@@ -127,11 +127,16 @@ export default class BBWideningLongService extends BaseStrategyService {
 
 
   private async openTrade(tp: number): Promise<Trade> {
+
+    const freeBalance = await this.getFreeBalance(this.strategy.ticker.exchangeId, this.strategy.ticker.base);
+    const quantity = +(freeBalance / this.currentCandlestick.close).toFixed(4); // Use all balance and round
+    console.log('fq', freeBalance, quantity);
+
     const trade = await this.tradeService.openTrade(
       this.strategy.ticker,
-      1,
+      quantity,
       [
-        { quantity: 1, price: this.currentCandlestick.close * (1 + tp) },
+        { quantity, price: this.currentCandlestick.close * (1 + tp) },
       ],
       null);
       // this.currentCandlestick.low);

@@ -4,7 +4,7 @@ import { ConfigurationManager } from '../../config/configuration-manager';
 import { CHART_CANDLESTICKS_COUNT } from '../../config/constants';
 import { ExchangeId } from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
-import AssetSymbol from '../../models/asset-symbol';
+import { AssetSymbol } from '../../models/asset-symbol';
 import ExchangeOrder from '../../models/exchange-order';
 import { OHLCV } from '../../models/ohlcv';
 import Ticker from '../../models/ticker';
@@ -64,9 +64,13 @@ export default class ExchangeService {
     // return orders;
   }
 
-  fetchFreeBalance = async (asset: AssetSymbol) => {
-    const balance = await this.client.fetchBalance(); // returns huge object with all balances
-    return balance[asset as string].free;
+  async fetchFreeBalance(): Promise<{ asset: AssetSymbol, amount: number }[]> {
+    const balances = await this.client.fetchBalance(); // returns huge object with all balances
+  
+    return Object.values(AssetSymbol).map(asset => {
+      const amount = balances[asset]?.free ?? 0;
+      return { asset, amount };
+    });
   }
 
   protected fetchOHLCV = async (
@@ -118,7 +122,7 @@ export default class ExchangeService {
     status: order.status,
     executedPrice: order.average,
     fee: {
-      asset: order.fee.currency,
+      asset: order.fee.currency as AssetSymbol,
       amount: order.fee.cost
     }
   });

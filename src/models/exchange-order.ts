@@ -1,4 +1,4 @@
-import AssetSymbol from './asset-symbol';
+import { AssetSymbol } from './asset-symbol';
 
 export default interface ExchangeOrder {
   id: string;

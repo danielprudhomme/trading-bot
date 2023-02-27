@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { getBacktestDataFile } from '../../backtest/backtest-data-file.helper';
 import { CHART_CANDLESTICKS_COUNT } from '../../config/constants';
+import { AssetSymbol } from '../../models/asset-symbol';
 import { OHLCV } from '../../models/ohlcv';
 import Ticker from '../../models/ticker';
 import { TimeFrame } from '../../timeframe/timeframe';
@@ -13,13 +14,15 @@ export default class BacktestExchangeService extends ReadOnlyExchangeService {
   ohlcvs: OHLCV[] = [];
   start: number;
   end: number;
+  initialBalance: number;
 
-  constructor(ticker: Ticker, timeframe: TimeFrame, start: number, end: number, fees: { maker: number, taker: number }) {
+  constructor(ticker: Ticker, timeframe: TimeFrame, start: number, end: number, fees: { maker: number, taker: number }, initialBalance: number) {
     super(ticker.exchangeId, fees);
     this.ticker = ticker;
     this.timeframe = timeframe;
     this.start = start;
     this.end = end;
+    this.initialBalance = initialBalance;
   }
 
   async init(): Promise<void> {
@@ -36,6 +39,10 @@ export default class BacktestExchangeService extends ReadOnlyExchangeService {
     const ohlcv = this.ohlcvs.shift();
     if (!ohlcv) throw new Error('No more Ohlcvs');
     return ohlcv;
+  }
+  
+  async fetchFreeBalance(): Promise<{ asset: AssetSymbol, amount: number }[]> {
+    return [{ asset: AssetSymbol.usdt, amount: this.initialBalance }];
   }
 
   private getOhlcvs(start: number, end: number, timeframe: TimeFrame): OHLCV[] {

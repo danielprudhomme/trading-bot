@@ -1,7 +1,7 @@
 import BackTest from './backtest';
 import { ConfigurationManager } from './config/configuration-manager';
 import BacktestExchangeService from './infrastructure/exchange-service/backtest-exchange.service';
-import AssetSymbol from './models/asset-symbol';
+import { AssetSymbol } from './models/asset-symbol';
 import Ticker from './models/ticker';
 import { bbWideningLongStrategy } from './strategies/bb-widening-long.strategy';
 import Strategy from './strategies/strategy';
@@ -23,7 +23,7 @@ const strategies: Strategy[] = [
 ];
 const tickTimeFrame: TimeFrame = '15m';
 const fees = { maker: 0.01, taker: 0.01 };
-const exchangeService = new BacktestExchangeService(ticker, tickTimeFrame, start, end, fees);
+const exchangeService = new BacktestExchangeService(ticker, tickTimeFrame, start, end, fees, 1000);
 
 const backtest = new BackTest(tickTimeFrame, strategies, start, end, exchangeService);
 await backtest.launch();

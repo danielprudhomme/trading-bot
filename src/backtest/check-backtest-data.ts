@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { timestampToString } from '../helpers/date';
-import AssetSymbol from '../models/asset-symbol';
+import { AssetSymbol } from '../models/asset-symbol';
 import Ticker from '../models/ticker';
 import { TimeFrame } from '../timeframe/timeframe';
 import { getBacktestDataFile } from './backtest-data-file.helper';

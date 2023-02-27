@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
 import { ExchangeId } from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
-import AssetSymbol from '../../models/asset-symbol';
+import { AssetSymbol } from '../../models/asset-symbol';
 import Candlestick from '../../models/candlestick';
 import ExchangeOrder from '../../models/exchange-order';
 import Ticker from '../../models/ticker';

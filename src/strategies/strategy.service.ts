@@ -1,4 +1,4 @@
-import StrategyRepository from '../infrastructure/repositories/strategy.repository';
+import StrategyRepository from '../infrastructure/repositories/strategy/strategy.repository';
 import Strategy from './strategy';
 
 export default class StrategyService {

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ConfigurationManager } from '../config/configuration-manager';
 import ExchangeService from '../infrastructure/exchange-service/exchange.service';
-import AssetSymbol from '../models/asset-symbol';
+import { AssetSymbol } from '../models/asset-symbol';
 import Ticker from '../models/ticker';
 import { TimeFrame } from '../timeframe/timeframe';
 import { getBacktestDataFile } from './backtest-data-file.helper';

@@ -1,3 +1,4 @@
+import BalanceManager from '../balance-manager';
 import ChartHelper from '../helpers/chart.helper';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import IndicatorValue from '../indicators/indicator-value';
@@ -128,9 +129,8 @@ export default class BBWideningLongService extends BaseStrategyService {
 
   private async openTrade(tp: number): Promise<Trade> {
 
-    const freeBalance = await this.getFreeBalance(this.strategy.ticker.exchangeId, this.strategy.ticker.base);
+    const freeBalance = await BalanceManager.getFreeBalance(this.strategy.ticker.exchangeId, this.strategy.ticker.base);
     const quantity = +(freeBalance / this.currentCandlestick.close).toFixed(4); // Use all balance and round
-    console.log('fq', freeBalance, quantity);
 
     const trade = await this.tradeService.openTrade(
       this.strategy.ticker,

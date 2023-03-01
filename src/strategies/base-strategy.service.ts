@@ -1,14 +1,12 @@
-import BalanceManager from '../balance-manager';
 import Candlestick from '../models/candlestick';
 import Trade from '../models/trade';
 import Workspace from '../workspace';
 import Strategy from './strategy';
 
-export default abstract class BaseStrategyService extends BalanceManager {
+export default abstract class BaseStrategyService {
   strategy: Strategy;
 
   constructor(strategy: Strategy) {
-    super();
     this.strategy = strategy;
   }
 

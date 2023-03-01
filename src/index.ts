@@ -11,7 +11,7 @@ import Workspace from './workspace';
 ConfigurationManager.load();
 
 const start = Date.UTC(2021, 11, 15);
-const end = Date.UTC(2022, 5, 7);
+const end = Date.UTC(2021, 11, 20);
 // const start = Date.UTC(2021, 0, 1);
 // const end = Date.UTC(2023, 0, 1);
 Workspace.init(true, true);
@@ -19,7 +19,7 @@ Workspace.init(true, true);
 const ticker: Ticker = { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchangeId: 'binance' };
 const strategies: Strategy[] = [
   bbWideningLongStrategy(ticker, '1h', 20, 2.5, 0.009, 7, 0.4 / 100),
-  bbWideningLongStrategy(ticker, '4h', 20, 2.5, 0.02, 7, 0.4 / 100),
+  // bbWideningLongStrategy(ticker, '4h', 20, 2.5, 0.02, 7, 0.4 / 100),
 ];
 const tickTimeFrame: TimeFrame = '15m';
 const fees = { maker: 0.01, taker: 0.01 };

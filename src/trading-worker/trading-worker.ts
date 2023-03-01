@@ -1,4 +1,3 @@
-import BalanceManager from '../balance-manager';
 import TickerHelper from '../helpers/ticker.helper';
 import IndicatorOnChart from '../indicators/indicator-on-chart';
 import IndicatorHelper from '../indicators/indicator.helper';
@@ -10,11 +9,10 @@ import StrategyServiceProvider from '../strategies/strategy-service-provider';
 import { TimeFrame } from '../timeframe/timeframe';
 import Workspace from '../workspace';
 
-export default abstract class TradingWorker extends BalanceManager {
+export default abstract class TradingWorker {
   protected tickTimeFrame: TimeFrame;
 
   constructor(tickTimeFrame: TimeFrame) {
-    super();
     this.tickTimeFrame = tickTimeFrame;
   }
 
@@ -73,14 +71,27 @@ export default abstract class TradingWorker extends BalanceManager {
   }
 
   private async updateBalanceWhenTradesAreClosed(trades: Trade[]) {
-    const exchangesToUpdate = [...new Set(trades.filter(trade => !trade.isOpen).map(trade => trade.ticker.exchangeId))];
-    
-    // pour chaque trade closed récupérer le PNL
-    // puis grouper par exchange
-    // pour chaque exchange faire balance + PNL
+    // const exchangeGroups = trades
+    //   .filter(trade => trade.isOpen)
+    //   .reduce((pnlByExchange, trade) => {
+    //     const tradePerf =  PerformanceCalculator.getTradePerformance(trade);
+    //     if (!tradePerf) return pnlByExchange;
+
+    //     const exchangeId = trade.ticker.exchangeId;
+
+    //     // TODO : attention il faut aussi gérer les autres base Assets
+    //     let currentPnl = pnlByExchange.get(exchangeId) ?? 0;
+    //     currentPnl += tradePerf.pnl;
+
+    //     pnlByExchange.set(exchangeId, currentPnl);
+
+    //     return pnlByExchange;
+    //   }, new Map<ExchangeId, number>());
 
 
+    //   const lol = [...exchangeGroups].forEach(([exchangeId, pnl]) => {
 
+    //   })
 
     
   }

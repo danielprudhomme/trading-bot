@@ -3,7 +3,7 @@ import { AssetSymbol } from './models/asset-symbol';
 import Workspace from './workspace';
 
 export default abstract class BalanceManager {
-  async getFreeBalance(exchangeId: ExchangeId, asset: AssetSymbol): Promise<number> {
+  static async getFreeBalance(exchangeId: ExchangeId, asset: AssetSymbol): Promise<number> {
     // Get balance from DB
     let exchangeBalance = await Workspace.balanceRepository.get(exchangeId);
 
@@ -21,9 +21,13 @@ export default abstract class BalanceManager {
     return balance ? balance.amount : 0;
   }
 
-  async updateBalance(exchangeId: ExchangeId) {
-    const exchangeBalance = await Workspace.balanceRepository.get(exchangeId);
+  static async updateBalance(exchangeId: ExchangeId, pnl: number) {
+    // const exchangeBalance = await Workspace.balanceRepository.get(exchangeId);
+    
+    // if (!exchangeBalance) return;
 
+
+    // // await Workspace.balanceRepository.addOrUpdate()
 
   }
   

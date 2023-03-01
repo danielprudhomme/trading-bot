@@ -42,7 +42,7 @@ export default class BackTest extends TradingWorker {
       await this.onTick();
     }
 
-    const trades = await Workspace.tradeRepository.getAll();
+    const trades = await Workspace.repository.trade.getAll();
     console.log('Trades taken', trades.length);
     PerformanceCalculator.getPerformance(trades);
 

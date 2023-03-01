@@ -25,7 +25,7 @@ export default abstract class TradingWorker {
   }
 
   protected get strategyRepository(): StrategyRepository {
-    return Workspace.strategyRepository;
+    return Workspace.repository.strategy;
   }
   
   async onTick() {

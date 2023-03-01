@@ -1,18 +1,7 @@
-import firebase from 'firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
-import { ConfigurationManager } from '../config/configuration-manager';
+
 import { ExchangeId } from '../enums/exchange-id';
 import TickerHelper from '../helpers/ticker.helper';
 import ExchangeService from '../infrastructure/exchange-service/exchange.service';
-import BalanceInMemoryRepository from '../infrastructure/repositories/balance/balance.in-memory-repository';
-import BalanceRepository from '../infrastructure/repositories/balance/balance.repository';
-import ChartInMemoryRepository from '../infrastructure/repositories/chart/chart.in-memory-repository';
-import ChartRepository from '../infrastructure/repositories/chart/chart.repository';
-import StrategyInMemoryRepository from '../infrastructure/repositories/strategy/strategy.in-memory-repository';
-import StrategyRepository from '../infrastructure/repositories/strategy/strategy.repository';
-import TradeFirebaseRepository from '../infrastructure/repositories/trade/trade.firebase-repository';
-import TradeInMemoryRepository from '../infrastructure/repositories/trade/trade.in-memory-repository';
-import TradeRepository from '../infrastructure/repositories/trade/trade.repository';
 import Chart from '../models/chart';
 import Ticker from '../models/ticker';
 import ChartService from '../services/chart.service';
@@ -22,10 +11,10 @@ import TradeService from '../services/trade.service';
 import StrategyService from '../strategies/strategy.service';
 import { TimeFrame } from '../timeframe/timeframe';
 import TimeFrameHelper from '../timeframe/timeframe.helper';
+import RepositoryProvider from './repository.provider';
 
 export default class Workspace {
   private static _backtest = false;
-  private static _inMemoryDatabase = false;
 
   private static _exchanges = new Map<ExchangeId, ExchangeService>();
   private static _charts = new Map<string, Map<TimeFrame, Chart>>();
@@ -33,20 +22,18 @@ export default class Workspace {
   private static _tradeService: TradeService | null = null;
   private static _strategyService: StrategyService | null = null;
   private static _chartService: ChartService | null = null;
-  
-  private static _firestore: FirebaseFirestore.Firestore;
-  private static _tradeRepository: TradeRepository | null = null;
-  private static _strategyRepository: StrategyRepository | null = null;
-  private static _chartRepository: ChartRepository | null = null;
-  private static _balanceRepository: BalanceRepository | null = null;
+
+  private static _repositoryProvider: RepositoryProvider | null = null;
 
   static init(backtest: boolean = false, inMemoryDatabase: boolean = false) {
     this._backtest = backtest;
-    this._inMemoryDatabase = inMemoryDatabase;
+    
+    this._repositoryProvider = new RepositoryProvider(inMemoryDatabase);
+  }
 
-    if (!this._inMemoryDatabase) {
-      this.initFirestore();
-    }
+  static get repository(): RepositoryProvider {
+    if (!this._repositoryProvider) throw new Error('Repository provider should be defined !');
+    return this._repositoryProvider;
   }
 
   static setExchange(exchangeId: ExchangeId, exchange: ExchangeService): void {
@@ -84,18 +71,18 @@ export default class Workspace {
     if (!this._tradeService) {
       const orderService = new OrderService();
       const stopLossService = new StopLossService(orderService);
-      this._tradeService = new TradeService(orderService, stopLossService, this.tradeRepository);
+      this._tradeService = new TradeService(orderService, stopLossService, this.repository.trade);
     }
     return this._tradeService;
   }
 
   static get strategyService(): StrategyService {
-    if (!this._strategyService) this._strategyService = new StrategyService(this.strategyRepository);
+    if (!this._strategyService) this._strategyService = new StrategyService(this.repository.strategy);
     return this._strategyService;
   }
 
   static get chartService(): ChartService {
-    if (!this._chartService) this._chartService = new ChartService(this.chartRepository);
+    if (!this._chartService) this._chartService = new ChartService(this.repository.chart);
     return this._chartService;
   }
 
@@ -104,33 +91,5 @@ export default class Workspace {
     if (!chartsByTimeframe) chartsByTimeframe = new Map<TimeFrame, Chart>();
     chartsByTimeframe.set(timeframe, chart);
     this._charts.set(TickerHelper.toString(ticker), chartsByTimeframe);
-  }
-
-  private static initFirestore() {
-    firebase.initializeApp({
-      credential: firebase.credential.cert(ConfigurationManager.getFirebaseServiceAccount()),
-    });
-    this._firestore = getFirestore();
-    this._firestore.settings({ ignoreUndefinedProperties: true });
-  }
-
-  private static get chartRepository(): ChartRepository {
-    if (!this._chartRepository) this._chartRepository = new ChartInMemoryRepository();
-    return this._chartRepository;
-  }
-
-  static get strategyRepository(): StrategyRepository {
-    if (!this._strategyRepository) this._strategyRepository = new StrategyInMemoryRepository();
-    return this._strategyRepository;
-  }
-
-  static get tradeRepository(): TradeRepository {
-    if (!this._tradeRepository) this._tradeRepository = this._inMemoryDatabase ? new TradeInMemoryRepository() : new TradeFirebaseRepository(this._firestore);
-    return this._tradeRepository;
-  }
-
-  static get balanceRepository(): BalanceRepository {
-    if (!this._balanceRepository) this._balanceRepository = new BalanceInMemoryRepository();
-    return this._balanceRepository;
   }
 }

@@ -7,7 +7,7 @@ import ChartService from '../services/chart.service';
 import TradeService from '../services/trade.service';
 import StrategyServiceProvider from '../strategies/strategy-service-provider';
 import { TimeFrame } from '../timeframe/timeframe';
-import Workspace from '../workspace';
+import Workspace from '../workspace/workspace';
 
 export default abstract class TradingWorker {
   protected tickTimeFrame: TimeFrame;

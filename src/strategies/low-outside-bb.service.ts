@@ -2,7 +2,7 @@ import ChartHelper from '../helpers/chart.helper';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import Trade from '../models/trade';
 import TradeService from '../services/trade.service';
-import Workspace from '../workspace';
+import Workspace from '../workspace/workspace';
 import BaseStrategyService from './base-strategy.service';
 import LowOutsideBBStrategy from './low-outside-bb.strategy';
 

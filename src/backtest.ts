@@ -5,7 +5,7 @@ import PerformanceCalculator from './performance/performance-calculator';
 import Strategy from './strategies/strategy';
 import { TimeFrame } from './timeframe/timeframe';
 import TradingWorker from './trading-worker/trading-worker';
-import Workspace from './workspace';
+import Workspace from './workspace/workspace';
 
 export default class BackTest extends TradingWorker {
   ticker: Ticker;

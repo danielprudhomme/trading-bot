@@ -2,7 +2,7 @@ import TradeHelper from '../helpers/trade.helper';
 import ExchangeOrder from '../models/exchange-order';
 import Order from '../models/order';
 import Trade from '../models/trade';
-import Workspace from '../workspace';
+import Workspace from '../workspace/workspace';
 
 export default class OrderService {
 

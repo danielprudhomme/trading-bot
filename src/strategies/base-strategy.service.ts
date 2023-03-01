@@ -1,6 +1,6 @@
 import Candlestick from '../models/candlestick';
 import Trade from '../models/trade';
-import Workspace from '../workspace';
+import Workspace from '../workspace/workspace';
 import Strategy from './strategy';
 
 export default abstract class BaseStrategyService {

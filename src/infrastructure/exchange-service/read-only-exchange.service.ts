@@ -5,7 +5,7 @@ import { AssetSymbol } from '../../models/asset-symbol';
 import Candlestick from '../../models/candlestick';
 import ExchangeOrder from '../../models/exchange-order';
 import Ticker from '../../models/ticker';
-import Workspace from '../../workspace';
+import Workspace from '../../workspace/workspace';
 import ExchangeService from './exchange.service';
 
 interface ReadOnlyExchangeOrder {

@@ -5,7 +5,7 @@ import Order from '../models/order';
 import { StopLossMoveCondition } from '../models/stop-loss-move-condition';
 import Ticker from '../models/ticker';
 import Trade from '../models/trade';
-import Workspace from '../workspace';
+import Workspace from '../workspace/workspace';
 import OrderService from './order.service';
 import StopLossService from './stop-loss.service';
 

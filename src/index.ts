@@ -6,7 +6,7 @@ import Ticker from './models/ticker';
 import { bbWideningLongStrategy } from './strategies/bb-widening-long.strategy';
 import Strategy from './strategies/strategy';
 import { TimeFrame } from './timeframe/timeframe';
-import Workspace from './workspace';
+import Workspace from './workspace/workspace';
 
 ConfigurationManager.load();
 

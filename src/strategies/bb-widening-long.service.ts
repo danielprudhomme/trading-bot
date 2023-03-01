@@ -5,7 +5,7 @@ import IndicatorValue from '../indicators/indicator-value';
 import MovingAverageValue from '../indicators/moving-average/moving-average-value';
 import Trade from '../models/trade';
 import TradeService from '../services/trade.service';
-import Workspace from '../workspace';
+import Workspace from '../workspace/workspace';
 import BaseStrategyService from './base-strategy.service';
 import BBWideningLongStrategy from './bb-widening-long.strategy';
 

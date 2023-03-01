@@ -1,6 +1,6 @@
 import { ExchangeId } from './enums/exchange-id';
 import { AssetSymbol } from './models/asset-symbol';
-import Workspace from './workspace';
+import Workspace from './workspace/workspace';
 
 export default abstract class BalanceManager {
   static async getFreeBalance(exchangeId: ExchangeId, asset: AssetSymbol): Promise<number> {

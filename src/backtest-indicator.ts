@@ -5,7 +5,7 @@ import IndicatorOnChart from './indicators/indicator-on-chart';
 import Ticker from './models/ticker';
 import ChartService from './services/chart.service';
 import { TimeFrame } from './timeframe/timeframe';
-import Workspace from './workspace';
+import Workspace from './workspace/workspace';
 
 export default class BackTestIndicator {
 

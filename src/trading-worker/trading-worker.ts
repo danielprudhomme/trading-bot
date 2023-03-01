@@ -17,11 +17,11 @@ export default abstract class TradingWorker {
   }
 
   protected get tradeService(): TradeService {
-    return Workspace.tradeService;
+    return Workspace.service.trade;
   }
 
   protected get chartService(): ChartService {
-    return Workspace.chartService;
+    return Workspace.service.chart;
   }
 
   protected get strategyRepository(): StrategyRepository {

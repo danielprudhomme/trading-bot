@@ -3,7 +3,6 @@ import { timestampToString } from './helpers/date';
 import Indicator from './indicators/indicator';
 import IndicatorOnChart from './indicators/indicator-on-chart';
 import Ticker from './models/ticker';
-import ChartService from './services/chart.service';
 import { TimeFrame } from './timeframe/timeframe';
 import Workspace from './workspace/workspace';
 
@@ -18,10 +17,6 @@ export default class BackTestIndicator {
     this.indicator = indicator;
     this.ticker = ticker;
   }
-
-  protected get chartService(): ChartService {
-    return Workspace.chartService;
-  }
   
   async launch() {
     const indicatorOnChart: IndicatorOnChart = {
@@ -29,7 +24,7 @@ export default class BackTestIndicator {
       ticker: this.ticker,
       timeframe: this.timeFrame,
     }
-    await this.chartService.fetchAndUpdate([indicatorOnChart], this.timeFrame);
+    await Workspace.service.chart.fetchAndUpdate([indicatorOnChart], this.timeFrame);
 
     this.print(0);
     this.print(1);

@@ -59,7 +59,7 @@ export default class BBWideningLongService extends BaseStrategyService {
   }
 
   private get tradeService(): TradeService {
-    return Workspace.tradeService;
+    return Workspace.service.trade;
   }
 
   async execute(trades: Trade[]): Promise<void> {

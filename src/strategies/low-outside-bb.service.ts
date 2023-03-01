@@ -26,7 +26,7 @@ export default class LowOutsideBBService extends BaseStrategyService {
   }
 
   private get tradeService(): TradeService {
-    return Workspace.tradeService;
+    return Workspace.service.trade;
   }
 
   async execute(trades: Trade[]): Promise<void> {

@@ -62,9 +62,9 @@ export default class BBWideningLongService extends BaseStrategyService {
     return Workspace.service.trade;
   }
 
-  async execute(trades: Trade[]): Promise<void> {
+  async execute(): Promise<void> {
     const currentTrade: Trade | null = this.strategy.currentTradeId ?
-      trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) ?? null : null;
+      Workspace.store.trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) ?? null : null;
 
     if (!currentTrade) {
       const buySignal = this.currentCandlestick.isClosed
@@ -78,7 +78,7 @@ export default class BBWideningLongService extends BaseStrategyService {
       if (buySignal) {
         const tp = this.rsi.value > 80 ? this.strategy.tp * 1.4 : this.strategy.tp;
         const trade = await this.openTrade(tp);
-        trades.push(trade);
+        Workspace.store.trades.push(trade);
         this.strategy.currentTradeId = trade.id;
         this.strategy.updated = true;
       }

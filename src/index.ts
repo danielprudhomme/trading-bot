@@ -22,6 +22,7 @@ const strategies: Strategy[] = [
   // bbWideningLongStrategy(ticker, '4h', 20, 2.5, 0.02, 7, 0.4 / 100),
 ];
 const tickTimeFrame: TimeFrame = '15m';
+// const fees = { maker: 0, taker: 0 };
 const fees = { maker: 0.01, taker: 0.01 };
 const exchangeService = new BacktestExchangeService(ticker, tickTimeFrame, start, end, fees, 1000);
 

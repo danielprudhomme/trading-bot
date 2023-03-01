@@ -6,23 +6,23 @@ import Chart from '../models/chart';
 import Ticker from '../models/ticker';
 import { TimeFrame } from '../timeframe/timeframe';
 import TimeFrameHelper from '../timeframe/timeframe.helper';
+import DataStore from './data.store';
 import RepositoryProvider from './repository.provider';
 import ServiceProvider from './service.provider';
 
 export default class Workspace {
   private static _backtest = false;
-
   private static _exchanges = new Map<ExchangeId, ExchangeService>();
   private static _charts = new Map<string, Map<TimeFrame, Chart>>();
-
   private static _repositoryProvider: RepositoryProvider | null = null;
   private static _serviceProvider: ServiceProvider | null = null;
+  private static _dataStore: DataStore | null = null;
 
   static init(backtest: boolean = false, inMemoryDatabase: boolean = false) {
     this._backtest = backtest;
-    
     this._repositoryProvider = new RepositoryProvider(inMemoryDatabase);
     this._serviceProvider = new ServiceProvider(this._repositoryProvider);
+    this._dataStore = new DataStore();
   }
 
   static get repository(): RepositoryProvider {
@@ -33,6 +33,11 @@ export default class Workspace {
   static get service(): ServiceProvider {
     if (!this._serviceProvider) throw new Error('Service provider should be defined !');
     return this._serviceProvider;
+  }
+
+  static get store(): DataStore {
+    if (!this._dataStore) throw new Error('Data store should be defined !');
+    return this._dataStore;
   }
 
   static setExchange(exchangeId: ExchangeId, exchange: ExchangeService): void {

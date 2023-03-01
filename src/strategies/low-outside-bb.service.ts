@@ -29,15 +29,15 @@ export default class LowOutsideBBService extends BaseStrategyService {
     return Workspace.service.trade;
   }
 
-  async execute(trades: Trade[]): Promise<void> {
-    const currentTrade: Trade | null = this.strategy.currentTradeId ? trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) ?? null : null;
+  async execute(): Promise<void> {
+    const currentTrade: Trade | null = this.strategy.currentTradeId ? Workspace.store.trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) ?? null : null;
 
     if (!currentTrade) {
       const buySignal = this.currentCandlestick.isClosed && this.bbFlat && this.lowOutsideBB && this.closeInsideBB && this.lowWickIsLong;
 
       if (buySignal) {
         const trade = await this.openTrade();
-        trades.push(trade);
+        Workspace.store.trades.push(trade);
         this.strategy.currentTradeId = trade.id;
         this.strategy.updated = true;
       }

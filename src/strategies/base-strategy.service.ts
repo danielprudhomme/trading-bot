@@ -1,5 +1,4 @@
 import Candlestick from '../models/candlestick';
-import Trade from '../models/trade';
 import Workspace from '../workspace/workspace';
 import Strategy from './strategy';
 
@@ -10,7 +9,7 @@ export default abstract class BaseStrategyService {
     this.strategy = strategy;
   }
 
-  abstract execute(trades: Trade[]): Promise<void>;
+  abstract execute(): Promise<void>;
 
   protected get currentCandlestick(): Candlestick {
     return this.getCandlestick();

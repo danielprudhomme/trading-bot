@@ -55,7 +55,7 @@ export default class ReadOnlyExchangeService extends ExchangeService {
       ticker,
       type: 'limit',
       side,
-      timestamp: Date.now(),
+      timestamp: this.currentCandlestick(ticker).timestamp,
       status: 'open',
       quantity,
       limit,

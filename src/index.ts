@@ -11,7 +11,7 @@ import Workspace from './workspace/workspace';
 ConfigurationManager.load();
 
 const start = Date.UTC(2021, 11, 15);
-const end = Date.UTC(2021, 11, 20);
+const end = Date.UTC(2021, 11, 17);
 // const start = Date.UTC(2021, 0, 1);
 // const end = Date.UTC(2023, 0, 1);
 Workspace.init(true, true);

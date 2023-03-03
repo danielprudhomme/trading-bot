@@ -128,7 +128,6 @@ export default class BBWideningLongService extends BaseStrategyService {
 
 
   private async openTrade(tp: number): Promise<Trade> {
-
     const freeBalance = await BalanceManager.getFreeBalance(this.strategy.ticker.exchangeId, this.strategy.ticker.base);
     const quantity = +(freeBalance / this.currentCandlestick.close).toFixed(4); // Use all balance and round
 

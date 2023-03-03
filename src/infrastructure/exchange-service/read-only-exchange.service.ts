@@ -42,9 +42,9 @@ export default class ReadOnlyExchangeService extends ExchangeService {
       status: 'closed',
       quantity,
       executedPrice: currentCandlestick.close,
-      fee: { asset: ticker.base, amount: currentCandlestick.close * this.fees.maker }
+      fee: { asset: ticker.base, amount: currentCandlestick.close * quantity * this.fees.maker }
     };
-
+    
     this.orders.set(order.id, order);
     return this.mapToExchangeOrder(order);
   }
@@ -83,9 +83,9 @@ export default class ReadOnlyExchangeService extends ExchangeService {
         || (order.side === 'buy' && currentCandlestick.low <= order.limit))) {
         order.status = 'closed';
         order.executedPrice = order.limit;
-        order.fee = { asset: ticker.base, amount: order.executedPrice * this.fees.taker }
+        order.fee = { asset: ticker.base, amount: order.executedPrice * order.quantity * this.fees.taker }
     }
-    
+
     return this.mapToExchangeOrder(order);
   }
 

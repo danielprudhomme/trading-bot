@@ -35,25 +35,26 @@ export default class PerformanceCalculator {
   static getTradePerformance(trade: Trade): TradePerformance | null {
     if (trade.isOpen) return null;
 
-    const openOrders = TradeHelper.openOrders(trade);
+    const openOrders = TradeHelper.openOrders(trade).filter(x => x.status === 'closed');
     const openTimestamp = Math.min(...openOrders.map(order => order.exchangeOrder?.timestamp ?? Number.MAX_SAFE_INTEGER));
-    const closeOrders = [...TradeHelper.takeProfitsOrders(trade), ...TradeHelper.stopLossOrders(trade)];
+    const closeOrders = [...TradeHelper.takeProfitsOrders(trade), ...TradeHelper.stopLossOrders(trade)].filter(x => x.status === 'closed');
     const closeTimestamp = Math.max(...closeOrders.map(order => order.exchangeOrder?.timestamp ?? 0));
 
-    const openAmount = this.getAmount(openOrders);
-    const finalAmount = this.getAmount(closeOrders);
+    const openAmount = this.getAmount(openOrders, 'open');
+    const finalAmount = this.getAmount(closeOrders, 'close');
     const pnl = finalAmount - openAmount;
     const pnlPercent = pnl / openAmount;
 
     return { pnl, pnlPercent, openTimestamp, closeTimestamp };
   }
   
-  private static getAmount = (orders: Order[]) => orders
+  // Amount paid to open order, and amount received after closed
+  private static getAmount = (orders: Order[], side: 'open' | 'close') => orders
     .reduce((amount, order) => {
       const quantity = order.quantity !== 'remaining' ? order.quantity : 0;
       const price = order.exchangeOrder?.executedPrice ?? 0;
-      const fees = order.exchangeOrder?.fee?.amount ?? 0;
-      return amount + quantity * price - fees;
+      const fees = (order.exchangeOrder?.fee?.amount ?? 0) * (side === 'close' ? -1 : 1);
+      return amount + quantity * price + fees;
     }, 0);
 
   private static toPercentage = (n: number): string => `${n.toFixed(2)}%`;

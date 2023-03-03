@@ -23,7 +23,7 @@ const strategies: Strategy[] = [
 ];
 const tickTimeFrame: TimeFrame = '15m';
 // const fees = { maker: 0, taker: 0 };
-const fees = { maker: 0.01, taker: 0.01 };
+const fees = { maker: 0.1 / 100, taker: 0.1 / 100 };
 const exchangeService = new BacktestExchangeService(ticker, tickTimeFrame, start, end, fees, 1000);
 
 const backtest = new BackTest(tickTimeFrame, strategies, start, end, exchangeService);

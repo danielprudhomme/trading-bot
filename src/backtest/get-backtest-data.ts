@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { ConfigurationManager } from '../config/configuration-manager';
+import { timestampToString } from '../helpers/date';
 import ExchangeService from '../infrastructure/exchange-service/exchange.service';
 import { AssetSymbol } from '../models/asset-symbol';
 import Ticker from '../models/ticker';
@@ -12,9 +13,10 @@ ConfigurationManager.load();
 console.log('Start get backtest data');
 
 const tickers: Ticker[] = [
-  { asset: AssetSymbol.eth, base: AssetSymbol.usdt, exchangeId: 'binance' },
+  { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchangeId: 'binance' },
 ];
 const timeframes: TimeFrame[] = ['5m', '15m', '30m', '1h', '2h', '4h', '1d'];
+// const timeframes: TimeFrame[] = ['1d'];
 const years = [2023];
 
 for (const ticker of tickers) {
@@ -34,10 +36,10 @@ async function getAndStoreOhlcvs(ticker: Ticker, year: number, timeframe: TimeFr
   }
   
   // Get Data from exchange
-  console.log('Retrieve OHLCVS from exchange');
+  console.log('Retrieve OHLCVS from exchange', timestampToString(start), timestampToString(end));
   const exchange = new ExchangeService(ticker.exchangeId);
   const ohlcvs = await exchange.fetchRange(ticker, timeframe, start, end);
-  console.log('Success !');
+  console.log('Success !', ohlcvs.length);
   const jsonArray = JSON.stringify(ohlcvs);
   
   // Store data in file
@@ -48,9 +50,7 @@ async function getAndStoreOhlcvs(ticker: Ticker, year: number, timeframe: TimeFr
     fs.mkdirSync(dirPath, { recursive: true });
   }
   
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, jsonArray);
-  }
+  fs.writeFileSync(filePath, jsonArray);
   
   console.log('Json created :', filePath);
 }

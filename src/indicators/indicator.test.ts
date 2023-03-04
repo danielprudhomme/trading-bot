@@ -1,13 +1,12 @@
-import ChartHelper from './helpers/chart.helper';
-import { timestampToString } from './helpers/date';
-import Indicator from './indicators/indicator';
-import IndicatorOnChart from './indicators/indicator-on-chart';
-import Ticker from './models/ticker';
-import { TimeFrame } from './timeframe/timeframe';
-import Workspace from './workspace/workspace';
+import ChartHelper from '../helpers/chart.helper';
+import { timestampToString } from '../helpers/date';
+import Ticker from '../models/ticker';
+import { TimeFrame } from '../timeframe/timeframe';
+import Workspace from '../workspace/workspace';
+import Indicator from './indicator';
+import IndicatorOnChart from './indicator-on-chart';
 
-export default class BackTestIndicator {
-
+export default class IndicatorTest {
   protected timeFrame: TimeFrame;
   protected indicator: Indicator;
   protected ticker: Ticker;

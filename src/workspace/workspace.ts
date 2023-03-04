@@ -54,8 +54,8 @@ export default class Workspace {
     return exchange;
   }
 
-  static addCharts(charts: Chart[]): void {
-    charts.forEach(chart => this.addChart(chart.ticker, chart.timeframe, chart));
+  static setCharts(charts: Chart[]): void {
+    charts.forEach(chart => this.setChart(chart.ticker, chart.timeframe, chart));
   }
 
   static getCharts = (): Map<string, Map<TimeFrame, Chart>> => this._charts;
@@ -71,7 +71,7 @@ export default class Workspace {
     return chartsByTimeframe.get(timeframe);
   }
 
-  private static addChart(ticker: Ticker, timeframe: TimeFrame, chart: Chart) {
+  private static setChart(ticker: Ticker, timeframe: TimeFrame, chart: Chart) {
     let chartsByTimeframe = this._charts.get(TickerHelper.toString(ticker));
     if (!chartsByTimeframe) chartsByTimeframe = new Map<TimeFrame, Chart>();
     chartsByTimeframe.set(timeframe, chart);

@@ -10,6 +10,7 @@
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q --es-module-specifier-resolution=node dist/index.js\"",
     "get-backtest-data": "npx tsc && node --es-module-specifier-resolution=node dist/backtest/get-backtest-data.js",
     "check-backtest-data": "npx tsc && node --es-module-specifier-resolution=node dist/backtest/check-backtest-data.js",
+    "indicator-test": "npx tsc && node --es-module-specifier-resolution=node dist/indicators/run.indicator.test.js",
     "sandbox": "npx tsc && node --es-module-specifier-resolution=node dist/sandbox.js"
   },
   "author": "",

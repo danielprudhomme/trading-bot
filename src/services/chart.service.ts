@@ -53,7 +53,7 @@ export default class ChartService {
     }
 
     await this.chartRepository.updateMultiple(charts);
-    Workspace.addCharts(charts);
+    Workspace.setCharts(charts);
   }
 
   private async createChart(timeframe: TimeFrame, ticker: Ticker): Promise<Chart> {

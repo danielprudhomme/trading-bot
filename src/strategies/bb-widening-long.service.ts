@@ -1,4 +1,3 @@
-import BalanceManager from '../balance-manager';
 import ChartHelper from '../helpers/chart.helper';
 import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-value';
 import IndicatorValue from '../indicators/indicator-value';
@@ -89,8 +88,7 @@ export default class BBWideningLongService extends BaseStrategyService {
     const sellSignal = currentTrade && this.priceDownAndTouchedSMA;
     if (sellSignal) {
       await this.tradeService.closeTrade(currentTrade);
-      this.strategy.currentTradeId = null;
-      this.strategy.updated = true;
+      this.onTradeClosed(currentTrade);
     }
   }
 
@@ -126,10 +124,8 @@ export default class BBWideningLongService extends BaseStrategyService {
     return (this.currentCandlestick.close / this.bb.basis) - 1 < 0.01;
   }
 
-
   private async openTrade(tp: number): Promise<Trade> {
-    const freeBalance = await BalanceManager.getFreeBalance(this.strategy.ticker.exchangeId, this.strategy.ticker.base);
-    const quantity = +(freeBalance / this.currentCandlestick.close).toFixed(4); // Use all balance and round
+    const quantity = +(this.availableBalance / this.currentCandlestick.close).toFixed(4); // Use all balance and round
 
     const trade = await this.tradeService.openTrade(
       this.strategy.ticker,

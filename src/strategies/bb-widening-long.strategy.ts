@@ -15,6 +15,7 @@ export default interface BBWideningLongStrategy extends Strategy {
 const type: StrategyType = 'bb-widening-long';
 export const bbWideningLongStrategy = (
   ticker: Ticker,
+  initialBalance: number,
   timeframe: TimeFrame,
   bbLength: number,
   bbMult: number,
@@ -26,6 +27,7 @@ export const bbWideningLongStrategy = (
   type,
   ticker,
   currentTradeId: null,
+  availableBalance: initialBalance,
   indicators: [
     { indicator: bb(bbLength, bbMult), timeframe },
     { indicator: sma(smaLength), timeframe },

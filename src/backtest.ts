@@ -46,6 +46,8 @@ export default class BackTest extends TradingWorker {
     console.log('Trades taken', trades.length);
     PerformanceCalculator.getPerformance(trades);
 
+    Workspace.store.strategies.forEach(x => console.log('End balance', x.availableBalance));
+
     console.log('Buy & hold performance', `${buyAndHoldPerformance.toFixed(2)}%`);
   }
 }

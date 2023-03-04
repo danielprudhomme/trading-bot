@@ -58,40 +58,19 @@ export default abstract class TradingWorker {
     // Update strategies and trades in DB
     await this.strategyRepository.updateMultiple(Workspace.store.strategies.filter(strategy => strategy.updated));
     await this.tradeService.persistUpdatedTrades(Workspace.store.trades);
-
-    // Update balance when trades are closed
-    await this.updateBalanceWhenTradesAreClosed();
   }
 
   private async synchronizeTradesWithExchange(): Promise<void> {
     for (const trade of Workspace.store.trades) {
       await this.tradeService.synchronizeWithExchange(trade);
+      
+      // If trade has been closed, update its strategy
+      if (!trade.isOpen) {
+        const strategy = Workspace.store.strategies.find(strategy => strategy.currentTradeId === trade.id);
+        if (strategy) {
+          StrategyServiceProvider.get(strategy).onTradeClosed(trade);
+        }
+      }
     }
-  }
-
-  private async updateBalanceWhenTradesAreClosed() {
-    // const exchangeGroups = trades
-    //   .filter(trade => trade.isOpen)
-    //   .reduce((pnlByExchange, trade) => {
-    //     const tradePerf =  PerformanceCalculator.getTradePerformance(trade);
-    //     if (!tradePerf) return pnlByExchange;
-
-    //     const exchangeId = trade.ticker.exchangeId;
-
-    //     // TODO : attention il faut aussi gérer les autres base Assets
-    //     let currentPnl = pnlByExchange.get(exchangeId) ?? 0;
-    //     currentPnl += tradePerf.pnl;
-
-    //     pnlByExchange.set(exchangeId, currentPnl);
-
-    //     return pnlByExchange;
-    //   }, new Map<ExchangeId, number>());
-
-
-    //   const lol = [...exchangeGroups].forEach(([exchangeId, pnl]) => {
-
-    //   })
-
-    
   }
 }

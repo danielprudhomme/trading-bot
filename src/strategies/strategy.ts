@@ -8,6 +8,7 @@ export default interface Strategy {
   type: StrategyType;
   ticker: Ticker;
   currentTradeId: string | null;
+  availableBalance: number;
   indicators: { indicator: Indicator, timeframe: TimeFrame }[];
   updated?: boolean;
 }

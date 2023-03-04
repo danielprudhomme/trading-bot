@@ -9,11 +9,12 @@ export default interface LowOutsideBBStrategy extends Strategy {
 }
 
 const type: StrategyType = 'low-outside-bb';
-export const lowOutsideBBStrategy = (ticker: Ticker, timeframe: TimeFrame): LowOutsideBBStrategy => ({
+export const lowOutsideBBStrategy = (ticker: Ticker, initialBalance: number, timeframe: TimeFrame): LowOutsideBBStrategy => ({
   id: `${type}::${TickerHelper.toString(ticker)}::${timeframe}`,
   type,
   ticker,
   currentTradeId: null,
+  availableBalance: initialBalance,
   indicators: [
     { indicator: bb(20, 2.5), timeframe }
   ]

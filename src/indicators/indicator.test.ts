@@ -38,6 +38,6 @@ export default class IndicatorTest {
     if (!currentCandlestick) return;
 
     const indicatorValue = ChartHelper.getCandlestickIndicatorValue(currentCandlestick, this.indicator);
-    console.log(`${index}\t${timestampToString(currentCandlestick.timestamp)}\t${currentCandlestick.close}\t${indicatorValue?.toString()}`);
+    console.log(`${index}\t${timestampToString(currentCandlestick.timestamp)}\tClose: ${currentCandlestick.close}\t${indicatorValue?.toString()}`);
   }
 }

@@ -87,16 +87,17 @@ export default class ChartService {
 
   private addOrUpdateCandlestick = (chart: Chart, ohlcv: OHLCV): void => {
     // We remove additional time to have the timestamp corresponding to the timeframe of the chart
-    const ohlcvTimestamp = ohlcv.timestamp - ohlcv.timestamp % TimeFrameHelper.toMilliseconds(chart.timeframe);
+    const normalizedOhlcvTimestamp = ohlcv.timestamp - ohlcv.timestamp % TimeFrameHelper.toMilliseconds(chart.timeframe);
 
     const currentCandlestick = chart.candlesticks[0];
-    const isNewCandle = currentCandlestick?.timestamp !== ohlcvTimestamp;
+    const isNewCandle = currentCandlestick?.timestamp !== normalizedOhlcvTimestamp;
     const isClosed = chart.timeframe === ohlcv.timeframe || ohlcv.timestamp + TimeFrameHelper.toMilliseconds(ohlcv.timeframe) === currentCandlestick.timestamp + TimeFrameHelper.toMilliseconds(chart.timeframe);
 
     if (isNewCandle) {
       if (chart.candlesticks.length === CHART_CANDLESTICKS_COUNT) chart.candlesticks.pop(); // Remove last element to always have same number of elements in candlesticks array
       const newCandlestick: Candlestick = {
-        timestamp: ohlcvTimestamp,
+        timestamp: normalizedOhlcvTimestamp,
+        lastUpdateTimestamp: ohlcv.timestamp,
         open: ohlcv.open,
         high: ohlcv.high,
         low: ohlcv.low,

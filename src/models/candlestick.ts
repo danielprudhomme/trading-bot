@@ -2,6 +2,7 @@ import IndicatorValue from '../indicators/indicator-value';
 
 export default interface Candlestick {
   timestamp: number;
+  lastUpdateTimestamp: number;
   open: number;
   high: number;
   low: number;

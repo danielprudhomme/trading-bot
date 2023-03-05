@@ -10,7 +10,7 @@ import Workspace from './workspace/workspace';
 
 ConfigurationManager.load();
 
-const start = Date.UTC(2023, 2, 1);
+const start = Date.UTC(2023, 0, 1);
 const end = Date.UTC(2023, 2, 3);
 // const start = Date.UTC(2021, 0, 1);
 // const end = Date.UTC(2023, 0, 1);
@@ -22,8 +22,8 @@ const strategies: Strategy[] = [
   // bbWideningLongStrategy(ticker, '4h', 20, 2.5, 0.02, 7, 0.4 / 100),
 ];
 const tickTimeFrame: TimeFrame = '15m';
-// const fees = { maker: 0, taker: 0 };
-const fees = { maker: 0.1 / 100, taker: 0.1 / 100 };
+const fees = { maker: 0, taker: 0 };
+// const fees = { maker: 0.1 / 100, taker: 0.1 / 100 };
 const exchangeService = new BacktestExchangeService(ticker, tickTimeFrame, start, end, fees);
 
 const backtest = new BackTest(tickTimeFrame, strategies, start, end, exchangeService);

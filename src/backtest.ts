@@ -1,7 +1,6 @@
 import { timestampToString } from './helpers/date';
 import BacktestExchangeService from './infrastructure/exchange-service/backtest-exchange.service';
 import Ticker from './models/ticker';
-import PerformanceCalculator from './performance/performance-calculator';
 import Strategy from './strategies/strategy';
 import { TimeFrame } from './timeframe/timeframe';
 import TradingWorker from './trading-worker/trading-worker';
@@ -41,12 +40,6 @@ export default class BackTest extends TradingWorker {
     while (this.exchangeService.ohlcvs.length > 0) {
       await this.onTick();
     }
-
-    const trades = await Workspace.repository.trade.getAll();
-    console.log('Trades taken', trades.length);
-    PerformanceCalculator.getPerformance(trades);
-
-    Workspace.store.strategies.forEach(x => console.log('End balance', x.availableBalance));
 
     console.log('Buy & hold performance', `${buyAndHoldPerformance.toFixed(2)}%`);
   }

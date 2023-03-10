@@ -5,31 +5,33 @@ import Trade from '../models/trade';
 import TradePerformance from './trade-performance';
 
 export default class PerformanceCalculator {
-  static getPerformance(trades: Trade[]): void {
-    const initialAmount = 1000;
-    let capital = initialAmount;
+  static getPerformance(initialAmount: number, trades: Trade[]): void {
+    let amount = initialAmount;
+    let highestAmount = initialAmount;
+    let maxDrawdown = 0;
     let wonTrades = 0;
-    let lostTrades = 0;
 
-    trades.forEach(trade => {
-      const perf = this.getTradePerformance(trade);
-      if (!perf) return;
+    trades.forEach((trade, i) => {
+      const performance = this.getTradePerformance(trade);
+      if (!performance) return;
 
-      console.log(timestampToString(perf.openTimestamp),
-        timestampToString(perf.closeTimestamp),
-        perf.pnl,
-        this.toPercentage(perf.pnlPercent * 100));
-        
-      const pnl = perf.pnl;
-      capital += pnl;
-      if (pnl >= 0) wonTrades++;
-      if (pnl < 0) lostTrades++;
+      amount += performance.pnl;
+      highestAmount = Math.max(highestAmount, amount);
+      const drawdown = amount / highestAmount - 1;
+      maxDrawdown = Math.min(maxDrawdown, drawdown);
+
+      console.log(i, '\t', timestampToString(performance.openTimestamp), '\t', this.toPercentage(performance.pnlPercent), '\t', 'PNL', performance.pnl.toFixed(2), '\tAmount', amount.toFixed(2), '\t', this.toPercentage(maxDrawdown))
+
+      if (performance.pnl > 0) wonTrades++;
     });
 
-    const totalPerformance = (capital / initialAmount - 1) * 100;
-    const winRate = (wonTrades / (wonTrades + lostTrades)) * 100;
+    const totalPerformance = amount / initialAmount - 1;
+    const winRate = wonTrades / trades.length;
 
-    console.log(`Total performance: ${this.toPercentage(totalPerformance)}\tWin: ${wonTrades}\tLoss: ${lostTrades}\tWinRate: ${this.toPercentage(winRate)}`);
+    console.log('-------------- Performance --------------');
+    console.log('Result: ', amount, `${totalPerformance > 0 ? '+' : ''}${this.toPercentage(totalPerformance)}`);
+    console.log('Trades taken: ', trades.length, 'Win rate: ', this.toPercentage(winRate));
+    console.log('Max Drawdown', this.toPercentage(maxDrawdown));
   }
 
   static getTradePerformance(trade: Trade): TradePerformance | null {
@@ -57,5 +59,5 @@ export default class PerformanceCalculator {
       return amount + quantity * price + fees;
     }, 0);
 
-  private static toPercentage = (n: number): string => `${n.toFixed(2)}%`;
+  private static toPercentage = (n: number): string => `${(n * 100).toFixed(2)}%`;
 }

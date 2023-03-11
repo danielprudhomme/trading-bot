@@ -1,5 +1,7 @@
 import { timestampToString } from '../helpers/date';
 import TradeHelper from '../helpers/trade.helper';
+import { AssetSymbol } from '../models/asset-symbol';
+import Fee from '../models/fee';
 import Order from '../models/order';
 import Trade from '../models/trade';
 import TradePerformance from './trade-performance';
@@ -10,6 +12,7 @@ export default class PerformanceCalculator {
     let highestAmount = initialAmount;
     let maxDrawdown = 0;
     let wonTrades = 0;
+    let paidFees = 0;
 
     trades.forEach((trade, i) => {
       const performance = this.getTradePerformance(trade);
@@ -19,6 +22,9 @@ export default class PerformanceCalculator {
       highestAmount = Math.max(highestAmount, amount);
       const drawdown = amount / highestAmount - 1;
       maxDrawdown = Math.min(maxDrawdown, drawdown);
+
+      // We assume that all fees are payed in USDT
+      paidFees += performance.fee.amount;
 
       console.log(i, '\t', timestampToString(performance.openTimestamp), '\t', this.toPercentage(performance.pnlPercent), '\t', 'PNL', performance.pnl.toFixed(2), '\tAmount', amount.toFixed(2), '\t', this.toPercentage(maxDrawdown))
 
@@ -32,6 +38,7 @@ export default class PerformanceCalculator {
     console.log('Result: ', amount, `${totalPerformance > 0 ? '+' : ''}${this.toPercentage(totalPerformance)}`);
     console.log('Trades taken: ', trades.length, 'Win rate: ', this.toPercentage(winRate));
     console.log('Max Drawdown', this.toPercentage(maxDrawdown));
+    console.log('Paid fees', `${paidFees.toFixed(2)} $`);
   }
 
   static getTradePerformance(trade: Trade): TradePerformance | null {
@@ -47,7 +54,15 @@ export default class PerformanceCalculator {
     const pnl = finalAmount - openAmount;
     const pnlPercent = pnl / openAmount;
 
-    return { pnl, pnlPercent, openTimestamp, closeTimestamp };
+    // We assume that all fees are payed in USDT
+    const feeAmount = trade.orders
+      .filter(x => x.status === 'closed')
+      .reduce((fee, order) => {
+        return fee + (order.exchangeOrder?.fee?.amount ?? 0);
+      }, 0);
+    const fee: Fee = { asset: AssetSymbol.usdt, amount: feeAmount };
+
+    return { pnl, pnlPercent, fee, openTimestamp, closeTimestamp };
   }
   
   // Amount paid to open order, and amount received after closed

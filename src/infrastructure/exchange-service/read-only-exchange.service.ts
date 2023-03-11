@@ -1,9 +1,9 @@
 import { Guid } from 'guid-typescript';
 import { ExchangeId } from '../../enums/exchange-id';
 import { OrderSide } from '../../enums/order-side';
-import { AssetSymbol } from '../../models/asset-symbol';
 import Candlestick from '../../models/candlestick';
 import ExchangeOrder from '../../models/exchange-order';
+import Fee from '../../models/fee';
 import Ticker from '../../models/ticker';
 import Workspace from '../../workspace/workspace';
 import ExchangeService from './exchange.service';
@@ -18,7 +18,7 @@ interface ReadOnlyExchangeOrder {
   quantity: number;
   executedPrice?: number;
   limit?: number;
-  fee?: { asset: AssetSymbol; amount: number };
+  fee?: Fee;
 }
 
 export default class ReadOnlyExchangeService extends ExchangeService {

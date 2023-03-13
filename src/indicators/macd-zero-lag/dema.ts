@@ -1,4 +1,4 @@
-import Indicator from '../indicator';
+import Indicator, { IndicatorSource } from '../indicator';
 import { ema, Ema } from '../moving-average/ema';
 
 export default interface Dema extends Indicator {
@@ -7,7 +7,7 @@ export default interface Dema extends Indicator {
   emaEma: Ema;
 }
 
-export const dema = (length: number, source?: Indicator): Dema => {
+export const dema = (length: number, source?: IndicatorSource): Dema => {
   const emaParam = ema(length, source);
 
   return {

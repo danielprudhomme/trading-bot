@@ -1,4 +1,4 @@
-import Indicator from '../indicator';
+import Indicator, { IndicatorSource } from '../indicator';
 import { Sma, sma } from '../moving-average/sma';
 
 export default interface StandardDeviation extends Indicator {
@@ -6,7 +6,7 @@ export default interface StandardDeviation extends Indicator {
   avg: Sma;
 }
 
-export const stdev = (length: number, source?: Indicator): StandardDeviation => ({
+export const stdev = (length: number, source?: IndicatorSource): StandardDeviation => ({
   type: 'stdev',
   source: source ?? 'close',
   length,

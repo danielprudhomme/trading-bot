@@ -1,4 +1,4 @@
-import Indicator from '../indicator';
+import Indicator, { IndicatorSource } from '../indicator';
 import { Sma, sma } from '../moving-average/sma';
 import StandardDeviation, { stdev } from './standard-deviation';
 
@@ -9,7 +9,7 @@ export default interface BollingerBands extends Indicator {
   stdev: StandardDeviation;
 }
 
-export const bb = (length: number, mult: number, source?: Indicator): BollingerBands => ({
+export const bb = (length: number, mult: number, source?: IndicatorSource): BollingerBands => ({
   type: 'bb',
   source: source ?? 'close',
   length,

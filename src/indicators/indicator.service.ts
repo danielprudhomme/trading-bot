@@ -23,6 +23,7 @@ export abstract class IndicatorService {
 
   protected getSourceValue = (chart: Chart, index: number): number | undefined => {
     if (index < chart.candlesticks.length) return undefined;
+    
     if (this.indicator.source === 'close') return chart.candlesticks[index].close;
 
     if (sourceIsIndicator(this.indicator.source)) {

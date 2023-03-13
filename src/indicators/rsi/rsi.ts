@@ -1,4 +1,4 @@
-import Indicator from '../indicator';
+import Indicator, { IndicatorSource } from '../indicator';
 import { Sma, sma } from '../moving-average/sma';
 
 export interface Rsi extends Indicator {
@@ -15,7 +15,7 @@ export interface RsiRma extends Indicator {
   sma: Sma;
 }
 
-export const rsi = (length: number, source?: Indicator): Rsi => ({
+export const rsi = (length: number, source?: IndicatorSource): Rsi => ({
   type: 'rsi',
   source: source ?? 'close',
   length,
@@ -23,17 +23,17 @@ export const rsi = (length: number, source?: Indicator): Rsi => ({
   downRma: rma(length, down(source)),
 });
 
-export const up = (source?: Indicator): RsiUp => ({
+export const up = (source?: IndicatorSource): RsiUp => ({
   type: 'rsiUp',
   source: source ?? 'close'
 });
 
-export const down = (source?: Indicator): RsiDown => ({
+export const down = (source?: IndicatorSource): RsiDown => ({
   type: 'rsiDown',
   source: source ?? 'close'
 });
 
-export const rma = (length: number, source?: Indicator): RsiRma => ({
+export const rma = (length: number, source?: IndicatorSource): RsiRma => ({
   type: 'rsiRma',
   source: source ?? 'close',
   length,

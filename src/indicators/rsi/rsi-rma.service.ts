@@ -17,7 +17,7 @@ export default class RsiRmaService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.sma];
   
-  calculateAtIndex(chart: Chart, index: number): void {
+  calculate(chart: Chart, index: number): void {
     if (chart.candlesticks.length < this.length) throw new Error('Not enough candlesticks to calculate RMA.');
 
     const alpha = 1 / this.length;

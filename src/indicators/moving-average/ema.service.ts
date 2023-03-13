@@ -12,7 +12,7 @@ export default class EmaService extends IndicatorService {
     this.length = ema.length;
   }
   
-  calculateAtIndex(chart: Chart, index: number): void {
+  calculate(chart: Chart, index: number): void {
     if (chart.candlesticks.length < this.length) throw new Error('Not enough candlesticks to calculate EMA.');
 
     if (index === chart.candlesticks.length - 1) {

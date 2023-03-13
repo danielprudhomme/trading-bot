@@ -24,7 +24,7 @@ export default class BollingerBandsService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.basis, this.stdev];
 
-  calculateAtIndex(chart: Chart, index: number): void {
+  calculate(chart: Chart, index: number): void {
     const basis = this.getIndicatorValue(chart, index, this.basis)?.value ?? 0;
     const dev = this.mult * (this.getIndicatorValue(chart, index, this.stdev)?.value ?? 0);
     const upper = basis + dev;

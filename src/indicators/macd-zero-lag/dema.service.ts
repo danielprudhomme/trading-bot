@@ -18,7 +18,7 @@ export default class DemaService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.ema, this.emaEma];
 
-  calculateAtIndex(chart: Chart, index: number): void {
+  calculate(chart: Chart, index: number): void {
     const ema = this.getIndicatorValue(chart, index, this.ema)?.value ?? 0;
     const emaEma = this.getIndicatorValue(chart, index, this.emaEma)?.value ?? 0;
     const value = 2 * ema - emaEma;

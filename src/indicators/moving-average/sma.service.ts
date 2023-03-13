@@ -13,7 +13,7 @@ export default class SmaService extends IndicatorService {
     this.length = sma.length;
   }
   
-  calculateAtIndex(chart: Chart, index: number): void {
+  calculate(chart: Chart, index: number): void {
     if (chart.candlesticks.length < this.length) throw new Error('Not enough candlesticks to calculate SMA.');
 
     if (index + this.length > chart.candlesticks.length - 1) {
@@ -22,8 +22,8 @@ export default class SmaService extends IndicatorService {
     }
     
     const sum = chart.candlesticks.slice(index, index + this.length)
-      .reduce((partialSum, candlestick) => {
-        const value = this.getCandlestickSourceValue(candlestick) ?? 0;
+      .reduce((partialSum, candlestick, i) => {
+        const value = this.getSourceValue(chart, i) ?? 0;
         return partialSum + value;
       }, 0);
 

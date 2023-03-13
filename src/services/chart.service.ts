@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
 import { CHART_CANDLESTICKS_COUNT } from '../config/constants';
 import TickerHelper from '../helpers/ticker.helper';
-import Indicator from '../indicators/indicator';
+import Indicator, { sourceIsIndicator } from '../indicators/indicator';
 import IndicatorOnChart from '../indicators/indicator-on-chart';
 import IndicatorServiceProvider from '../indicators/indicator-service-provider';
 import IndicatorHelper from '../indicators/indicator.helper';
@@ -74,7 +74,8 @@ export default class ChartService {
   addIndicator = (chart: Chart, indicator: Indicator): void => {
     if (chart.indicators.findIndex(x => IndicatorHelper.areEqual(x, indicator)) > -1) return;
 
-    if (indicator.source !== 'close') this.addIndicator(chart, indicator.source);
+    if (sourceIsIndicator(indicator.source)) this.addIndicator(chart, indicator.source);
+
     IndicatorServiceProvider.get(indicator).getDependencies()
       .forEach(dependencyIndicator => this.addIndicator(chart, dependencyIndicator));
  
@@ -120,6 +121,6 @@ export default class ChartService {
       };
     }
 
-    chart.indicators.forEach(indicator => IndicatorServiceProvider.get(indicator).calculate(chart));
+    chart.indicators.forEach(indicator => IndicatorServiceProvider.get(indicator).calculate(chart, 0));
   }
 }

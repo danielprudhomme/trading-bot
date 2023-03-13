@@ -19,7 +19,7 @@ export default class RsiService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.upRma, this.downRma];
   
-  calculateAtIndex(chart: Chart, index: number): void {
+  calculate(chart: Chart, index: number): void {
     const up = this.getIndicatorValue(chart, index, this.upRma)?.value;
     const down = this.getIndicatorValue(chart, index, this.downRma)?.value;
 

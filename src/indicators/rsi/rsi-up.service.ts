@@ -11,7 +11,7 @@ export default class RsiUpService extends IndicatorService {
 
   getDependencies = (): indicator[] => [];
 
-  calculateAtIndex(chart: Chart, index: number): void {
+  calculate(chart: Chart, index: number): void {
     const value = this.getSourceValue(chart, index);
     const previousValue = this.getSourceValue(chart, index + 1);
 

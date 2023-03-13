@@ -18,7 +18,7 @@ export default class StandardDeviationService extends IndicatorService {
 
   getDependencies = (): Indicator[] => [this.avg];
 
-  calculateAtIndex(chart: Chart, index: number): void {
+  calculate(chart: Chart, index: number): void {
     if (chart.candlesticks.length < this.length) throw new Error('Not enough candlesticks to calculate Standard Deviation.');
 
     const avg = this.getIndicatorValue(chart, index, this.avg)?.value ?? 0;

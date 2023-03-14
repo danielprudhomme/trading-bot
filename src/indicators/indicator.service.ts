@@ -22,13 +22,14 @@ export abstract class IndicatorService {
   }
 
   protected getSourceValue = (chart: Chart, index: number): number | undefined => {
-    if (index < chart.candlesticks.length) return undefined;
+    const candlestick = chart.candlesticks[index];
+    if (!candlestick) return undefined;
     
-    if (this.indicator.source === 'close') return chart.candlesticks[index].close;
+    if (this.indicator.source === 'close') return candlestick.close;
 
     if (sourceIsIndicator(this.indicator.source)) {
       const sourceIndicator = IndicatorHelper.toString(this.indicator.source as Indicator);
-      return chart.candlesticks[index].indicators[sourceIndicator]?.value;
+      return candlestick.indicators[sourceIndicator]?.value;
     }
 
     return this.indicator.source(chart, index);

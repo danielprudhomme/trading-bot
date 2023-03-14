@@ -1,12 +1,11 @@
 import { ConfigurationManager } from './config/configuration-manager';
-import ExchangeService from './infrastructure/exchange-service/exchange.service';
+import IndicatorHelper from './indicators/indicator.helper';
+import { rma } from './indicators/rsi/rsi';
+import { trueTrange } from './indicators/supertrend/supertrend';
 import Workspace from './workspace/workspace';
 
 ConfigurationManager.load();
 Workspace.init(true, true);
 
-const exchangeService = new ExchangeService('binance');
-
-const b = await exchangeService.fetchFreeBalance();
-
-console.log('done', b);
+const i = rma(100, trueTrange);
+console.log('to string', IndicatorHelper.toString(i));

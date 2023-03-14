@@ -4,4 +4,5 @@ export type IndicatorType =
   | 'rsi' | 'rsiUp' | 'rsiDown' | 'rsiRma'
   | 'bb'  | 'stdev'
   | 'macd-zero-lag' | 'dema'
+  | 'supertrend'
 ;

@@ -17,6 +17,8 @@ import RsiDownService from './rsi/rsi-down.service';
 import RsiRmaService from './rsi/rsi-rma.service';
 import RsiUpService from './rsi/rsi-up.service';
 import RsiService from './rsi/rsi.service';
+import { Supertrend } from './supertrend/supertrend';
+import SupertrendService from './supertrend/supertrend.service';
 
 export default class IndicatorServiceProvider {
   static get(indicator: Indicator): IndicatorService {
@@ -41,6 +43,8 @@ export default class IndicatorServiceProvider {
         return new MacdZeroLagService(indicator as MacdZeroLag);
       case 'dema':
         return new DemaService(indicator as Dema);
+      case 'supertrend':
+        return new SupertrendService(indicator as Supertrend);
       default:
         throw new Error(`Indicator service not found for type : ${indicator.type}`);
     }

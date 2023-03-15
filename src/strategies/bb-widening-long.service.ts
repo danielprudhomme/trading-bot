@@ -24,7 +24,7 @@ export default class BBWideningLongService extends BaseStrategyService {
         //&& this.priceNotTooFarFromSma // prix pas trop loin de MM20 (SL), donc limite le risque
 
       if (buySignal) {
-        const tp = this.getIndicatorValue('rsi').value > 80 ? this.strategy.tp * 1.4 : this.strategy.tp;
+        const tp = this.getIndicatorValue('rsi', this.strategy.timeframe).value > 80 ? this.strategy.tp * 1.4 : this.strategy.tp;
         const trade = await this.openTrade(tp);
         Workspace.store.trades.push(trade);
         this.strategy.currentTradeId = trade.id;
@@ -41,11 +41,11 @@ export default class BBWideningLongService extends BaseStrategyService {
   }
 
   private get bbWidening(): boolean {
-    return this.getIndicatorValue<BollingerBandsValue>('bb').phase === 'widening';
+    return this.getIndicatorValue<BollingerBandsValue>('bb', this.strategy.timeframe).phase === 'widening';
   }
 
   private get bbWideEnough(): boolean {
-    return this.getIndicatorValue<BollingerBandsValue>('bb').width > this.strategy.bbMinWidth; // valable pour 1H
+    return this.getIndicatorValue<BollingerBandsValue>('bb', this.strategy.timeframe).width > this.strategy.bbMinWidth; // valable pour 1H
   }
 
   private get candlestickIsGreen(): boolean {
@@ -53,23 +53,23 @@ export default class BBWideningLongService extends BaseStrategyService {
   }
 
   private get priceAboseSMA(): boolean {
-    return this.currentCandlestick.close >= this.getIndicatorValue<MovingAverageValue>('sma').value;
+    return this.currentCandlestick.close >= this.getIndicatorValue<MovingAverageValue>('sma', this.strategy.timeframe).value;
   }
 
   private get closeOutsideBB(): boolean {
-    return this.currentCandlestick.close >= this.getIndicatorValue<BollingerBandsValue>('bb').upper;
+    return this.currentCandlestick.close >= this.getIndicatorValue<BollingerBandsValue>('bb', this.strategy.timeframe).upper;
   }
 
   private get priceDownAndTouchedSMA(): boolean {
-    return this.currentCandlestick.close <= this.getIndicatorValue<MovingAverageValue>('sma').value;
+    return this.currentCandlestick.close <= this.getIndicatorValue<MovingAverageValue>('sma', this.strategy.timeframe).value;
   }
 
   private get smaIsGoingUp(): boolean {
-    return this.getIndicatorValue<MovingAverageValue>('sma').direction === 'up';
+    return this.getIndicatorValue<MovingAverageValue>('sma', this.strategy.timeframe).direction === 'up';
   }
 
   private get priceNotTooFarFromSma(): boolean {
-    return (this.currentCandlestick.close / this.getIndicatorValue<BollingerBandsValue>('bb').basis) - 1 < 0.01;
+    return (this.currentCandlestick.close / this.getIndicatorValue<BollingerBandsValue>('bb', this.strategy.timeframe).basis) - 1 < 0.01;
   }
 
   private async openTrade(tp: number): Promise<Trade> {

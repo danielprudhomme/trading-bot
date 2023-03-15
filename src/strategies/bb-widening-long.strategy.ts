@@ -10,6 +10,7 @@ import { StrategyType } from './strategy-type';
 export default interface BBWideningLongStrategy extends Strategy {
   bbMinWidth: number;
   tp: number;
+  timeframe: TimeFrame;
 }
 
 const type: StrategyType = 'bb-widening-long';
@@ -35,4 +36,5 @@ export const bbWideningLongStrategy = (
   ],
   bbMinWidth,
   tp,
+  timeframe,
 });

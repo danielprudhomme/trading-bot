@@ -4,6 +4,7 @@ import IndicatorValue from '../indicators/indicator-value';
 import Candlestick from '../models/candlestick';
 import Trade from '../models/trade';
 import PerformanceCalculator from '../performance/performance-calculator';
+import { TimeFrame } from '../timeframe/timeframe';
 import Workspace from '../workspace/workspace';
 import Strategy from './strategy';
 
@@ -27,9 +28,8 @@ export default abstract class BaseStrategyService {
 
   abstract execute(): Promise<void>;
 
-  getIndicatorValue<T = IndicatorValue>(indicatorType: IndicatorType): T {
-    const { indicator, timeframe } = this.strategy.indicators.find(x => x.indicator.type === indicatorType) ?? {};
-    if (!timeframe) throw new Error('Timeframe should be defined');
+  getIndicatorValue<T = IndicatorValue>(indicatorType: IndicatorType, timeframe: TimeFrame): T {
+    const { indicator } = this.strategy.indicators.find(x => x.indicator.type === indicatorType && x.timeframe === timeframe) ?? {};
     if (!indicator) throw new Error(`Indicator of type ${indicatorType} should be defined`);
 
     const chart = Workspace.getChart(this.strategy.ticker, timeframe);

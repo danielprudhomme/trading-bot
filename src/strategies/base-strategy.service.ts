@@ -1,3 +1,6 @@
+import ChartHelper from '../helpers/chart.helper';
+import { IndicatorType } from '../indicators/indicator-type';
+import IndicatorValue from '../indicators/indicator-value';
 import Candlestick from '../models/candlestick';
 import Trade from '../models/trade';
 import PerformanceCalculator from '../performance/performance-calculator';
@@ -23,6 +26,19 @@ export default abstract class BaseStrategyService {
   }
 
   abstract execute(): Promise<void>;
+
+  getIndicatorValue<T = IndicatorValue>(indicatorType: IndicatorType): T {
+    const { indicator, timeframe } = this.strategy.indicators.find(x => x.indicator.type === indicatorType) ?? {};
+    if (!timeframe) throw new Error('Timeframe should be defined');
+    if (!indicator) throw new Error(`Indicator of type ${indicatorType} should be defined`);
+
+    const chart = Workspace.getChart(this.strategy.ticker, timeframe);
+    if (!chart) throw new Error('Chart should be defined');
+
+    const value = ChartHelper.getIndicatorValue(chart, 0, indicator);
+    if (!value) throw new Error(`Value of indicator of type ${indicatorType} should be defined`);
+    return value as T;
+  }
 
   async closeCurrentTrade(): Promise<void> {
     if (!this.currentTrade) throw new Error('Close current trade cannot be called if no current trade open.');

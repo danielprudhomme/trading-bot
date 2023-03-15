@@ -2,17 +2,17 @@ import Chart from '../../models/chart';
 import Indicator from '../indicator';
 import IndicatorValue from '../indicator-value';
 import { IndicatorService } from '../indicator.service';
-import { Sma } from '../moving-average/sma';
-import { RsiRma } from './rsi';
+import { Rma } from './rma';
+import { Sma } from './sma';
 
-export default class RsiRmaService extends IndicatorService {
+export default class RmaService extends IndicatorService {
   length: number;
   sma: Sma;
 
-  constructor(rsiRma: RsiRma) {
-    super(rsiRma);
-    this.length = rsiRma.length;
-    this.sma = rsiRma.sma;
+  constructor(rma: Rma) {
+    super(rma);
+    this.length = rma.length;
+    this.sma = rma.sma;
   }
 
   getDependencies = (): Indicator[] => [this.sma];

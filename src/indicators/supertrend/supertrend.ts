@@ -1,10 +1,10 @@
 import Chart from '../../models/chart';
 import Indicator, { IndicatorSource } from '../indicator';
-import { rma, RsiRma } from '../rsi/rsi';
+import { rma, Rma } from '../moving-average/rma';
 
 export interface Supertrend extends Indicator {
   factor: number;
-  atr: RsiRma;
+  atr: Rma;
 }
 
 export const supertrend = (factor: number, atrPeriod: number, source?: IndicatorSource): Supertrend => ({

@@ -1,6 +1,7 @@
 import Chart from '../models/chart';
 import { IndicatorType } from './indicator-type';
 
+// TODO : function chart, index + ADD SOURCE
 export type IndicatorSource = 'close' | Indicator | ((chart: Chart, index: number) => number);
 
 export default interface Indicator {

@@ -1,41 +1,31 @@
+import Chart from '../../models/chart';
 import Indicator, { IndicatorSource } from '../indicator';
-import { Sma, sma } from '../moving-average/sma';
+import { rma, Rma } from '../moving-average/rma';
 
 export interface Rsi extends Indicator {
   length: number;
-  upRma: RsiRma;
-  downRma: RsiRma;
-}
-
-export interface RsiUp extends Indicator {}
-export interface RsiDown extends Indicator {}
-
-export interface RsiRma extends Indicator {
-  length: number;
-  sma: Sma;
+  upRma: Rma;
+  downRma: Rma;
 }
 
 export const rsi = (length: number, source?: IndicatorSource): Rsi => ({
   type: 'rsi',
   source: source ?? 'close',
   length,
-  upRma: rma(length, up(source)),
-  downRma: rma(length, down(source)),
+  upRma: rma(length, up),
+  downRma: rma(length, down),
 });
 
-export const up = (source?: IndicatorSource): RsiUp => ({
-  type: 'rsiUp',
-  source: source ?? 'close'
-});
+export function up(chart: Chart, index: number): number {
+  const close = chart.candlesticks[index]?.close;
+  const prevClose = chart.candlesticks[index + 1]?.close;
 
-export const down = (source?: IndicatorSource): RsiDown => ({
-  type: 'rsiDown',
-  source: source ?? 'close'
-});
+  return close && prevClose ? Math.max(close - prevClose, 0) : 0;
+}
 
-export const rma = (length: number, source?: IndicatorSource): RsiRma => ({
-  type: 'rsiRma',
-  source: source ?? 'close',
-  length,
-  sma: sma(length, source),
-});
+export function down(chart: Chart, index: number): number {
+  const close = chart.candlesticks[index]?.close;
+  const prevClose = chart.candlesticks[index + 1]?.close;
+
+  return close && prevClose ? Math.max(prevClose - close, 0) : 0;
+}

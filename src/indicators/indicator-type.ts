@@ -1,7 +1,6 @@
 export type IndicatorType =
-    'sma'
-  | 'ema'
-  | 'rsi' | 'rsiUp' | 'rsiDown' | 'rsiRma'
+    'sma' | 'ema' | 'rma'
+  | 'rsi'
   | 'bb'  | 'stdev'
   | 'macd-zero-lag' | 'dema'
   | 'supertrend'

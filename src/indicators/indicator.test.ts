@@ -22,7 +22,7 @@ export default class IndicatorTest {
       indicator: this.indicator,
       ticker: this.ticker,
       timeframe: this.timeFrame,
-    }
+    };
     await Workspace.service.chart.fetchAndUpdate([indicatorOnChart], this.timeFrame);
 
     this.print(0);

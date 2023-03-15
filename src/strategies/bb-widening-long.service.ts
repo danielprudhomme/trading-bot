@@ -3,7 +3,6 @@ import BollingerBandsValue from '../indicators/bollinger-bands/bollinger-bands-v
 import IndicatorValue from '../indicators/indicator-value';
 import MovingAverageValue from '../indicators/moving-average/moving-average-value';
 import Trade from '../models/trade';
-import TradeService from '../services/trade.service';
 import Workspace from '../workspace/workspace';
 import BaseStrategyService from './base-strategy.service';
 import BBWideningLongStrategy from './bb-widening-long.strategy';
@@ -57,15 +56,8 @@ export default class BBWideningLongService extends BaseStrategyService {
     return value as MovingAverageValue;
   }
 
-  private get tradeService(): TradeService {
-    return Workspace.service.trade;
-  }
-
   async execute(): Promise<void> {
-    const currentTrade: Trade | null = this.strategy.currentTradeId ?
-      Workspace.store.trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) ?? null : null;
-
-    if (!currentTrade) {
+    if (!this.currentTrade) {
       const buySignal = this.currentCandlestick.isClosed
         && this.priceAboseSMA // prix au dessus de la MM
         && this.smaIsGoingUp // MM haussière
@@ -85,10 +77,9 @@ export default class BBWideningLongService extends BaseStrategyService {
       return;
     }
 
-    const sellSignal = currentTrade && this.priceDownAndTouchedSMA;
+    const sellSignal = this.currentTrade && this.priceDownAndTouchedSMA;
     if (sellSignal) {
-      await this.tradeService.closeTrade(currentTrade);
-      this.onTradeClosed(currentTrade);
+      await this.closeCurrentTrade();
     }
   }
 
@@ -127,7 +118,7 @@ export default class BBWideningLongService extends BaseStrategyService {
   private async openTrade(tp: number): Promise<Trade> {
     const quantity = +(this.availableBalance / this.currentCandlestick.close).toFixed(4); // Use all balance and round
 
-    const trade = await this.tradeService.openTrade(
+    const trade = await Workspace.service.trade.openTrade(
       this.strategy.ticker,
       quantity,
       [

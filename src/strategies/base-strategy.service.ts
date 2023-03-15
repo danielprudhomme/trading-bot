@@ -7,11 +7,28 @@ import Strategy from './strategy';
 export default abstract class BaseStrategyService {
   strategy: Strategy;
 
+  private _currentTrade: Trade | undefined = undefined;
+  private _currentTradeRetrieved = false;
+  get currentTrade(): Trade | undefined {
+    if (!this._currentTradeRetrieved) {
+      this._currentTrade = this.strategy.currentTradeId ? 
+        Workspace.store.trades.find(trade => trade.isOpen && trade.id === this.strategy.currentTradeId) : undefined;
+      this._currentTradeRetrieved = true;
+    }
+    return this._currentTrade;
+  }
+
   constructor(strategy: Strategy) {
     this.strategy = strategy;
   }
 
   abstract execute(): Promise<void>;
+
+  async closeCurrentTrade(): Promise<void> {
+    if (!this.currentTrade) throw new Error('Close current trade cannot be called if no current trade open.');
+    await Workspace.service.trade.closeTrade(this.currentTrade);
+    this.onTradeClosed(this.currentTrade);
+  }
 
   onTradeClosed(trade: Trade): void {
     if (trade.id !== this.strategy.currentTradeId) return;

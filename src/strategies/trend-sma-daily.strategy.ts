@@ -17,6 +17,7 @@ export const trendSmaDailyStrategy = (
   initialBalance: number,
   timeframe: TimeFrame,
   smaDailyLength: number,
+  bbDailyParams: { length: number, mult: number },
   bbParams: { length: number, mult: number },
   supertrendParams: { factor: number, atrPeriod: number },
 ): TrendSmaDailyStrategy => ({
@@ -26,8 +27,8 @@ export const trendSmaDailyStrategy = (
   currentTradeId: null,
   availableBalance: initialBalance,
   indicators: [
-    { indicator: sma(smaDailyLength), timeframe: '1d' },
-    { indicator: bb(bbParams.length, bbParams.mult), timeframe: '1d' },
+    { indicator: sma(smaDailyLength), timeframe },
+    { indicator: bb(bbDailyParams.length, bbDailyParams.mult), timeframe: '1d' },
     { indicator: bb(bbParams.length, bbParams.mult), timeframe },
     { indicator: supertrend(supertrendParams.factor, supertrendParams.atrPeriod), timeframe },
   ],

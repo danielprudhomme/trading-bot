@@ -36,8 +36,8 @@ export default class BollingerBandsService extends IndicatorService {
     const previousWidth = (this.getIndicatorValue(chart, index + 1) as BollingerBandsValue | undefined)?.width;
     const diffPreviousWidth = previousWidth ? 1 - previousWidth / width : 0;
     let phase: BollingerBandsPhase = 'flat';
-    if (diffPreviousWidth > 0.05) phase = 'widening';
-    if (diffPreviousWidth < -0.05) phase = 'narrowing';
+    if (diffPreviousWidth > 0.07) phase = 'widening';
+    if (diffPreviousWidth < -0.07) phase = 'narrowing';
 
     this.setValue(chart, index, new BollingerBandsValue(basis, upper, lower, percentB, width, phase));
   }

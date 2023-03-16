@@ -12,7 +12,7 @@ export default class TrendSmaDailyStrategyService extends BaseStrategyService {
   }
 
   async execute(): Promise<void> {
-    const smaDaily = this.getIndicatorValue<MovingAverageValue>('sma', '1d');
+    const smaDaily = this.getIndicatorValue<MovingAverageValue>('sma', (this.strategy as TrendSmaDailyStrategy).timeframe);
     const bbDaily = this.getIndicatorValue<BollingerBandsValue>('bb', '1d');
     const bb = this.getIndicatorValue<BollingerBandsValue>('bb', (this.strategy as TrendSmaDailyStrategy).timeframe);
     const supertrend = this.getIndicatorValue<SupertrendValue>('supertrend', (this.strategy as TrendSmaDailyStrategy).timeframe);
@@ -20,27 +20,34 @@ export default class TrendSmaDailyStrategyService extends BaseStrategyService {
     const close = this.currentCandlestick.close;
     const high = this.currentCandlestick.high;
 
+    // console.log(timestampToString(this.currentCandlestick.timestamp), bbDaily.phase)
+
     const buySignal =
       !this.currentTrade &&
       smaDaily.direction === 'up' &&
       close > smaDaily.value && 
+      close > bb.upper &&
       bb.phase === 'widening' &&
       close > bb.basis &&
-      // TODO : rajouter le check : pas trop haut par rapport aux bb daily fermées
       supertrend.direction === 'up';
 
+      // console.log('--', timestampToString(this.currentCandlestick.timestamp), high > bbDaily.upper, bbDaily.phase);
+
     if (buySignal) {
+      // console.log('-- B', timestampToString(this.currentCandlestick.timestamp), smaDaily.direction === 'up', close > smaDaily.value, bb.phase === 'widening', close > bb.basis, supertrend.direction === 'up');
       await this.openTrade();
     }
 
     const sellSignal =
-      this.currentTrade && (
+      this.currentTrade && 
+      (
         supertrend.direction === 'down' ||
-        (close < smaDaily.value) ||
+        (close < smaDaily.value && smaDaily.direction === 'down') ||
         (high > bbDaily.upper && bbDaily.phase !== 'widening')
       );
 
     if (sellSignal) {
+      // console.log('-- S', timestampToString(this.currentCandlestick.timestamp), smaDaily.value, supertrend.direction === 'down', close < smaDaily.value, high > bbDaily.upper && bbDaily.phase !== 'widening');
       await this.closeCurrentTrade();
     }
   }

@@ -23,7 +23,7 @@ export default class SmaService extends IndicatorService {
     
     const sum = chart.candlesticks.slice(index, index + this.length)
       .reduce((partialSum, candlestick, i) => {
-        const value = this.getSourceValue(chart, i) ?? 0;
+        const value = this.getSourceValue(chart, index + i) ?? 0;
         return partialSum + value;
       }, 0);
 

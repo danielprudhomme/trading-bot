@@ -21,6 +21,9 @@ export default abstract class BaseStrategyService {
     }
     return this._currentTrade;
   }
+  set currentTrade(trade: Trade | undefined) {
+    this._currentTrade = trade;
+  }
 
   constructor(strategy: Strategy) {
     this.strategy = strategy;
@@ -28,16 +31,16 @@ export default abstract class BaseStrategyService {
 
   abstract execute(): Promise<void>;
 
-  getIndicatorValue<T = IndicatorValue>(indicatorType: IndicatorType, timeframe: TimeFrame): T {
+  getIndicatorValue<T = IndicatorValue>(indicatorType: IndicatorType, timeframe: TimeFrame, index: number = 0): T {
     const { indicator } = this.strategy.indicators.find(x => x.indicator.type === indicatorType && x.timeframe === timeframe) ?? {};
     if (!indicator) throw new Error(`Indicator of type ${indicatorType} should be defined`);
 
     const chart = Workspace.getChart(this.strategy.ticker, timeframe);
     if (!chart) throw new Error('Chart should be defined');
 
-    const value = ChartHelper.getIndicatorValue(chart, 0, indicator);
-    if (!value) throw new Error(`Value of indicator of type ${indicatorType} should be defined`);
-    return value as T;
+    const value = ChartHelper.getIndicatorValue(chart, index, indicator);
+    if (!value) throw new Error(`Value of indicator of type ${indicatorType} should be defined at index ${index}`);
+    return value as unknown as T;
   }
 
   async closeCurrentTrade(): Promise<void> {

@@ -1,1 +1,1 @@
-export type StrategyType = 'low-outside-bb' | 'bb-widening-long';
+export type StrategyType = 'low-outside-bb' | 'bb-widening-long' | 'trend-sma-daily';

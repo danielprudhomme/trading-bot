@@ -26,7 +26,7 @@ export default class PerformanceCalculator {
       // We assume that all fees are payed in USDT
       paidFees += performance.fee.amount;
 
-      console.log(i, '\t', timestampToString(performance.openTimestamp), '\t', this.toPercentage(performance.pnlPercent), '\t', 'PNL', performance.pnl.toFixed(2), '\tAmount', amount.toFixed(2), '\t', this.toPercentage(maxDrawdown))
+      console.log(i, '\t', timestampToString(performance.openTimestamp), '\t', this.toPercentage(performance.pnlPercent), '\t', 'PNL', performance.pnl.toFixed(2), '\tAmount', amount.toFixed(2), '\t', timestampToString(performance.closeTimestamp))
 
       if (performance.pnl > 0) wonTrades++;
     });

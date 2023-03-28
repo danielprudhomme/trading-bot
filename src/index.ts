@@ -11,17 +11,17 @@ import Workspace from './workspace/workspace';
 
 ConfigurationManager.load();
 
-// const start = Date.UTC(2022, 0, 1);
-const start = Date.UTC(2023, 1, 14);
-const end = Date.UTC(2023, 1, 20);
+const start = Date.UTC(2021, 0, 1);
+// const start = Date.UTC(2023, 1, 14);
+const end = Date.UTC(2022, 11, 31);
 // const end = Date.UTC(2023, 2, 3);
 Workspace.init(true, true);
 
 const initialAmount = 1000;
 
-const ticker: Ticker = { asset: AssetSymbol.btc, base: AssetSymbol.usdt, exchangeId: 'binance' };
+const ticker: Ticker = { asset: AssetSymbol.eth, base: AssetSymbol.usdt, exchangeId: 'binance' };
 const strategies: Strategy[] = [
-  trendSmaDailyStrategy(ticker, initialAmount, '1h', 7 * 24, { length: 20, mult: 2 }, { length: 20, mult: 2.5 }, { factor: 3, atrPeriod: 10 })
+  trendSmaDailyStrategy(ticker, initialAmount, '1h', 10 * 24, { length: 20, mult: 2 }, { length: 20, mult: 2.5 }, { factor: 3, atrPeriod: 10 })
 ];
 const tickTimeFrame: TimeFrame = '1h';
 // const fees = { maker: 0, taker: 0 };

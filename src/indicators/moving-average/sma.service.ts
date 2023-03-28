@@ -1,6 +1,6 @@
 import Chart from '../../models/chart';
-import { Direction } from '../direction';
 import { IndicatorService } from '../indicator.service';
+import { movingAverageDirection } from './moving-average-direction';
 import MovingAverageValue from './moving-average-value';
 import { Sma } from './sma';
 
@@ -28,8 +28,9 @@ export default class SmaService extends IndicatorService {
       }, 0);
 
     const value = sum / this.length;
+
     const previousValue = this.getIndicatorValue(chart, index + 1)?.value ?? 0;
-    const direction: Direction = value >= previousValue ? 'up': 'down';
+    const direction = movingAverageDirection(value, previousValue);
     
     this.setValue(chart, index, new MovingAverageValue(value, direction));
   }

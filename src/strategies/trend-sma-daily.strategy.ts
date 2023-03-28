@@ -1,6 +1,6 @@
 import TickerHelper from '../helpers/ticker.helper';
 import { bb } from '../indicators/bollinger-bands/bollinger-bands';
-import { sma } from '../indicators/moving-average/sma';
+import { ema } from '../indicators/moving-average/ema';
 import { supertrend } from '../indicators/supertrend/supertrend';
 import Ticker from '../models/ticker';
 import { TimeFrame } from '../timeframe/timeframe';
@@ -27,7 +27,7 @@ export const trendSmaDailyStrategy = (
   currentTradeId: null,
   availableBalance: initialBalance,
   indicators: [
-    { indicator: sma(smaDailyLength), timeframe },
+    { indicator: ema(smaDailyLength), timeframe },
     { indicator: bb(bbDailyParams.length, bbDailyParams.mult), timeframe: '1d' },
     { indicator: bb(bbParams.length, bbParams.mult), timeframe },
     { indicator: supertrend(supertrendParams.factor, supertrendParams.atrPeriod), timeframe },
